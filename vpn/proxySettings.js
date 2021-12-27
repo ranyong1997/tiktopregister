@@ -1,15 +1,15 @@
 // 进行VPN设置
 
-const { clickIfWidgetExists, clickIfWidgetClickable, swipeWithBezier, shortSleep, randomSleep, scrollShortUp, newThread } = require("../lib/common.js");
+const { clickIfWidgetExists, clickIfWidgetClickable, newThread } = require("../lib/common.js");
 const commonFunc = require("../lib/common.js");
 const httpUtilFunc = require("../http/httpUtils.js");
 
 var proxySettings = {}
 
 // 安装VPN
-proxySettings.kitsunebiInstall = function( url ){
-    if( !app.getAppName("fun.kitsunebi.kitsunebi4android") ){ 
-        if( !httpUtilFunc.downloadFile( url, "/storage/emulated/0/Kitsunebi_v1.8.0.apk", 1000*60, false ) ||  !commonFunc.installApk( "/storage/emulated/0/Kitsunebi_v1.8.0.apk", 1000*60 ) ){ 
+proxySettings.kitsunebiInstall = function (url) {
+    if (!app.getAppName("fun.kitsunebi.kitsunebi4android")) {
+        if (!httpUtilFunc.downloadFile(url, "/storage/emulated/0/Kitsunebi_v1.8.0.apk", 1000 * 60, false) || !commonFunc.installApk("/storage/emulated/0/Kitsunebi_v1.8.0.apk", 1000 * 60)) {
             return false
         }
     }
@@ -46,7 +46,7 @@ proxySettings.kitsunebiSetup = function (proxy_info, force_update) {
         is_proxy_ready = newThread(function () {
             while (true) {
                 if (!packageName("fun.kitsunebi.kitsunebi4android").findOne(1)) {
-                    log("正在启动VPN【kitsunebi launching】 .. ")
+                    log("正在启动VPN .. ")
                     launch("fun.kitsunebi.kitsunebi4android")
                     sleep(6000)
                 }

@@ -579,5 +579,5 @@ function registerGmail () {
 }
 
 
-checkGoogleServicePage()
+// checkGoogleServicePage()
 getRegisterInfo()

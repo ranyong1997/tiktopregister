@@ -1,23 +1,23 @@
+var httpUtilFunc = require("../http/httpUtils.js");
+var proxySettings = require("../vpn/proxySettings.js")
 var commonFunc = require("../lib/common")
 var proxySettings = require("../vpn/proxySettings")
-const { VPN_TYPE, VPN_PROXY_TIMELINESS, REGISTER_APP_ID, VPN_USE_ACTION_TAG } = require("../util/enums.js");
-
 var FIND_WIDGET_TIMEOUT = 750 // 设置元素超时时间
 var launchAppCount = 1
 var tiktop_packageName = "com.zhiliaoapp.musically"
-var android_set = "com.android.settings"
 
 // 脚本执行方法区
 commonFunc.systemTimezoneSet("Europe/London")   // 设置时区 (英国/伦敦)
 commonFunc.systemTimezoneGet()  // 获取当前时区
-// closeLocation()  // 关闭本地网络
-// closeVPNSettings()   // 关闭vpn
-// checkTiktokInstall() // 检测tiktop是否安装
-// if (connectVPN()) { // 判断是否连接vpn
-//     sleep(5000)
-//     getRegisterInfo()
-// }
-One_Key_Login()
+closeLocation()  // 关闭本地网络
+//TODO:需要重构
+closeVPNSettings()   // 关闭vpn
+checkTiktokInstall() // 检测tiktop是否安装
+if (connectVPN()) { // 判断是否连接vpn
+    sleep(5000)
+    One_Key_Login()
+}
+
 
 // TODO:更改英国ip
 var vpnInfos = [
@@ -61,75 +61,75 @@ function connectVPN() {
 // 关闭vpn设置
 function closeVPNSettings() {
     randomSleep()
-    // do {
-    if (!packageName("com.android.settings").findOne(1)) {
-        log("正在打开设置...")
-        launchApp("Settings")
-        sleep(3000)
-    }
-    if (!packageName("com.android.settings").findOne(1)) {
-        sleep(3000)
-        // continue
-    }
-    var settingPage = id("com.android.settings:id/dashboard_container").findOne(3000)
-    if (settingPage != null) {
-        var networkSetting = text("Network & Internet").findOne(FIND_WIDGET_TIMEOUT)
-        if (networkSetting != null) {
-            commonFunc.clickWidget(networkSetting)
-            randomSleep()
-        } else {
-            settingPage.scrollBackward()
+    do {
+        if (!packageName("com.android.settings").findOne(1)) {
+            log("正在打开设置...")
+            launchApp("Settings")
+            sleep(3000)
         }
-    } else {
-        back()
-        sleep(3000)
-    }
-    var vpnSettings = text("VPN").id("android:id/title").findOne(500)
-    if (vpnSettings != null) {
-        commonFunc.clickWidget(vpnSettings)
-        randomSleep()
-    }
-    var KitsunebiSetting = text("Kitsunebi").id("android:id/title").findOne(500)
-    if (KitsunebiSetting != null) {
-        commonFunc.clickWidget(id("com.android.settings:id/settings_button").findOne(500))
-        randomSleep()
-    }
-    var switchBt = id("android:id/switch_widget").findOne(FIND_WIDGET_TIMEOUT)
-    if (switchBt != null && switchBt.text() != "OFF") {
-        commonFunc.clickWidget(switchBt)
-        sleep(500)
-        back()
-        sleep(500)
-        back()
-        sleep(500)
-        back()
-        sleep(500)
-        back()
-        sleep(500)
-        // break
-    } else if (switchBt != null && switchBt.text() == "OFF") {
-        sleep(500)
-        back()
-        sleep(500)
-        back()
-        sleep(500)
-        back()
-        sleep(500)
-        back()
-        sleep(500)
-        // break
-    }
-    var noVPN = text("No VPNs added").findOne(500)
-    if (noVPN != null) {
-        sleep(500)
-        back()
-        sleep(500)
-        back()
-        sleep(500)
-        back()
-        // break
-    }
-    // } while (true)
+        if (!packageName("com.android.settings").findOne(1)) {
+            sleep(3000)
+            continue
+        }
+        var settingPage = id("com.android.settings:id/dashboard_container").findOne(3000)
+        if (settingPage != null) {
+            var networkSetting = text("Network & Internet").findOne(FIND_WIDGET_TIMEOUT)
+            if (networkSetting != null) {
+                commonFunc.clickWidget(networkSetting)
+                randomSleep()
+            } else {
+                settingPage.scrollBackward()
+            }
+        } else {
+            back()
+            sleep(3000)
+        }
+        var vpnSettings = text("VPN").id("android:id/title").findOne(500)
+        if (vpnSettings != null) {
+            commonFunc.clickWidget(vpnSettings)
+            randomSleep()
+        }
+        var KitsunebiSetting = text("Kitsunebi").id("android:id/title").findOne(500)
+        if (KitsunebiSetting != null) {
+            commonFunc.clickWidget(id("com.android.settings:id/settings_button").findOne(500))
+            randomSleep()
+        }
+        var switchBt = id("android:id/switch_widget").findOne(FIND_WIDGET_TIMEOUT)
+        if (switchBt != null && switchBt.text() != "OFF") {
+            commonFunc.clickWidget(switchBt)
+            sleep(500)
+            back()
+            sleep(500)
+            back()
+            sleep(500)
+            back()
+            sleep(500)
+            back()
+            sleep(500)
+            break
+        } else if (switchBt != null && switchBt.text() == "OFF") {
+            sleep(500)
+            back()
+            sleep(500)
+            back()
+            sleep(500)
+            back()
+            sleep(500)
+            back()
+            sleep(500)
+            break
+        }
+        var noVPN = text("No VPNs added").findOne(500)
+        if (noVPN != null) {
+            sleep(500)
+            back()
+            sleep(500)
+            back()
+            sleep(500)
+            back()
+            break
+        }
+    } while (3)
 }
 
 // 关闭本地网络
@@ -142,7 +142,7 @@ function closeLocation() {
             return false
         }
         if (!packageName("com.android.settings").findOne(1)) {
-            log("kitsunebi launching .. ")
+            log("正在打开设置 .. ")
             launchApp("Settings")
             sleep(5000)
         }
@@ -201,13 +201,12 @@ function checkTiktokInstall() {
     }
 }
 
-
 // 检查vpn连接
 function checkVPNConnect() {
     do {
         try {
             if (!packageName("fun.kitsunebi.kitsunebi4android").findOne()) {
-                log("kitsunebi launching .. ")
+                log("正在启动vpn .. ")
                 launch("fun.kitsunebi.kitsunebi4android")
                 sleep(6000)
             }
@@ -220,11 +219,10 @@ function checkVPNConnect() {
                     clickIfWidgetClickable(id("fun.kitsunebi.kitsunebi4android:id/fab").findOne()) && toastLog("启动代理")
                     id("fun.kitsunebi.kitsunebi4android:id/running_indicator").text("running").findOne() || clickIfWidgetClickable(text("OK").findOne())
                     id("fun.kitsunebi.kitsunebi4android:id/running_indicator").text("running").findOne() || clickIfWidgetClickable(id("fun.kitsunebi.kitsunebi4android:id/fab").findOne()) && toastLog("启动代理")
-
                 }
             }
         } catch (error) {
-            toastLog(error)
+            log("检查vpn时捕获到一个错误:" + error)
             break
         }
     } while (true)
@@ -233,6 +231,8 @@ function checkVPNConnect() {
 function One_Key_Login() {
     commonFunc.clearData(tiktop_packageName)
     randomSleep()
+    var vpnState = SLChanges.getVPNLinkState()
+    log("vpn是否连接:" + vpnState)
     if (!vpnState) {
         checkVPNConnect()
     }
@@ -241,7 +241,7 @@ function One_Key_Login() {
     toastLog("开始一键登陆功能")
     randomSleep()
     do {
-        if (!packageName(tiktop_packageName).findOne()) {
+        if (!packageName(tiktop_packageName).findOne(1)) {
             log("TikTok 启动中..." + "启动次数为:" + launchAppCount)
             launchApp("TikTok")
             sleep(3000)
@@ -254,7 +254,8 @@ function One_Key_Login() {
         }
         try {
             checkSignUpPage()
-        } catch (error) {
+        } 
+        catch (error) {
             toastLog("检查启动页捕获到一个错误:" + error)
         }
     } while (true)
@@ -269,9 +270,6 @@ function checkSignUpPage() {
         continueFacebooka.click();
     }
 }
-
-
-
 
 //------------------------------------------------------
 // 随机等待
