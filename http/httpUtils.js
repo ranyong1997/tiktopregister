@@ -1,4 +1,4 @@
-const { shortSleep, timing, screenTip, getSerial, commonClick, widgetCompare, clickAlreadyFindWidget, clickWidget, longSleep, newThread, md5 } = require("../lib/common.js");
+const { md5 } = require("../lib/common.js");
 const commonFunc = require("../lib/common.js");
 var httpUtilFunc = {};
 // 初始化Http
@@ -17,7 +17,7 @@ httpUtilFunc.init = function () {
 }
 
 // 日志
-httpUtilFunc.reportLog = function (context, logType) {
+httpUtilFunc.reportLog = function (context) {
     let is_upload = false
     try {
         context = typeof (context) == "object" ? JSON.stringify(context) : context
@@ -138,5 +138,5 @@ httpUtilFunc.httpRequest = function (apiCall, body) {
     return null;
 }
 
-httpUtilFunc.init()
+// httpUtilFunc.init()
 module.exports = httpUtilFunc;
