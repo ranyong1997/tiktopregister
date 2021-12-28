@@ -8,7 +8,7 @@ function init() {
         // console.setPosition(110, 100);
         var window = floaty.window(
             <frame>
-                <button id="action" text="点击停止脚本" w="100" h="40" bg="#F0EB4336" />
+                <button id="action" text="点击停止脚本" w="90" h="40" bg="#F0EB4336" />
             </frame>
         );
         setInterval(() => { }, 1000);
@@ -80,7 +80,7 @@ function init() {
 }
 
 init()
-// var mainTask = require("./case/tit_register_v22_4_5");
-var mainTask = require("./case/模板");
+var mainTask = require("./case/tit_register_v22_4_5");
+// var mainTask = require("./case/tit_register_v19_2_4");
 threads.shutDownAll()
 toastLog("脚本结束")
