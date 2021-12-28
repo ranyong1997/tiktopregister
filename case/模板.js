@@ -1,8 +1,6 @@
 
 var commonFun = require("../lib/common.js")
-
 var proxySettings = require("../vpn/proxySettings.js")
-
 var FIND_WIDGET_TIMEOUT = 750
 
 var vpnInfos = [
@@ -30,7 +28,7 @@ function closeLocation() {
             return false
         }
         if (!packageName("com.android.settings").findOne(1)) {
-            log("kitsunebi launching .. ")
+            log("正在打开设置关闭网络 .. ")
             launchApp("Settings")
             sleep(5000)
         }
@@ -52,7 +50,6 @@ function closeLocation() {
                     toastLog("scrolldown " + settingPage.scrollable())
                     settingPage.scrollForward()
                 }
-
             }
         } else {
             back()
@@ -90,7 +87,7 @@ function closeVPNSettings() {
     randomSleep()
     do {
         if (!packageName("com.android.settings").findOne(1)) {
-            log("kitsunebi launching .. ")
+            log("正在打开设置关闭vpn .. ")
             launchApp("Settings")
             sleep(3000)
         }
@@ -181,91 +178,6 @@ function connectVPN() {
         }
     } while (!is_proxy_on)
     return true
-}
-//  关闭vpn设置
-function closeVPNSettings() {
-    // launchApp("Settings")
-    randomSleep()
-    do {
-
-        if (!packageName("com.android.settings").findOne(1)) {
-            log("kitsunebi launching .. ")
-            launchApp("Settings")
-            sleep(3000)
-        }
-
-
-
-        if (!packageName("com.android.settings").findOne(1)) {
-            sleep(3000)
-            continue
-        }
-
-        var settingPage = id("com.android.settings:id/dashboard_container").findOne(3000)
-        if (settingPage != null) {
-            var networkSetting = text("Network & Internet").findOne(FIND_WIDGET_TIMEOUT)
-            if (networkSetting != null) {
-                commonFun.clickWidget(networkSetting)
-                randomSleep()
-            } else {
-                settingPage.scrollBackward()
-            }
-        } else {
-            back()
-            sleep(3000)
-        }
-
-        var vpnSettings = text("VPN").id("android:id/title").findOne(500)
-        if (vpnSettings != null) {
-            commonFun.clickWidget(vpnSettings)
-            randomSleep()
-
-        }
-
-        var KitsunebiSetting = text("Kitsunebi").id("android:id/title").findOne(500)
-        if (KitsunebiSetting != null) {
-            commonFun.clickWidget(id("com.android.settings:id/settings_button").findOne(500))
-            randomSleep()
-        }
-
-        var switchBt = id("android:id/switch_widget").findOne(FIND_WIDGET_TIMEOUT)
-        if (switchBt != null && switchBt.text() != "OFF") {
-            commonFun.clickWidget(switchBt)
-            sleep(500)
-            back()
-            sleep(500)
-            back()
-            sleep(500)
-            back()
-            sleep(500)
-            back()
-            sleep(500)
-            break
-        } else if (switchBt != null && switchBt.text() == "OFF") {
-            sleep(500)
-            back()
-            sleep(500)
-            back()
-            sleep(500)
-            back()
-            sleep(500)
-            back()
-            sleep(500)
-            break
-        }
-
-        var noVPN = text("No VPNs added").findOne(500)
-        if (noVPN != null) {
-            sleep(500)
-            back()
-            sleep(500)
-            back()
-            sleep(500)
-            back()
-            break
-        }
-    } while (true)
-
 }
 //  随机等待
 function randomSleep() {
