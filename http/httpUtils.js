@@ -137,6 +137,13 @@ httpUtilFunc.httpRequest = function (apiCall, body) {
     }
     return null;
 }
+httpUtilFunc.getIpByIpify = function () {
+    var r = http.get("https://api.ipify.org/?format=json");
+    var ipRes = r.body.json().ip
+    log("获取vpn IP地址为:" + ipRes)
+    return ipRes;
+}
 
-// httpUtilFunc.init()
+
+httpUtilFunc.init()
 module.exports = httpUtilFunc;

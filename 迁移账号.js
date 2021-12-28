@@ -1,5 +1,5 @@
 targetPackageName = "com.facebook.katana"
-androidId = "01da046a377ea0a7"
+androidId = "e7b3f127ba5d5b28"
 
 var trans = JSON.parse(SLChanges.transferApp(targetPackageName,androidId))
 log(trans)
