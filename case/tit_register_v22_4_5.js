@@ -19,12 +19,15 @@ var vpnInfos = [
 // **********************************方法执行区**********************************
 // commonFun.systemTimezoneSet("Europe/London")
 // commonFun.systemTimezoneGet()   // 获取当前时区
-// closeLocation()
-// closeVPNSettings()
-// if (connectVPN()) {
+// closeLocation()  // 关闭本地网络
+// closeVPNSettings()   // 关闭本地网络
+// checkTiktokInstall() // 检测tiktok是否安装
+// checkFacebookInstall()   // 检测facebook是否安装
+// Facebook_Account_Transfer()  // facebook账号迁移
+// if (connectVPN()) {  // 判断是否已连接vpn
 //     randomSleep()
 //     log("脚本执行")
-//     One_Key_Login()
+//     One_Key_Login()  // 一键登陆
 // }
 One_Key_Login()
 // **********************************方法执行区**********************************
@@ -225,25 +228,15 @@ function One_Key_Login() {
         checkAuthorizationPage1()
         checkSignupPage()
         checkinterestsPage()
+        // checkinterestsPage1()
         checkSwipe_up_Page()
         checkSynchronizingPage()
         if (registerDone && registerSignUp) {
             break
         }
-        // try {
-        //     sleep(5000)
-        //     checkSignUpPage()
-        //     if (registerDone && registerSignUp) {
-        //         break
-        //     }
-        // }
-        // catch (error) {
-        //     toastLog("检查启动页捕获到一个错误:" + error)
-        // }
-    } while (5)
+    } while (true)
 }
 
-//TODO:例子
 function checkSignUpPage() {
     log("检查登陆页")
     var signUpText = text("Sign up for TikTok").id("com.zhiliaoapp.musically:id/title").findOne(FIND_WIDGET_TIMEOUT)
@@ -321,32 +314,14 @@ function checkSignupPage() {
 }
 
 
-// function checkinterestsPage() {
-//     log("选择你的兴趣界面")
-//     randomSleep()
-//     var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/bek").findOne(FIND_WIDGET_TIMEOUT)
-//     if (choose_interests != null) {
-//         log("点击跳过按钮")
-//         var interests_skip = text("Skip").id("com.zhiliaoapp.musically:id/e1u").findOne(FIND_WIDGET_TIMEOUT)
-//         var interests_skip2 = text("Skip").id("com.zhiliaoapp.musically:id/em0").findOne(FIND_WIDGET_TIMEOUT)
-//         if (interests_skip != null || interests_skip2 != null) {
-//             var collect = interests_skip == interests_skip2
-//             commonFun.clickWidget(collect)
-//             randomSleep()
-//         }
-//     }
-// }
-
-
 function checkinterestsPage() {
     log("选择你的兴趣界面")
-    var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/bek").findOne(FIND_WDGET_TIMEOUT)
+    var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/title").findOne(FIND_WIDGET_TIMEOUT)
     if (choose_interests != null) {
         log("点击跳过按钮")
-        var interests_skip = text("Skip").id("com.zhiliaoapp.musically:id/e1u").findOne()
-        var interests_skip2 = text("Skip").id("com.zhiliaoapp.musically:id/em0").findOne()
-        if (interests_skip != null || interests_skip2 != null) {
-            interests_skip == interests_skip2
+        var interests_skip = text("Skip").id("com.zhiliaoapp.musically:id/e1u").findOne(FIND_WIDGET_TIMEOUT)
+        var interests_skip1 = text("Skip").id("com.zhiliaoapp.musically:id/em0").findOne(FIND_WIDGET_TIMEOUT)
+        if (interests_skip != null || interests_skip1 != null) {
             commonFun.clickWidget(interests_skip)
         }
     }
@@ -355,7 +330,7 @@ function checkinterestsPage() {
 
 function checkinterestsPage1() {
     log("选择你的兴趣界面")
-    var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/bek").findOne(FIND_WIDGET_TIMEOUT)
+    var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/title").findOne(FIND_WIDGET_TIMEOUT)
     if (choose_interests != null) {
         log("点击跳过按钮")
         var interests_skip = text("Skip").id("com.zhiliaoapp.musically:id/em0").findOne(FIND_WIDGET_TIMEOUT)

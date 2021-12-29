@@ -173,19 +173,19 @@
 //     sleep(time_random);
 // }
 
-checkinterestsPage()
+// checkinterestsPage()
 
-function checkinterestsPage() {
-    log("选择你的兴趣界面")
-    var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/bek").find()
-    if (choose_interests != null) {
-        log("点击跳过按钮")
-        var interests_skip = text("Skip").id("com.zhiliaoapp.musically:id/e1u").find()
-        var interests_skip2 = text("Skip").id("com.zhiliaoapp.musically:id/em0").find()
-        if (interests_skip != null || interests_skip2 != null) {
-            interests_skip == interests_skip2
-            // commonFun.clickWidget(collect)
-            interests_skip.click()
-        }
-    }
-}
+// function checkinterestsPage() {
+//     log("选择你的兴趣界面")
+//     var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/bek").find()
+//     if (choose_interests != null) {
+//         log("点击跳过按钮")
+//         var interests_skip = text("Skip").id("com.zhiliaoapp.musically:id/e1u").find()
+//         var interests_skip2 = text("Skip").id("com.zhiliaoapp.musically:id/em0").find()
+//         if (interests_skip != null || interests_skip2 != null) {
+//             interests_skip == interests_skip2
+//             // commonFun.clickWidget(collect)
+//             interests_skip.click()
+//         }
+//     }
+// }
