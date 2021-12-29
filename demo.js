@@ -189,3 +189,15 @@
 //         }
 //     }
 // }
+
+face_recognition()
+
+function face_recognition() {
+    log("检测是否需要人脸识别")
+    var face_recognition = text("Your account has been disabled").findOne()
+    if (face_recognition != null) {
+        log("该账号需要人脸识别")
+        // TODO：记录该facebook安卓id
+    }
+    commonFun.clearData(tiktop_packageName)
+}

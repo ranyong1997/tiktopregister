@@ -9,7 +9,9 @@ const REGISTER_STATUS = {
     EMAIL_CODE_ERROR: 7, // 验证码错误
     EMAIL_CODE_TIMEOUT: 8,  // 获取邮箱验证码超过3分钟
     EMAIL_CODE_OPEN_FAILED: 9, // 获取验证码000500
-    PHOTO_VERIFY_TIMEOUT: 10  // 获取图片验证超时
+    PHOTO_VERIFY_TIMEOUT: 10,  // 获取图片验证超时
+    FACE_RECOGNITION: 11, // 人脸识别
+    Content_Not_Found: 12   // 请求页失效
 };
 
 const REGISTER_APP_ID = {
