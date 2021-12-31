@@ -260,9 +260,75 @@
 //     }
 // }
 
-var sign_up = id("com.zhiliaoapp.musically:id/dwe").find()
-        if (sign_up != null) {
-            toastLog("该账号已被注册")
-            sign_up.click()
-            
+
+// check_allow_cookiesPage()
+function check_allow_cookiesPage() {
+    log("检查允许cookie页面")
+    var allow_cookies = text("Allow the use of cookies by Facebook?").findOne()
+    if (allow_cookies != null) {
+        log("点击Allow All Cookies")
+        var click_allow_cookies = text("Allow All Cookies").findOne().bounds()
+        let x = click_allow_cookies.centerX()
+        let y = click_allow_cookies.centerY()
+        if (click_allow_cookies != null) {
+            click(x, y)
         }
+    }
+}
+
+// checkauthorizationPage()
+
+function checkauthorizationPage() {
+    log("检查授权页面")
+    var authorizationPage = text("Log in With Facebook").id("m-future-page-header-title").find()
+    if (authorizationPage != null) {
+        var cancel = text("Cancel").findOne().bounds()
+        log("点击授权按钮")
+        if (cancel != null) {
+            var x = cancel.centerX() - 126
+            var y = cancel.centerY() - 126
+            click(x, y)
+        }
+    }
+}
+
+
+// // create_random_name()
+// function create_random_name() {
+//     var a = commonFun.randomStr(7)
+//     var b = commonFun.randomStrInStr(2)
+//     var create_username = a + b
+//     log("创建用户名为===>", create_username)
+//     setText(create_username)
+//     // randomSleep()
+// }
+
+// launchApp("TikTok")
+
+
+check_allow_cookiesPage()
+function check_allow_cookiesPage() {
+    log("检测是否为请求页无法显示\n【需要等待页面超时,预计需要等待2分13秒】")
+    var content_not_found = text("More Options").findOne(500)
+    if (content_not_found != null) {
+        log("点击Allow All Cookies")
+        var click_allow_cookies = text("Allow All Cookies").findOne(500).bounds()
+        let x = click_allow_cookies.centerX()
+        let y = click_allow_cookies.centerY()
+        if (click_allow_cookies != null) {
+            click(x, y)
+        }
+    }
+}
+
+// checkauthorizationPage()
+// function checkauthorizationPage() {
+//     log("检查授权页面")
+//     var cancel = text("Cancel").findOne(500).bounds(500)
+//     log("点击授权按钮")
+//     if (cancel != null) {
+//         var x = cancel.centerX() - 126
+//         var y = cancel.centerY() - 126
+//         click(x, y)
+//     }
+// }
