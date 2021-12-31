@@ -11,7 +11,7 @@ var vpnInfos = [
 ]
 
 // **********************************方法执行区**********************************
-commonFun.systemTimezoneSet("Europe/London")
+commonFun.systemTimezoneSet_New("Europe/London")
 closeLocation()
 closeVPNSettings()
 if (connectVPN()) {

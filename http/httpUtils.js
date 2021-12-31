@@ -546,17 +546,6 @@ httpUtilFunc.getProxyFromBytesfly = function (proxyType, timeliness, appName, ac
                     "eip": "",
                     "oaid": ""
                 };
-
-                // let headers = {
-                //     "x-Token": null,
-                //     "wechatId": requestConfig.wechatId
-                // };
-
-                // var body = {
-                //     "register_app_id": 2,
-                //     "limit": 1,
-                //     "status": 0
-                //  }
                 var args = {
                     "body": body,
                     "comm_args": commArgs
@@ -684,8 +673,7 @@ httpUtilFunc.getGlobalIp = function (timeout) {
     let ip = null
     try {
         timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
-        ip = newThread(function () {
-            // let user_agent  = commonFunc.getRandomUA()
+        ip = commonFunc.newThread(function () {
             let res = http.get("https://api.ipify.org/?format=json", {
                 "headers": {
                     'User-Agent': commonFunc.getRandomUA()
@@ -699,7 +687,7 @@ httpUtilFunc.getGlobalIp = function (timeout) {
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://api.ipify.org/?format=json: request error ") }
     try {
-        ip = ip || newThread(function () {
+        ip = ip || commonFunc.newThread(function () {
             let res = http.get("https://ipinfo.io/json", {
                 "headers": {
                     'User-Agent': commonFunc.getRandomUA()
@@ -713,7 +701,7 @@ httpUtilFunc.getGlobalIp = function (timeout) {
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://ipinfo.io/json: request error ") }
     try {
-        ip = ip || newThread(function () {
+        ip = ip || commonFunc.newThread(function () {
             let res = http.get("https://ifconfig.me/", {
                 "headers": {
                     'User-Agent': commonFunc.getRandomUA()
@@ -728,7 +716,7 @@ httpUtilFunc.getGlobalIp = function (timeout) {
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://ifconfig.me/ request error ") }
     try {
-        ip = ip || newThread(function () {
+        ip = ip || commonFunc.newThread(function () {
             let res = http.get("https://www.whatismyip.com/", {
                 "headers": {
                     'User-Agent': commonFunc.getRandomUA()
@@ -743,7 +731,9 @@ httpUtilFunc.getGlobalIp = function (timeout) {
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://www.whatismyip.com/ request error ") }
     return ip
+    
 }
+
 /**
  * 从 http://ip-api.com 获取当前网络IP和IP所属地理位置信息
  * @param {*} timeout 

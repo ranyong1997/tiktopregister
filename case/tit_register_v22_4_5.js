@@ -7,10 +7,11 @@ var registerDone = false
 var isSuccess = true
 var desc = ""
 var registerSignUp = false
+var click_all_cookies_success = false
 var fail_register = false
-var FIND_WIDGET_TIMEOUT = 750
+var FIND_WIDGET_TIMEOUT = 500
 var launchAppCount = 1
-var resgisterStatus = enums.REGISTER_STATUS.DEFAULT
+var resgisterStatus = ""
 var tiktop_packageName = "com.zhiliaoapp.musically"
 var facebook_packageName = "com.facebook.katana"
 var androidId = material_gain()
@@ -21,21 +22,21 @@ var vpnInfos = [
     { "ip": "185.145.128.72", "port": 4113, "user": "u768$A0K4Lmeui8*GB", "pass": "88tr", "ptype": "sock5" },
     { "ip": "185.145.128.72", "port": 4113, "user": "u768$mpziPDECFK*GB", "pass": "88tr", "ptype": "sock5" }
 ]
+var vpnData = vpnInfos[random(0, 3)]
 
 // **********************************方法执行区**********************************
-commonFun.systemTimezoneSet("Europe/London")
+commonFun.systemTimezoneSet_New("Europe/London")
 commonFun.systemTimezoneGet()   // 获取当前时区
-closeLocation()  // 关闭本地网络
-closeVPNSettings()   // 关闭VPN
-checkTiktokInstall() // 检测tiktok是否安装
-checkFacebookInstall()   // 检测facebook是否安装
-material_gain() // 安卓id获取
-Facebook_Account_Transfer()  // facebook账号迁移
-if (connectVPN()) {  // 判断是否已连接vpn
-    randomSleep()
-    log("脚本执行")
-    One_Key_Login()  // 一键登陆
-}
+// closeLocation()  // 关闭本地网络
+// closeVPNSettings()   // 关闭VPN
+// checkTiktokInstall() // 检测tiktok是否安装
+// checkFacebookInstall()   // 检测facebook是否安装
+// if (connectVPN()) {  // 判断是否已连接vpn
+//     randomSleep()
+//     log("脚本执行")
+//     One_Key_Login()  // 一键登陆
+// }
+One_Key_Login()
 
 // **********************************方法执行区**********************************
 
@@ -52,10 +53,10 @@ function closeLocation() {
         if (!packageName("com.android.settings").findOne(1)) {
             log("正在打开设置关闭网络 .. ")
             launchApp("Settings")
-            sleep(3000)
+            sleep(5000)
         }
         if (!packageName("com.android.settings").findOne(1)) {
-            sleep(1000)
+            sleep(3000)
             continue
         }
         var settingPage = id("com.android.settings:id/dashboard_container").findOne(3000)
@@ -63,7 +64,7 @@ function closeLocation() {
             var locationSetting = text("Security & location").id("android:id/title").findOne(3000)
             if (locationSetting != null) {
                 commonFun.clickWidget(locationSetting)
-                sleep(2000)
+                sleep(3000)
             } else {
                 var locationSetting = text("System").id("android:id/title").findOne(1000)
                 if (locationSetting != null) {
@@ -75,30 +76,30 @@ function closeLocation() {
             }
         } else {
             back()
-            sleep(2000)
+            sleep(3000)
         }
         var locationSettings = text("Location").id("android:id/title").findOne(3000)
         if (locationSettings != null) {
             commonFun.clickWidget(locationSettings)
-            sleep(2000)
+            sleep(3000)
 
         }
         var switchBt = id("com.android.settings:id/switch_widget").findOne(3000)
         if (switchBt != null && switchBt.text() != "OFF") {
             commonFun.clickWidget(switchBt)
-            sleep(2000)
+            sleep(3000)
             back()
-            sleep(2000)
+            sleep(3000)
             back()
-            sleep(2000)
+            sleep(3000)
             back()
             break
         } else if (switchBt != null && switchBt.text() == "OFF") {
-            sleep(2000)
+            sleep(3000)
             back()
-            sleep(2000)
+            sleep(3000)
             back()
-            sleep(2000)
+            sleep(3000)
             back()
             break
         }
@@ -211,6 +212,8 @@ function randomSleep() {
 
 // **********************************方法编辑区**********************************
 function One_Key_Login() {
+    randomSleep()
+    Facebook_Account_Transfer()
     commonFun.clearData(tiktop_packageName)
     randomSleep()
     var vpnState = SLChanges.getVPNLinkState()
@@ -230,32 +233,25 @@ function One_Key_Login() {
         try {
             sleep(5000)
             checkSignUpPage()
-            checkauthorizationPage()
+            sleep(1000)
             check_face_recognition()
             if (fail_register) {
                 break
             }
             check_content_not_found()
-            if (fail_register) {
-                break
-            }
-            // checkBirthdayPage()
-            // checkphonePage()
-            checkAuthorizationPage1()
+            checkauthorizationPage()
             checkCreatNamePage()
             checkinterestsPage()
-            // checkinterestsPage1()
             checkSwipe_up_Page()
-            // checkSynchronizingPage()
-            check_login_success()
-            updateRegisterResult()
+            checkSynchronizingPage()
+            clickProfile()
             if (registerDone && registerSignUp) {
                 break
             }
         } catch (error) {
             toastLog(" register error " + error)
         }
-    } while (4)
+    } while (true)
 }
 
 function checkSignUpPage() {
@@ -272,51 +268,16 @@ function checkSignUpPage() {
 
 function checkauthorizationPage() {
     log("检查授权页面")
-    var authorizationPage = id("m-future-page-header-title").findOne(FIND_WIDGET_TIMEOUT)
+    var authorizationPage = text("Log in With Facebook").id("m-future-page-header-title").find()
     if (authorizationPage != null) {
+        var cancel = text("Cancel").findOne().bounds()
         log("点击授权按钮")
-        var authorizationText = id("u_0_5_ik").findOne(FIND_WIDGET_TIMEOUT)
-        if (authorizationText != null) {
-            commonFun.clickWidget(authorizationText)
+        if (cancel != null) {
+            var x = cancel.centerX() - 126
+            var y = cancel.centerY() - 126
             randomSleep()
+            click(x, y)
         }
-    }
-}
-
-function checkBirthdayPage() {
-    log("选择出生月月日页")
-    randomSleep()
-    var choose_birthday = text("When’s your birthday?").id("com.zhiliaoapp.musically:id/qv").findOne(500)
-    if (choose_birthday != null) {
-        log("点击返回")
-        var click_back = id("com.zhiliaoapp.musically:id/pi").findOne(500)
-        randomSleep()
-        click_back.click()
-    }
-}
-
-function checkphonePage() {
-    log("手机/邮箱页")
-    randomSleep()
-    var checkphone = text("Send code").id("com.zhiliaoapp.musically:id/cfh").findOne(500)
-    if (checkphone != null) {
-        log("点击返回")
-        var click_back = id("com.zhiliaoapp.musically:id/pi").findOne(500)
-        randomSleep()
-        click_back.click()
-    }
-}
-
-function checkAuthorizationPage1() {
-    log("授权登陆界面")
-    randomSleep()
-    var authorizationText = className("android.widget.Button").text("Cancel").find()
-    if (authorizationText != null) {
-        log("点击允许授权")
-        var click_authorization = text("Agree and Continue").find()
-        randomSleep()
-        click_authorization.click();
-
     }
 }
 
@@ -325,14 +286,16 @@ function checkCreatNamePage() {
     randomSleep()
     var vpnSettings = text("Sign up").id("com.zhiliaoapp.musically:id/title").findOne(FIND_WIDGET_TIMEOUT)
     if (vpnSettings != null) {
+        create_random_name()
         log("点击Sign up")
-        var sign_up = text("Sign up").id("com.zhiliaoapp.musically:id/cfh").findOne(FIND_WIDGET_TIMEOUT)
+        var sign_up = id("com.zhiliaoapp.musically:id/dwe").find()
         if (sign_up != null) {
-            toastLog("该账号已被注册")
-            commonFun.clickWidget(sign_up)
+            log("该账号已被注册成功")
+            sign_up.click()
             randomSleep()
             fail_register = true
-            resgisterStatus = enums.REGISTER_STATUS.REGISTERED
+            resgisterStatus = enums.REGISTER_STATUS.SUCCESS
+            desc = resgisterStatus
         }
     }
 }
@@ -372,16 +335,12 @@ function checkSwipe_up_Page() {
 function checkSynchronizingPage() {
     log("关闭同步联系人")
     randomSleep()
-    var Synchronizing = text("Sync your contacts to easily find people you know on TikTok. Your contacts will only be used to help you connect with friends.").id("com.zhiliaoapp.musically:id/adq").findOne(500)
+    var Synchronizing = text("OK").findOne(FIND_WIDGET_TIMEOUT)
     if (Synchronizing != null) {
         log("点击不允许")
-        var click_dont = text("Don't allow").findOne(500)
+        var click_dont = text("Don't allow").findOne(FIND_WIDGET_TIMEOUT)
         if (click_dont != null) {
-            // randomSleep()
-            commonFun.clickWidget(start_watching)
-            // click_dont.click()
-            registerDone = true
-            registerSignUp = true
+            commonFun.clickWidget(click_dont)
         }
     }
     randomSleep()
@@ -437,7 +396,7 @@ function checkFacebookInstall() {
     if (!app.getAppName(facebook_packageName)) {
         toastLog("检测到未安装Facebook")
         closeVPNSettings()
-        if (!commonFun.facebookInstall("	http://192.168.91.3:8012/upload/aefb636d-5f4b-435b-adfc-12734903a05a.apk")) { throw "未安装 " + "Facebook" }
+        if (!commonFun.facebookInstall("http://192.168.91.3:8012/upload/aefb636d-5f4b-435b-adfc-12734903a05a.apk")) { throw "未安装 " + "Facebook" }
     }
 }
 
@@ -465,24 +424,56 @@ function material_gain() {
 }
 
 
+// updateRegisterResult()
 // 更新账号信息到8000端口
 function updateRegisterResult() {
     log("更新账号信息到8000端口")
-    function updateRegisterResult(account) {
-        toastLog("updateRegisterResult status " + resgisterStatus)
-        var resultBody = {
-            "id": account.id,
-            "password": account.password,
-            "email": emailAddress,
-            "register_ip": httpUtilFunc.getIpByIpify(),
-            "status": resgisterStatus,
-            "account": accountName,
-            "register_app_id": enums.REGISTER_APP_ID.TIKTOK
-        }
-        toastLog(" updateRegisterResult ")
-        var result = httpUtilFunc.httpRequest("registerAccountUpdate", resultBody)
-        toastLog(" updateRegisterResult result " + result.body.string())
+    try {
+        return commonFun.newThread(() => {
+            var data = {
+                "forceRecord": true,
+                "type": 1,
+                "appName": "tiktok",
+                "phone": "",
+                "deviceId": commonFun.deviceId,
+                "folderId": commonFun.folderId,
+                "androidId": androidId,
+                "password": null,
+                "username": null,
+                "tag": "test_20211230_ran",
+                "phoneProvider": "facebook",
+                "dialCode": "44",
+                "countryCode": "GB",
+                "email": null,
+                "emailPassword": null,
+                "smsurl": null,
+                "isRegistered": false,
+                "isProcess": true,
+                "extra": null,
+                "city": null,
+                "country": null,
+                "emailProvider": null,
+                "proxy": vpnData,
+                "proxyProvider": "bytesfly",
+                "ip": getGlobalIp(1000),
+                "isUsed": true,
+                "desc": desc,
+                "isSuccess": isSuccess,
+                "deviceInfo": commonFun.model,
+                "nickname": create_random_name,
+            }
+            httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
+            let url = "http://" + commonFun.server + "/:8000/user/registered"
+            var res = http.postJson(url, data);
+            res = res.body.json()
+            httpUtilFunc.reportLog("更新注册账号结果: " + res.resultBody)
+            if (res.code != 200) { throw res }
+            return JSON.parse(res.data)
+        })
+    } catch (error) {
+        httpUtilFunc.reportLog("更新注册账号异常: " + JSON.stringify(error))
     }
+    return null
 }
 
 // 需要人脸验证直接结束并返回
@@ -492,29 +483,34 @@ function check_face_recognition() {
     var face_recognition = text("Your account has been disabled").findOne(FIND_WIDGET_TIMEOUT)
     if (face_recognition != null) {
         toastLog("该账号需要人脸识别")
-        // TODO：记录该facebook安卓id
         randomSleep()
         commonFun.clearData(tiktop_packageName)
         fail_register = true
         resgisterStatus = enums.REGISTER_STATUS.FACE_RECOGNITION
+        isSuccess = false
+        desc = resgisterStatus
+        log(desc)
+        updateRegisterResult()
         One_Key_Login()
     }
 }
-
-// 请求页面无法显示
+// 请求页面无法显示,需要加超时等待
 function check_content_not_found() {
     log("检测是否为请求页无法显示")
-    randomSleep()
-    var content_not_found = text("Content Not Found").findOne(FIND_WIDGET_TIMEOUT)
-    if (content_not_found != null) {
-        toastLog("该账号请求也无法显示")
-        // TODO：记录该facebook安卓id
-        randomSleep()
-        fail_register = true
-        resgisterStatus = enums.REGISTER_STATUS.Content_Not_Found
-        Home()
-        One_Key_Login()
-    }
+    do {
+        var content_not_found = text("Content Not Found").findOne(FIND_WIDGET_TIMEOUT)
+        if (content_not_found != null) {
+            log("该账号请求无法显示,需要等待超时")
+        }
+        try {
+            check_allow_cookiesPage()
+            if (click_all_cookies_success) {
+                break
+            }
+        } catch (error) {
+            toastLog("在检查允许cookie时捕获到一个错误:" + error)
+        }
+    } while (true)
 }
 
 // tiktok注册成功进行备份
@@ -522,22 +518,86 @@ function tiktio_backupUplive() {
     commonFun.backupUplive(tiktop_packageName)
     randomSleep()
     resgisterStatus = enums.REGISTER_STATUS.SUCCESS
+
 }
 
 // tiktok登陆成功
-function check_login_success() {
-    log("检测tiktok登陆成功")
+function clickProfile() {
+    log("登陆成功后点击我的页面")
     randomSleep()
-    var login_success = id("com.zhiliaoapp.musically:id/bbq").findOne(FIND_WIDGET_TIMEOUT)
-    if (login_success != null) {
-        toastLog("该账号已登陆成功")
-        // TODO：记录该facebook安卓id
+    commonFun.scrollShortUp()
+    var login_in = text("Home").findOne(FIND_WIDGET_TIMEOUT)
+    if (login_in != null) {
+        log("该账号已登陆成功")
         randomSleep()
+        var click_profile = text("Profile").findOne(FIND_WIDGET_TIMEOUT)
+        if (click_profile != null) {
+            log("点击Profile")
+            randomSleep()
+            commonFun.clickWidget(click_profile)
+        }
         fail_register = true
-        resgisterStatus = enums.REGISTER_STATUS.REGISTERED
+        resgisterStatus = enums.REGISTER_STATUS.SUCCESS
+        registerDone = true
+        registerSignUp = true
+        isSuccess = false
+        desc = resgisterStatus
+        updateRegisterResult()
+        randomSleep()
         tiktio_backupUplive()
+        randomSleep()
         One_Key_Login()
     }
 }
 
-// **********************************方法编辑区**********************************检查授权页面
+
+function check_allow_cookiesPage() {
+    log("检查允许cookie页面")
+    randomSleep()
+    var allow_cookies = text("Allow the use of cookies by Facebook?").findOne(FIND_WIDGET_TIMEOUT)
+    if (allow_cookies != null) {
+        log("点击Allow All Cookies")
+        var click_allow_cookies = text("Allow All Cookies").findOne().bounds()
+        let x = click_allow_cookies.centerX()
+        let y = click_allow_cookies.centerY()
+        if (click_allow_cookies != null) {
+            click(x, y)
+        }
+        click_all_cookies_success = true
+    }
+}
+
+// TODO: 进入fb授权的时候会弹出网页登陆
+function check_web_fb_login() {
+    pass
+}
+
+
+// create_random_name()
+// 创建随机名字
+function create_random_name() {
+    var a = commonFun.randomStr(7)
+    var b = commonFun.randomStrInStr(2)
+    var create_username = a + b
+    log("创建用户名为===>", create_username)
+    setText(create_username)
+    randomSleep()
+}
+
+// TODO:获取ip需要进行封装
+function getGlobalIp(timeout) {
+    let ip = null
+    timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
+    let res = http.get("https://api.ipify.org/?format=json", {
+        "headers": {
+            'User-Agent': commonFun.getRandomUA()
+        }
+    })
+    if (res.statusCode == 200) {
+        res = res.body.json()
+        return res.ip
+    }
+}
+
+
+// **********************************方法编辑区**********************************

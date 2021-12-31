@@ -190,14 +190,79 @@
 //     }
 // }
 
-face_recognition()
+// face_recognition()
 
-function face_recognition() {
-    log("检测是否需要人脸识别")
-    var face_recognition = text("Your account has been disabled").findOne()
-    if (face_recognition != null) {
-        log("该账号需要人脸识别")
-        // TODO：记录该facebook安卓id
-    }
-    commonFun.clearData(tiktop_packageName)
-}
+// function face_recognition() {
+//     log("检测是否需要人脸识别")
+//     var face_recognition = text("Your account has been disabled").findOne()
+//     if (face_recognition != null) {
+//         log("该账号需要人脸识别")
+//         // TODO：记录该facebook安卓id
+//     }
+//     commonFun.clearData(tiktop_packageName)
+// }
+
+
+
+// getGlobalIp(1000)
+
+// function getGlobalIp(timeout) {
+//     let ip = null
+//     timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
+//     let res = http.get("https://api.ipify.org/?format=json", {
+//         "headers": {
+//             'User-Agent': "Mozilla/5.0(iPhone;U;CPUiPhoneOS4_3_3likeMacOSX;en-us)AppleWebKit/533.17.9(KHTML,likeGecko)Version/5.0.2Mobile/8J2Safari/6533.18.5"
+//         }
+//     })
+//     if (res.statusCode == 200) {
+//         res = res.body.json()
+//         log(res.ip)
+//         return res.ip
+//     }
+// }
+
+// var cancel = text("Cancel").findOne().bounds()
+// var x = cancel.centerX()-126
+// var y = cancel.centerY()-126
+// click(x,y)
+
+// check_allow_cookiesPage()
+// function check_allow_cookiesPage() {
+//     log("检查允许cookie页面")
+//     var allow_cookies = text("Allow the use of cookies by Facebook?").find()
+//     if (allow_cookies != null) {
+//         log("点击Allow All Cookies")
+//         var click_allow_cookies = text("Allow All Cookies").find()
+//         if (click_allow_cookies != null) {
+//             click_allow_cookies.click()
+//         }
+//     }
+// }
+
+// var cancel = text("Allow All Cookies").findOne().bounds()
+// var x = cancel.centerX()
+// var y = cancel.centerY()
+
+// click(x,y)
+
+// checkauthorizationPage()
+// function checkauthorizationPage() {
+//     log("检查授权页面")
+//     var authorizationPage = text("Log in With Facebook").id("m-future-page-header-title").find()
+//     if (authorizationPage != null) {
+//         var cancel = text("Cancel").findOne().bounds()
+//         log("点击授权按钮")
+//         if (cancel != null) {
+//             var x = cancel.centerX() - 126
+//             var y = cancel.centerY() - 126
+//             click(x, y)
+//         }
+//     }
+// }
+
+var sign_up = id("com.zhiliaoapp.musically:id/dwe").find()
+        if (sign_up != null) {
+            toastLog("该账号已被注册")
+            sign_up.click()
+            
+        }

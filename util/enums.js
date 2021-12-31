@@ -1,17 +1,17 @@
 const REGISTER_STATUS = {
-    DEFAULT: 0, // 系统生成
-    ASSIGNMENT: 1, // 已分配
-    SUCCESS: 2, // 成功
-    FAIL: 3, // 注册失败
-    BAN: 4, // 封号
-    REGISTERED: 5, // 被注册
-    TOOMANYATTEMPTS: 6, // 尝试太多次，稍后再试
-    EMAIL_CODE_ERROR: 7, // 验证码错误
-    EMAIL_CODE_TIMEOUT: 8,  // 获取邮箱验证码超过3分钟
-    EMAIL_CODE_OPEN_FAILED: 9, // 获取验证码000500
-    PHOTO_VERIFY_TIMEOUT: 10,  // 获取图片验证超时
-    FACE_RECOGNITION: 11, // 人脸识别
-    Content_Not_Found: 12   // 请求页失效
+    DEFAULT: "系统生成", // 系统生成
+    ASSIGNMENT: "已分配", // 已分配
+    SUCCESS: "注册成功", // 成功
+    FAIL: "注册失败", // 注册失败
+    BAN: "封号", // 封号
+    REGISTERED: "被注册", // 被注册
+    TOOMANYATTEMPTS: "尝试太多次，稍后再试", // 尝试太多次，稍后再试
+    EMAIL_CODE_ERROR: "验证码错误", // 验证码错误
+    EMAIL_CODE_TIMEOUT: "获取邮箱验证码超过3分钟",  // 获取邮箱验证码超过3分钟
+    EMAIL_CODE_OPEN_FAILED: "获取验证码000500", // 获取验证码000500
+    PHOTO_VERIFY_TIMEOUT: "获取图片验证超时",  // 获取图片验证超时
+    FACE_RECOGNITION: "需要人脸识别验证", // 人脸识别
+    Content_Not_Found: "请求页失效"   // 请求页失效
 };
 
 const REGISTER_APP_ID = {
