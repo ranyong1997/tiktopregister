@@ -7,7 +7,6 @@ var registerDone = false
 var isSuccess = true
 var desc = ""
 var registerSignUp = false
-var click_all_cookies_success = false
 var fail_register = false
 var FIND_WIDGET_TIMEOUT = 500
 var launchAppCount = 1
@@ -25,20 +24,23 @@ var vpnInfos = [
 var vpnData = vpnInfos[random(0, 3)]
 
 // **********************************方法执行区**********************************
-commonFun.systemTimezoneSet_New("Europe/London")
-commonFun.systemTimezoneGet()   // 获取当前时区
-closeLocation()  // 关闭本地网络
-closeVPNSettings()   // 关闭VPN
-checkTiktokInstall() // 检测tiktok是否安装
-checkFacebookInstall()   // 检测facebook是否安装
-if (connectVPN()) {  // 判断是否已连接vpn
-    randomSleep()
-    log("脚本执行")
+// commonFun.systemTimezoneSet_New("Europe/London")
+// commonFun.systemTimezoneGet()   // 获取当前时区
+// closeLocation()  // 关闭本地网络
+// closeVPNSettings()   // 关闭VPN
+// checkTiktokInstall() // 检测tiktok是否安装
+// checkFacebookInstall()   // 检测facebook是否安装
+// if (connectVPN()) {  // 判断是否已连接vpn
+//     randomSleep()
+//     log("脚本执行")
+//     Facebook_Account_Transfer()
+//     One_Key_Login()  // 一键登陆
+// }
+function alaways_running() {
     Facebook_Account_Transfer()
-    One_Key_Login()  // 一键登陆
+    One_Key_Login()
 }
-// Facebook_Account_Transfer()
-// One_Key_Login()
+// alaways_running()
 
 // **********************************方法执行区**********************************
 
@@ -229,11 +231,14 @@ function One_Key_Login() {
             launchApp("TikTok")
             sleep(3000)
             launchAppCount++
+            if (launchAppCount > 12) {
+                break
+            }
         }
         try {
             sleep(5000)
             checkSignUpPage()
-            sleep(5000)
+
             check_web_fb_login()
             if (fail_register) {
                 break
@@ -242,17 +247,14 @@ function One_Key_Login() {
             if (fail_register) {
                 break
             }
-            //点击授权失效
-            check_allow_cookiesPage()
-            checkauthorizationPage()
-            sleep(5000)
             create_random_name()
-            // checkCreatNamePage()
             checkinterestsPage()
+            checkinterestsPage1()
             checkSynchronizingPage()
             checkSwipe_up_Page()
-            
             clickProfile()
+            check_allow_cookiesPage()
+            checkauthorizationPage()
             if (registerDone && registerSignUp) {
                 break
             }
@@ -274,49 +276,36 @@ function checkSignUpPage() {
     }
 }
 
+
 function checkauthorizationPage() {
-    log("检查授权页面")
-    var authorizationPage = text("Log in With Facebook").id("m-future-page-header-title").find()
-    if (authorizationPage != null) {
-        var cancel = text("Cancel").findOne().bounds()
-        log("点击授权按钮")
-        if (cancel != null) {
-            var x = cancel.centerX() - 126
-            var y = cancel.centerY() - 126
-            randomSleep()
-            click(x, y)
-        }
+    var cancel = text("Cancel").findOne(FIND_WIDGET_TIMEOUT).bounds()
+    log("点击授权按钮")
+    if (cancel != null) {
+        var x = cancel.centerX() - 126
+        var y = cancel.centerY() - 126
+        click(x, y)
     }
 }
 
-// function checkCreatNamePage() {
-//     log("检查创建用户名页面")
-//     randomSleep()
-//     var creatName = text("Sign up").id("com.zhiliaoapp.musically:id/title").findOne(FIND_WIDGET_TIMEOUT)
-//     if (creatName != null) {
-//         log("点击Sign up")
-//         var sign_up = id("com.zhiliaoapp.musically:id/dwe").find()
-//         if (sign_up != null) {
-//             log("该账号已被一键登陆成功")
-//             sign_up.click()
-//             randomSleep()
-//             fail_register = true
-//             resgisterStatus = enums.REGISTER_STATUS.SUCCESS
-//             desc = resgisterStatus
-//         }
-//     }
-// }
-
+// 检查兴趣爱好页面
 function checkinterestsPage() {
     log("选择你的兴趣界面")
+    // var choose_interests = text("Next").id("com.zhiliaoapp.musically:id/anm").findOne(FIND_WIDGET_TIMEOUT)
+    // if (choose_interests != null) {
+    log("点击跳过按钮")
+    var interests_skip = text("Skip").id("com.zhiliaoapp.musically:id/e1u").findOne(FIND_WIDGET_TIMEOUT)
+    if (interests_skip != null) {
+        commonFun.clickWidget(interests_skip)
+    }
+    // }
+}
+
+function checkinterestsPage1() {
     var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/title").findOne(FIND_WIDGET_TIMEOUT)
     if (choose_interests != null) {
         log("点击跳过按钮")
-        var interests_skip = text("Skip").id("com.zhiliaoapp.musically:id/e1u").findOne(FIND_WIDGET_TIMEOUT)
         var interests_skip1 = text("Skip").id("com.zhiliaoapp.musically:id/em0").findOne(FIND_WIDGET_TIMEOUT)
-        if (interests_skip != null || interests_skip1 != null) {
-            commonFun.clickWidget(interests_skip)
-            // TODO：可能会点击失败
+        if (interests_skip1 != null) {
             commonFun.clickWidget(interests_skip1)
         }
     }
@@ -389,13 +378,16 @@ function checkVPNConnect() {
 }
 
 // 检测Tiktok是否安装对应版本
-// TODO:tiktokInstall地址需要更改
 function checkTiktokInstall() {
     if (!app.getAppName(tiktop_packageName)) {
         log("检测到未安装TikTok")
         closeVPNSettings()
-        if (!commonFun.tiktokInstall("http://192.168.91.3:8012/upload/7c207a62-dafc-48ce-ae55-af6d1d05c737.apk")) { throw "未安装 " + "TikTok" }
+        // if (!commonFun.tiktokInstall("http://192.168.91.3:8012/upload/a59d3e2a-1a41-4eb1-8098-2d9a0b524364.xapk")) { throw "未安装 " + "TikTok" }
+        httpUtilFunc.downloadFile("http://192.168.91.3:8012/upload/a59d3e2a-1a41-4eb1-8098-2d9a0b524364.xapk", "/storage/emulated/obb/Tiktok_v19.2.4", 1000 * 60, false)
+        randomSleep()
+        commonFun.installApkNew("/storage/emulated/obb/Tiktok_v19.2.4")
     }
+
 }
 
 // 检测Facebook是否安装对应版本
@@ -430,8 +422,6 @@ function material_gain() {
     }
 }
 
-
-updateRegisterResult()
 // 更新账号信息到8000端口
 function updateRegisterResult() {
     log("更新账号信息到8000端口")
@@ -444,7 +434,7 @@ function updateRegisterResult() {
                 "phone": "",
                 "deviceId": commonFun.deviceId,
                 "folderId": commonFun.folderId,
-                "androidId": androidId,
+                "androidId": commonFun.androidId,
                 "password": null,
                 "username": null,
                 "tag": "test_20211230_ran",
@@ -467,7 +457,7 @@ function updateRegisterResult() {
                 "desc": desc,
                 "isSuccess": isSuccess,
                 "deviceInfo": commonFun.model,
-                "nickname": create_random_name,
+                "nickname": create_username,
             }
             httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
             let url = "http://" + commonFun.server + "/:8000/user/registered"
@@ -496,29 +486,10 @@ function check_face_recognition() {
         resgisterStatus = enums.REGISTER_STATUS.FACE_RECOGNITION
         isSuccess = false
         desc = resgisterStatus
-        log(desc)
         updateRegisterResult()
-        One_Key_Login()
     }
 }
 
-// 请求页面无法显示,需要加超时等待
-// function check_content_not_found() {
-//     log("检测是否为请求页无法显示\n【需要等待页面超时,预计需要等待2分13秒】")
-//     do {
-//         var content_not_found = text("Content Not Found").findOne(FIND_WIDGET_TIMEOUT)
-//         if (content_not_found != null) {
-//             try {
-//                 check_allow_cookiesPage()
-//                 checkauthorizationPage()
-//             } catch (error) {
-//                 log("在检查允许cookie时捕获到一个错误:" + error)
-//             }
-//         }
-//     } while (true)
-// }
-
-// tiktok注册成功进行备份
 
 // 进行tiktok备份
 function tiktio_backupUplive() {
@@ -550,18 +521,16 @@ function clickProfile() {
         updateRegisterResult()
         randomSleep()
         tiktio_backupUplive()
-        randomSleep()
     }
 }
 
 // 检查允许cookie页面
 function check_allow_cookiesPage() {
-    log("检查允许cookie页面")
-    randomSleep()
-    var allow_cookies = text("Allow the use of cookies by Facebook?").findOne(FIND_WIDGET_TIMEOUT)
-    if (allow_cookies != null) {
+    log("检测是否为请求页无法显示\n【需要等待页面超时,预计需要等待2分13秒】")
+    var content_not_found = text("More Options").findOne(FIND_WIDGET_TIMEOUT)
+    if (content_not_found != null) {
         log("点击Allow All Cookies")
-        var click_allow_cookies = text("Allow All Cookies").findOne().bounds()
+        var click_allow_cookies = text("Allow All Cookies").findOne(FIND_WIDGET_TIMEOUT).bounds()
         let x = click_allow_cookies.centerX()
         let y = click_allow_cookies.centerY()
         if (click_allow_cookies != null) {
@@ -589,6 +558,7 @@ function check_web_fb_login() {
 
 // 创建随机名字
 function create_random_name() {
+    log("检测创建昵称页面")
     var creatName = text("Sign up").id("com.zhiliaoapp.musically:id/title").findOne(FIND_WIDGET_TIMEOUT)
     if (creatName != null) {
         var a = commonFun.randomStr(7)
@@ -599,14 +569,11 @@ function create_random_name() {
         setText(create_username)
         randomSleep()
         log("点击Sign up")
-        var sign_up = id("com.zhiliaoapp.musically:id/dwe").find()
+        var sign_up = id("com.zhiliaoapp.musically:id/dwe").findOne(FIND_WIDGET_TIMEOUT)
         if (sign_up != null) {
             log("该账号已被一键登陆成功")
-            sign_up.click()
             randomSleep()
-            fail_register = true
-            resgisterStatus = enums.REGISTER_STATUS.SUCCESS
-            desc = resgisterStatus
+            sign_up.click()
         }
     }
 }

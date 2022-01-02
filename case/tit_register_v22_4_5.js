@@ -33,8 +33,7 @@ var vpnData = vpnInfos[random(0, 3)]
 // if (connectVPN()) {  // 判断是否已连接vpn
 //     randomSleep()
 //     log("脚本执行")
-//     Facebook_Account_Transfer()
-//     One_Key_Login()  // 一键登陆
+//     alaways_running()
 // }
 function alaways_running() {
     Facebook_Account_Transfer()
@@ -457,15 +456,16 @@ function updateRegisterResult() {
                 "desc": desc,
                 "isSuccess": isSuccess,
                 "deviceInfo": commonFun.model,
-                "nickname": "123",
+                "nickname": create_username,
             }
             httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
-            let url = "http://" + commonFun.server + "/:8000/user/registered"
+            var url = "http://" + commonFun.server + ":8000/user/registered"
             var res = http.postJson(url, data);
             res = res.body.json()
-            httpUtilFunc.reportLog("更新注册账号结果: " + res.resultBody)
+            httpUtilFunc.reportLog("更新注册账号结果: " +JSON.stringify(res))
             if (res.code != 200) { throw res }
             return JSON.parse(res.data)
+
         })
     } catch (error) {
         httpUtilFunc.reportLog("更新注册账号异常: " + JSON.stringify(error))
@@ -572,8 +572,8 @@ function create_random_name() {
         var sign_up = id("com.zhiliaoapp.musically:id/dwe").findOne(FIND_WIDGET_TIMEOUT)
         if (sign_up != null) {
             log("该账号已被一键登陆成功")
-            sign_up.click()
             randomSleep()
+            sign_up.click()
         }
     }
 }

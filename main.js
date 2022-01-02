@@ -81,5 +81,6 @@ function init() {
 
 init()
 var mainTask = require("./case/tit_register_v22_4_5");
+// var mainTask = require("./case/tit_register_v22_4_5 copy");
 threads.shutDownAll()
 toastLog("脚本结束")
