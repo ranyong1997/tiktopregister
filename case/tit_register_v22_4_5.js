@@ -14,32 +14,31 @@ var resgisterStatus = ""
 var tiktop_packageName = "com.zhiliaoapp.musically"
 var facebook_packageName = "com.facebook.katana"
 var androidId = material_gain()
+var create_username = create_username
 
 var vpnInfos = [
     { "ip": "185.145.128.72", "port": 4113, "user": "u768$g9NkvqmNL0*GB", "pass": "88tr", "ptype": "sock5" },
     { "ip": "185.145.128.72", "port": 4113, "user": "u768$3FJHAhGpFW*GB", "pass": "88tr", "ptype": "sock5" },
-    { "ip": "185.145.128.72", "port": 4113, "user": "u768$A0K4Lmeui8*GB", "pass": "88tr", "ptype": "sock5" },
     { "ip": "185.145.128.72", "port": 4113, "user": "u768$mpziPDECFK*GB", "pass": "88tr", "ptype": "sock5" }
 ]
 var vpnData = vpnInfos[random(0, 3)]
 
 // **********************************方法执行区**********************************
-// commonFun.systemTimezoneSet_New("Europe/London")
-// commonFun.systemTimezoneGet()   // 获取当前时区
-// closeLocation()  // 关闭本地网络
-// closeVPNSettings()   // 关闭VPN
-// checkTiktokInstall() // 检测tiktok是否安装
-// checkFacebookInstall()   // 检测facebook是否安装
-// if (connectVPN()) {  // 判断是否已连接vpn
-//     randomSleep()
-//     log("脚本执行")
-//     alaways_running()
-// }
+commonFun.systemTimezoneSet_New("Europe/London")
+commonFun.systemTimezoneGet()   // 获取当前时区
+closeLocation()  // 关闭本地网络
+closeVPNSettings()   // 关闭VPN
+checkFacebookInstall()   // 检测facebook是否安装
+checkTiktokInstall() // 检测tiktok是否安装
+if (connectVPN()) {  // 判断是否已连接vpn
+    randomSleep()
+    log("脚本执行")
+    alaways_running()
+}
 function alaways_running() {
     Facebook_Account_Transfer()
     One_Key_Login()
 }
-alaways_running()
 
 // **********************************方法执行区**********************************
 
@@ -237,7 +236,6 @@ function One_Key_Login() {
         try {
             sleep(5000)
             checkSignUpPage()
-
             check_web_fb_login()
             if (fail_register) {
                 break
@@ -380,11 +378,11 @@ function checkVPNConnect() {
 function checkTiktokInstall() {
     if (!app.getAppName(tiktop_packageName)) {
         log("检测到未安装TikTok")
-        closeVPNSettings()
-        // if (!commonFun.tiktokInstall("http://192.168.91.3:8012/upload/a59d3e2a-1a41-4eb1-8098-2d9a0b524364.xapk")) { throw "未安装 " + "TikTok" }
+        // closeVPNSettings()
         httpUtilFunc.downloadFile("http://192.168.91.3:8012/upload/a59d3e2a-1a41-4eb1-8098-2d9a0b524364.xapk", "/storage/emulated/obb/Tiktok_v19.2.4", 1000 * 60, false)
         randomSleep()
         commonFun.installApkNew("/storage/emulated/obb/Tiktok_v19.2.4")
+        
     }
 
 }
@@ -393,9 +391,16 @@ function checkTiktokInstall() {
 function checkFacebookInstall() {
     if (!app.getAppName(facebook_packageName)) {
         toastLog("检测到未安装Facebook")
-        closeVPNSettings()
-        if (!commonFun.facebookInstall("http://192.168.91.3:8012/upload/aefb636d-5f4b-435b-adfc-12734903a05a.apk")) { throw "未安装 " + "Facebook" }
+        httpUtilFunc.downloadBigFile("http://192.168.91.3:8012/upload/aefb636d-5f4b-435b-adfc-12734903a05a.apk", "/storage/emulated/0/Facebook_v348_1.apk", 2000 * 60, false)
+        randomSleep()
+        commonFun.installApkNew("/storage/emulated/0/Facebook_v348_1.apk")
+        randomSleep()
+        log("正在打开Facebook")
+        launch(facebook_packageName);
+        randomSleep()
+        home()
     }
+
 }
 
 
@@ -436,7 +441,7 @@ function updateRegisterResult() {
                 "androidId": commonFun.androidId,
                 "password": null,
                 "username": null,
-                "tag": "test_20211230_ran",
+                "tag": "test_20220104_ran",
                 "phoneProvider": "facebook",
                 "dialCode": "44",
                 "countryCode": "GB",
@@ -462,7 +467,7 @@ function updateRegisterResult() {
             var url = "http://" + commonFun.server + ":8000/user/registered"
             var res = http.postJson(url, data);
             res = res.body.json()
-            httpUtilFunc.reportLog("更新注册账号结果: " +JSON.stringify(res))
+            httpUtilFunc.reportLog("更新注册账号结果: " + JSON.stringify(res))
             if (res.code != 200) { throw res }
             return JSON.parse(res.data)
 
@@ -493,10 +498,10 @@ function check_face_recognition() {
 
 // 进行tiktok备份
 function tiktio_backupUplive() {
-    commonFun.backupUplive(tiktop_packageName)
+    commonFun.backupUpApp(tiktop_packageName)
     randomSleep()
     resgisterStatus = enums.REGISTER_STATUS.SUCCESS
-
+    commonFun.backupUpAppInfo(tiktop_packageName,"UK-Tiktok—ran(2022-1-4)")
 }
 
 // tiktok登陆成功
@@ -505,6 +510,7 @@ function clickProfile() {
     var login_in = text("Home").findOne(FIND_WIDGET_TIMEOUT)
     if (login_in != null) {
         log("该账号已登陆成功")
+        commonFun.swipeUpSlowly()
         randomSleep()
         var click_profile = text("Profile").findOne(FIND_WIDGET_TIMEOUT)
         if (click_profile != null) {
@@ -552,7 +558,6 @@ function check_web_fb_login() {
         isSuccess = false
         desc = resgisterStatus
         updateRegisterResult()
-        One_Key_Login()
     }
 }
 
@@ -561,9 +566,9 @@ function create_random_name() {
     log("检测创建昵称页面")
     var creatName = text("Sign up").id("com.zhiliaoapp.musically:id/title").findOne(FIND_WIDGET_TIMEOUT)
     if (creatName != null) {
-        var a = commonFun.randomStr(7)
-        var b = commonFun.randomStrInStr(2)
-        var create_username = a + b
+        let a = commonFun.randomStr(7)
+        let b = commonFun.randomStrInStr(2)
+        let create_username = a + b
         log("创建用户名为===>", create_username)
         randomSleep()
         setText(create_username)
@@ -571,7 +576,6 @@ function create_random_name() {
         log("点击Sign up")
         var sign_up = id("com.zhiliaoapp.musically:id/dwe").findOne(FIND_WIDGET_TIMEOUT)
         if (sign_up != null) {
-            log("该账号已被一键登陆成功")
             randomSleep()
             sign_up.click()
         }

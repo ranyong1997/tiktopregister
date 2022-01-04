@@ -731,7 +731,7 @@ httpUtilFunc.getGlobalIp = function (timeout) {
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://www.whatismyip.com/ request error ") }
     return ip
-    
+
 }
 
 /**
