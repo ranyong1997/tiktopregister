@@ -306,20 +306,20 @@ function checkauthorizationPage() {
 // launchApp("TikTok")
 
 
-check_allow_cookiesPage()
-function check_allow_cookiesPage() {
-    log("检测是否为请求页无法显示\n【需要等待页面超时,预计需要等待2分13秒】")
-    var content_not_found = text("More Options").findOne(500)
-    if (content_not_found != null) {
-        log("点击Allow All Cookies")
-        var click_allow_cookies = text("Allow All Cookies").findOne(500).bounds()
-        let x = click_allow_cookies.centerX()
-        let y = click_allow_cookies.centerY()
-        if (click_allow_cookies != null) {
-            click(x, y)
-        }
-    }
-}
+// check_allow_cookiesPage()
+// function check_allow_cookiesPage() {
+//     log("检测是否为请求页无法显示\n【需要等待页面超时,预计需要等待2分13秒】")
+//     var content_not_found = text("More Options").findOne(500)
+//     if (content_not_found != null) {
+//         log("点击Allow All Cookies")
+//         var click_allow_cookies = text("Allow All Cookies").findOne(500).bounds()
+//         let x = click_allow_cookies.centerX()
+//         let y = click_allow_cookies.centerY()
+//         if (click_allow_cookies != null) {
+//             click(x, y)
+//         }
+//     }
+// }
 
 // checkauthorizationPage()
 // function checkauthorizationPage() {
@@ -332,3 +332,16 @@ function check_allow_cookiesPage() {
 //         click(x, y)
 //     }
 // }
+
+checkinterestsPage1()
+function checkinterestsPage1() {
+    var choose_interests = text("Choose your interests").id("com.zhiliaoapp.musically:id/bek").findOne(750)
+    if (choose_interests != null) {
+        log("点击跳过按钮")
+        var interests_skip1 = text("Skip").id("com.zhiliaoapp.musically:id/em0").findOne(750)
+        if (interests_skip1 != null) {
+            interests_skip1.click()
+            // commonFun.clickWidget(interests_skip1)
+        }
+    }
+}

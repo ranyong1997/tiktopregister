@@ -1,5 +1,5 @@
-var targetPackageName = "com.facebook.katana"
-var androidId = "26f1bbe13cd35055"
+var targetPackageName = "com.zhiliaoapp.musically"
+var androidId = "554e36b945531bc8"
 console.time('迁移耗时');
 var trans = JSON.parse(SLChanges.transferApp(targetPackageName, androidId))
 log(trans)

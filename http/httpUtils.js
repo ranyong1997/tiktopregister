@@ -1262,5 +1262,41 @@ httpUtilFunc.updateDevice = function (appName, proxyData, accountData) {
     return null
 }
 
+
+// 获取动态代理
+httpUtilFunc.getProxyFromConnanys = function (base_url, args) {
+    try {
+        if (!base_url || !args) { throw "getProxyFromDoveip 参数异常" }
+        let geo = args.regionid || "US"
+        let timeout = args.timeout || 30
+        let url = "http://connanys.com:8082/client_getendpoints"
+        log("尝试获取动态代理: " + url)
+        return newThread(function () {
+            let data_json = {
+                "user": "3182",
+                "pass": "ypiun8",
+                "protocol": 0,
+                "count": 1,
+                "portmap": 0,
+                "keeptime": timeout,
+                "autoswitch": 0,
+                "region": geo,
+                "sign": commonFunc.getmd5("3182" + "1" + timeout + "ypiun8" + "request")
+            }
+            log(data_json.sign)
+            log("代理申请提交: " + commonFunc.objectToString(data_json))
+            let res = http.postJson("http://connanys.com:8082/client_getendpoints", data_json)
+            res = res.body.json()
+            if (res.code == 0 && res.data.length) {
+                let data = res.data[0]
+                // return "SOCKS5," + data.ip + "," + data.port + "," + data.user + "," + data.pass
+                return data
+            }
+            throw res
+        }, null, 1000 * 20, () => { throw "超时退出" })
+    } catch (error) { throw "获取代理异常: " + commonFunc.objectToString(error) }
+}
+
+
 httpUtilFunc.init()
 module.exports = httpUtilFunc;
