@@ -20,8 +20,6 @@ var vpnData = httpUtilFunc.getProxyFromConnanys("connanys", { "regionid": "GB", 
 // **********************************方法执行区**********************************
 commonFun.systemTimezoneSet_New("Europe/London")
 commonFun.systemTimezoneGet()   // 获取当前时区
-closeLocation()  // 关闭本地网络
-closeVPNSettings()   // 关闭VPN
 checkFacebookInstall()   // 检测facebook是否安装
 checkTiktokInstall() // 检测tiktok是否安装
 if (connectVPN()) {  // 判断是否已连接vpn
@@ -361,7 +359,6 @@ function checkTiktokInstall() {
         commonFun.installApkNew("/storage/emulated/obb/Tiktok_v19.2.4")
 
     }
-
 }
 
 // 检测Facebook是否安装对应版本
@@ -464,7 +461,6 @@ function check_face_recognition() {
         if (face_recognition != null) {
             toastLog("该账号需要人脸验证")
             randomSleep()
-            commonFun.clearData(tiktop_packageName)
             fail_register = true
             resgisterStatus = enums.REGISTER_STATUS.FACE_RECOGNITION
             isSuccess = false
