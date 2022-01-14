@@ -11,7 +11,7 @@ const REGISTER_STATUS = {
     EMAIL_CODE_OPEN_FAILED: "获取验证码000500", // 获取验证码000500
     PHOTO_VERIFY_TIMEOUT: "获取图片验证超时",  // 获取图片验证超时
     FACE_RECOGNITION: "需要人脸识别验证", // 人脸识别
-    Content_Not_Found: "请求页失效",   // 请求页失效
+    Content_Not_Found: "Couldn't log in",   // 请求页失效
     WEB_FB_LOGIN: "弹出web登陆fb界面"   // 请求页失效
 
 };

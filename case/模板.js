@@ -12,8 +12,8 @@ var vpnInfos = [
 
 // **********************************方法执行区**********************************
 commonFun.systemTimezoneSet_New("Europe/London")
-closeLocation()
-closeVPNSettings()
+// closeLocation()
+// closeVPNSettings()
 if (connectVPN()) {
     randomSleep()
     log("脚本执行")

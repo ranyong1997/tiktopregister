@@ -77,8 +77,6 @@ httpUtilFunc.accountQuery = function (filter) {
         httpUtilFunc.reportLog("查询账号: " + url)
         var res = http.get(url);
         let res_json = res.body.json()
-        //  {"code":200,"msg":"Success","data":"[{\"model\": \"model.registaccount\", \"pk\": 28842, \"fields\": {\"appName\": \"facebook\", \"deviceId\": \"AA2036086D\", \"folderId\": \"1\", \"isSuccess\": true, \"isRegistered\": false, \"isUsed\": true, \"isDeleted\": false, \"isSold\": false, \"username\": \"David Peterson\", \"password\": \"k(Sx6WA_!\", \"email\": null, \"emailPassword\": null, \"phone\": \"777507857\", \"ip\": \"14.233.65.24\", \"dialCode\": \"84\", \"city\": null, \"country\": null, \"countryCode\": \"VN\", \"extra\": null, \"account_tag\": null, \"phoneProvider\": \"yuenanka\", \"emailProvider\": null, \"proxy\": \"SOCKS5,18.138.238.133,58314\", \"proxyProvider\": \"doveip\", \"desc\": null, \"deviceInfo\": \"htc-HTC2Q55300\", \"androidId\": \"f0b0da3ef3565f1e\", \"tag\": null, \"forceRecord\": true, \"createTime\": \"2021-08-23T11:55:25.994Z\", \"updateTime\": \"2021-08-23T11:55:25.994Z\"}}]"}
-        // log( JSON.stringify(res_json) )
         let data_list = JSON.parse(res_json.data)
         if (data_list.length) {
             for (let index = data_list.length - 1; index > -1; index--) {
@@ -453,8 +451,6 @@ httpUtilFunc.getProxyData = function (proxy_provider, proxy_tag) {
         } else {
             url = "http://" + commonFunc.server + ":8000/proxy/getproxy?tag=" + proxy_tag
         }
-        // if( !proxy_provider || !proxy_tag ){ throw "代理来源或代理标签为空" }
-        // let url = "http://" + commonFunc.server + ":8000/proxy/getproxy?proxyProvider=" + proxy_provider + "&tag="+proxy_tag
         httpUtilFunc.reportLog("获取代理: " + url)
         return newThread(function () {
             let res = http.get(url)
@@ -664,6 +660,7 @@ httpUtilFunc.getProxyFromDoveip = function (base_url, args) {
         }, null, 1000 * 20, () => { throw "超时退出" })
     } catch (error) { throw "获取代理异常: " + commonFunc.objectToString(error) }
 }
+
 /**
  * 从 https://api.ipify.org 或 https://www.whatismyip.com 获取当前网络IP
  * @param {*} timeout 
@@ -928,7 +925,6 @@ httpUtilFunc.materialFeedback = function (feedback_data) {
  */
 httpUtilFunc.materialRollback = function (app_id, app_secret, material) {
     try {
-        // "mid": 3380
         if (!material) { return false }
         if (!isNotNullObject(material) || !material.id) { throw "参数异常" + commonFunc.objectToString(material) }
         httpUtilFunc.reportLog("素材回滚: " + commonFunc.objectToString(material))
@@ -952,16 +948,18 @@ httpUtilFunc.materialRollback = function (app_id, app_secret, material) {
         let res = http.postJson("http://" + commonFunc.server + ":3002/i/a/", data_json)
         res = res.body.json()
         if (res.data && res.data.code == "000000") {
-            // return res.data.data.materials
             return true
         }
         throw res
     } catch (error) {
         httpUtilFunc.reportLog("素材回滚异常: " + commonFunc.objectToString(error))
-        // throw error
     }
     return false
 }
+
+
+
+
 httpUtilFunc.isUrlAccessable = function (url, flag_content, timeout) {
     let is_accessable = false
     try {
@@ -1093,8 +1091,6 @@ httpUtilFunc.reportLog = function (context, logType) {
         let rep_thread = threads.start(function () {
             try {
                 let log_type = logType != null ? logType : 0
-                // let url = "http://192.168.91.3:83/api/logger/rptlogs"
-                // let url = "http://172.16.0.100:83/api/logger/rptlogs"
                 let url = "http://" + commonFunc.server + ":83/api/logger/rptlogs"
                 let data = {
                     "AndroidId": commonFunc.androidId,
@@ -1266,7 +1262,7 @@ httpUtilFunc.updateDevice = function (appName, proxyData, accountData) {
 // 获取动态代理
 httpUtilFunc.getProxyFromConnanys = function (base_url, args) {
     try {
-        if (!base_url || !args) { throw "getProxyFromDoveip 参数异常" }
+        if (!args) { throw "getProxyFromDoveip 参数异常" }
         let geo = args.regionid || "US"
         let timeout = args.timeout || 30
         let url = "http://connanys.com:8082/client_getendpoints"
@@ -1289,7 +1285,6 @@ httpUtilFunc.getProxyFromConnanys = function (base_url, args) {
             res = res.body.json()
             if (res.code == 0 && res.data.length) {
                 let data = res.data[0]
-                // return "SOCKS5," + data.ip + "," + data.port + "," + data.user + "," + data.pass
                 return data
             }
             throw res

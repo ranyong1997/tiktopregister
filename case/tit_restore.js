@@ -7,16 +7,16 @@ var tiktop_packageName = "com.zhiliaoapp.musically"
 var vpnData = httpUtilFunc.getProxyFromConnanys("connanys", { "regionid": "GB", "timeout": 30 })
 // log(vpnData)
 // **********************************方法执行区**********************************
-commonFun.systemTimezoneSet_New("Europe/London")
-commonFun.systemTimezoneGet()   // 获取当前时区
+// commonFun.systemTimezoneSet_New("Europe/London")
+// commonFun.systemTimezoneGet()   // 获取当前时区
 // closeLocation()  // 关闭本地网络
 // closeVPNSettings()   // 关闭VPN
-// checkTiktokInstall() // 检测tiktok是否安装
-// if (connectVPN()) {  // 判断是否已连接vpn
-//     randomSleep()
-//     log("脚本执行")
-//     restoreTiktok()
-// }
+checkTiktokInstall() // 检测tiktok是否安装
+if (connectVPN()) {  // 判断是否已连接vpn
+    randomSleep()
+    log("脚本执行")
+    restoreTiktok()
+}
 
 
 // restoreTiktok()
