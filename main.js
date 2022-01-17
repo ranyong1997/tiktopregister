@@ -26,14 +26,14 @@ function init() {
     }
 }
 
-init()
+// init()
 // var mainTask = require("./case/tit_restore");
-// var mainTask = require("./case/tit_register_v22_4_5ID");
+var mainTask = require("./case/tit_register_v22_4_5ID");
 // var mainTask = require("./case/tit_register_v22_4_5UK");
 // var mainTask = require("./case/模板");
 // var mainTask = require("./case/Gmail_login");
 // var mainTask = require("./case/tit_restore");
 // var mainTask = require("./case/tit_register_v22_4_5获取昵称");
-var mainTask = require("./case/Gmail_login");
+// var mainTask = require("./case/Gmail_login");
 threads.shutDownAll()
 toastLog("脚本结束")

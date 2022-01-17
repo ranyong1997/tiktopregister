@@ -78,10 +78,6 @@ function randomSleep() {
 function One_Key_Login() {
     commonFun.clearData(tiktop_packageName)
     randomSleep()
-    // var vpnState = SLChanges.getVPNLinkState()
-    // if (!vpnState) {
-    //     checkVPNConnect()
-    // }
     startRegisterTime = new Date().getTime()
     toastLog("开始一键登陆功能")
     randomSleep()
@@ -185,6 +181,7 @@ function checkSwipe_up_Page() {
     commonFun.scrollShortUp()
     commonFun.scrollShortUp()
 }
+
 function Facebook_Account_Transfer() {
     var androidId = material_gain()
     try {
@@ -358,7 +355,7 @@ function updateRegisterResult() {
                 "folderId": commonFun.folderId,
                 "androidId": commonFun.androidId,
                 "password": null,
-                "username": null,
+                "username": username,
                 "tag": "test_20220112(印尼)_ran",
                 "phoneProvider": "facebook",
                 "dialCode": "44",
@@ -379,6 +376,7 @@ function updateRegisterResult() {
                 "desc": desc,
                 "isSuccess": isSuccess,
                 "deviceInfo": commonFun.model,
+                "nickname": username
             }
             httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
             var url = "http://" + commonFun.server + ":8000/user/registered"
@@ -417,7 +415,6 @@ function check_face_recognition() {
         log("该账号需要人脸识别:" + error)
         commonFun.taskResultSet("该账号需要人脸识别" + error, "w")
     }
-
 }
 
 
@@ -426,7 +423,6 @@ function tiktio_backupUplive() {
     commonFun.backupUpApp(tiktop_packageName)
     randomSleep()
     commonFun.backupUpAppInfo(tiktop_packageName, "ID-Tiktok—ran(2022-1-12)")
-
 }
 
 // tiktok登陆成功
@@ -444,10 +440,11 @@ function clickProfile() {
                 log("点击Profile")
                 randomSleep()
                 commonFun.clickWidget(click_profile)
-                var user_name = id("com.zhiliaoapp.musically:id/f_q").findOne(FIND_WIDGET_TIMEOUT)
+                var user_name = id("com.zhiliaoapp.musically:id/f_q").findOne(750)
                 log("获取昵称")
                 if (user_name != null) {
-                    log(user_name.getText())
+                    username = user_name.text().match(/@(\S+)/)[1]
+                    log(username)
                 }
             }
             fail_register = true

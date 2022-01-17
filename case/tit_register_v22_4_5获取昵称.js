@@ -84,13 +84,36 @@ function One_Key_Login() {
     clickProfile()
 }
 
+//  检查登录状态
+commonFunc.taskResultSet("登录检查:" + login_status, "a")
+
+
+//  检查账号 username
+let aboutInfo = login_status
+aboutInfo.username && commonFun.taskResultSet("粉丝数量:" + aboutInfo.followers, "a")
+let account_unique_id = aboutInfo.username || null
+try {
+    if (account_unique_id && account_unique_id != account.username) {
+        log("username 不匹配")
+        let androidId_account = httpUtilFunc.accountQuery({ "appName": tiktop_packageName, "androidId": commonFun.androidId, "isSuccess": true })
+        if (androidId_account.id == account.id) {
+            log("更新 username: " + account_unique_id)
+            let updated_account = httpUtilFunc.accountUpdate(account.id, { "username": account_unique_id })
+            account = updated_account.id ? updated_account : account
+        } else {
+            throw "安卓ID对应的账号与当前绑定账号不匹配,请核对绑定信息是否正确"
+        }
+    }
+} catch (error) { log("username 检查异常: " + commonFun.objectToString(error)) }
+
+
+
 
 // 更新部分信息到后台
 // updata_portioninfo()
 function updata_portioninfo() {
     let new_account = targetApp.editProfile(account, { "name": null, "username": null, "bio": null, "photo": null })
     account = httpUtilFunc.accountUpdate(account.id, { "name": new_account.name })
-
     //  修改昵称
     try {
         if (taskPluginData.updateName) {
