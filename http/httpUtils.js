@@ -1292,6 +1292,75 @@ httpUtilFunc.getProxyFromConnanys = function (base_url, args) {
     } catch (error) { throw "获取代理异常: " + commonFunc.objectToString(error) }
 }
 
+/**
+ * 从 https://api.ipify.org 或 https://www.whatismyip.com 获取当前网络IP
+ * @param {*} timeout 
+ * @returns ip
+ */
+httpUtilFunc.getGlobalIp = function (timeout) {
+    let ip = null
+    try {
+        timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
+        ip = newThread(function () {
+            // let user_agent  = commonFunc.getRandomUA()
+            let res = http.get("https://api.ipify.org/?format=json", {
+                "headers": {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            if (res.statusCode == 200) {
+                res = res.body.json()
+                return res.ip
+            }
+            throw res.statusCode
+        }, null, timeout, () => { throw "超时退出" })
+    } catch (error) { log("    https://api.ipify.org/?format=json: request error ") }
+    try {
+        ip = ip || newThread(function () {
+            let res = http.get("https://ipinfo.io/json", {
+                "headers": {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            if (res.statusCode == 200) {
+                res = res.body.json()
+                return res.ip
+            }
+            throw res
+        }, null, timeout, () => { throw "超时退出" })
+    } catch (error) { log("    https://ipinfo.io/json: request error ") }
+    try {
+        ip = ip || newThread(function () {
+            let res = http.get("https://ifconfig.me/", {
+                "headers": {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            res = res.body.string()
+            let reg = new RegExp(/id="ip_address">([^<]+)/)
+            if (reg.test(res)) {
+                return res.match(reg)[1]
+            }
+            throw res
+        }, null, timeout, () => { throw "超时退出" })
+    } catch (error) { log("    https://ifconfig.me/ request error ") }
+    try {
+        ip = ip || newThread(function () {
+            let res = http.get("https://www.whatismyip.com/", {
+                "headers": {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            res = res.body.string()
+            let reg = new RegExp(/Detailed information about IP address ([^"]+)/)
+            if (reg.test(res)) {
+                return res.match(reg)[1]
+            }
+            throw res
+        }, null, timeout, () => { throw "超时退出" })
+    } catch (error) { log("    https://www.whatismyip.com/ request error ") }
+    return ip
+}
 
 httpUtilFunc.init()
 module.exports = httpUtilFunc;

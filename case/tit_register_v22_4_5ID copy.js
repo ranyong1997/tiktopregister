@@ -19,7 +19,7 @@ var kitsunebi_packageName = "fun.kitsunebi.kitsunebi4android"
 // commonFun.uninstallApp(kitsunebi_packageName)
 // 获取动态【doveip】代理
 var proxy_data = httpUtilFunc.getProxyData("doveip", "doveip")
-proxy_info = httpUtilFunc.getProxyFromDoveip(proxy_data.proxy, { "geo": "ID", "timeout": 10 })
+var proxy_info = httpUtilFunc.getProxyFromDoveip(proxy_data.proxy, { "geo": "ID", "timeout": 10 })
 log("获取的代理信息: " + JSON.stringify(proxy_info))
 
 
@@ -319,37 +319,6 @@ function updateRegisterResult() {
     try {
         return commonFun.newThread(() => {
             var data = {
-                // "forceRecord": true,
-                // "type": 1,
-                // "appName": "tiktok",
-                // "phone": "test_20220112 Ran_" + commonFun.androidId,
-                // "deviceId": commonFun.deviceId,
-                // "folderId": commonFun.folderId,
-                // "androidId": commonFun.androidId,
-                // "password": null,
-                // "username": null,
-                // "tag": "test_20220112(印尼)_ran",
-                // "phoneProvider": "facebook",
-                // "dialCode": "44",
-                // "countryCode": "ID",
-                // "email": null,
-                // "emailPassword": null,
-                // "smsurl": null,
-                // "isRegistered": false,
-                // "isProcess": isProcess,
-                // "extra": null,
-                // "city": null,
-                // "country": null,
-                // "emailProvider": null,
-                // "proxy": null,
-                // "proxyProvider": "doveip",
-                // "ip": getGlobalIp(1000),
-                // "isUsed": isUsed,
-                // "desc": desc,
-                // "isSuccess": isSuccess,
-                // "deviceInfo": commonFun.model,
-                // "nickname": null,
-
                 "forceRecord": true,
                 "type": 1,
                 "appName": "tiktok",
@@ -372,13 +341,14 @@ function updateRegisterResult() {
                 "city": null,
                 "country": null,
                 "emailProvider": null,
-                "proxy": proxy_info,
+                "proxy": null,
                 "proxyProvider": "doveip",
-                "ip": global_ip,
+                "ip": getGlobalIp(1000),
                 "isUsed": isUsed,
                 "desc": desc,
                 "isSuccess": isSuccess,
                 "deviceInfo": commonFun.model,
+                "nickname": null,
             }
             httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
             var url = "http://" + commonFun.server + ":8000/user/registered"
@@ -526,8 +496,19 @@ function check_error() {   // 点击登陆出现错误toast
 }
 
 // 获取ip
-var global_ip = httpUtilFunc.getGlobalIp()
-log(global_ip)
+function getGlobalIp(timeout) {
+    let ip = null
+    timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
+    let res = http.get("https://api.ipify.org/?format=json", {
+        "headers": {
+            'User-Agent': commonFun.getRandomUA()
+        }
+    })
+    if (res.statusCode == 200) {
+        res = res.body.json()
+        return res.ip
+    }
+}
 
 // 回滚素材
 function matter_rollback() {
