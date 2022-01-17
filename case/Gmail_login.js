@@ -10,24 +10,37 @@ var gmail_package = "com.google.android.gm"
 var youtube_package = "com.google.android.youtube"
 var GJ_tools_package = "com.gxl.logsrecordmaster"
 // 获取动态代理
-// var vpnData = httpUtilFunc.getProxyFromConnanys("connanys", { "regionid": "US", "timeout": 30 })
-// log(vpnData)
+// var vpnData1 = httpUtilFunc.getProxyFromConnanys("connanys", { "regionid": "US", "timeout": 30 })
+// log("vpnData---->", vpnData1)
+
+
+// 获取动态【GMail_20220117】代理
+var proxy_data = httpUtilFunc.getProxyData("sellerip", "GMail_20220117")
+var vpnData = proxy_data.proxy
+log("proxy_data---->",vpnData)
+
+
+// var proxy_data = httpUtilFunc.getProxyData("doveip", "doveip")
+// proxy_info = httpUtilFunc.getProxyFromDoveip(proxy_data.proxy, { "geo": "ID", "timeout": 10 })
+// log("获取的代理信息: " + JSON.stringify(proxy_info))
+
+
+
 // 获取ip
 // var global_ip = httpUtilFunc.getGlobalIp()
 // log(global_ip)
-material_gain() // 素材获取
-matter_rollback()   // 回滚素材
-// updateRegisterResult()  // 更新账号信息
+// material_gain() // 素材获取
+// matter_rollback()   // 回滚素材
 
 
 // **********************************方法执行区**********************************
-// commonFun.systemTimezoneSet_New("Europe/London") // 设置时区
-// commonFun.systemTimezoneGet()   // 获取当前时区
-// if (connectVPN()) {  // 判断是否已连接vpn
-//     randomSleep()
-//     log("脚本执行")
-//     One_Key_Login()
-// }
+commonFun.systemTimezoneSet_New("America/Los_Angeles") // 设置时区
+commonFun.systemTimezoneGet()   // 获取当前时区
+if (connectVPN()) {  // 判断是否已连接vpn
+    randomSleep()
+    log("脚本执行")
+    One_Key_Login()
+}
 
 // One_Key_Login()
 
@@ -45,7 +58,7 @@ function connectVPN() {
             return false
         }
         try {
-            is_proxy_on = proxySettings.kitsunebiSetup2(vpnData)
+            is_proxy_on = proxySettings.kitsunebiSetup(vpnData)
         } catch (error) {
             log("连接vpn时捕获到一个错误:", error)
         }
@@ -60,9 +73,6 @@ function randomSleep() {
     var randomSleep = random(500, 1500)
     sleep(randomSleep)
 }
-
-
-
 // **********************************方法保护区 勿动**********************************
 
 
@@ -82,10 +92,10 @@ function updateRegisterResult() {
                 "folderId": commonFun.folderId,
                 "androidId": commonFun.androidId,
                 "password": null,
-                "username": null,
-                "tag": "test_20220117_ran",
-                "phoneProvider": "facebook",
-                "dialCode": "44",
+                "username": user_name,
+                "tag": "test_20220117(Gmail)_ran",
+                "phoneProvider": null,
+                "dialCode": null,
                 "countryCode": "US",
                 "email": username,
                 "emailPassword": password,
@@ -103,6 +113,7 @@ function updateRegisterResult() {
                 "desc": desc,
                 "isSuccess": isSuccess,
                 "deviceInfo": commonFun.model,
+                "nickname": user_name
             }
             httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
             var url = "http://" + commonFun.server + ":8000/user/registered"
@@ -139,10 +150,17 @@ function One_Key_Login() {
             click_Add()
             click_Google()
             click_Signin()
-
-
-
-
+            click_Welcome()
+            click_Add_Phone()
+            click_SkipBtn()
+            click_AgreeBtn()
+            click_TakeMeToBtn()
+            click_PopUpBtn()
+            click_HeadPortrait()
+            click_IdInfo()
+            // if(isSuccess){
+            //     break
+            // }
         } catch (error) {
             log("一键登陆时捕获到一个错误:" + error)
         }
@@ -209,16 +227,12 @@ function material_gain() {
         commonFun.taskResultSet("素材获取失败" + error, "w")
     }
 }
-
 // 回滚素材库
 function matter_rollback() {
     let app_id = "a01ed8c2a96ef33a28f21043318acf5f"
     let app_secret = "c159d6d44650179ef5498d5081c87bdd"
     httpUtilFunc.materialRollback(app_id, app_secret, material_INFO)
 }
-
-
-
 
 // Gmail第一步:点击GOT IT
 function click_GotIt() {
@@ -276,8 +290,8 @@ function click_Signin() {
                 let check_Next_Btn = text("Next").findOne(FIND_WIDGET_TIMEOUT)
                 if (check_Next_Btn != null) {
                     log("点击Next")
-                    sleep(3000)
                     commonFun.clickWidget(check_Next_Btn)
+                    sleep(5000)
                 }
             } catch (error) {
                 log("检查Next页面时捕获到一个错误:", error)
@@ -287,7 +301,6 @@ function click_Signin() {
         log("检查Signin页面时捕获到一个错误:", error)
     }
 }
-click_Welcome()
 // Gmail第五步:输入邮箱密码
 function click_Welcome() {
     log("检查Welcome是否存在")
@@ -302,8 +315,8 @@ function click_Welcome() {
                 let check_Show_pas = text("Show password").findOne(FIND_WIDGET_TIMEOUT)
                 if (check_Show_pas != null) {
                     log("点击展示密码")
-                    randomSleep()
                     commonFun.clickWidget(check_Show_pas)
+                    sleep(3000)
                 }
             } catch (error) {
                 log("检查展示密码按钮时捕获到一个错误:", error)
@@ -315,6 +328,7 @@ function click_Welcome() {
                     log("点击Next")
                     randomSleep()
                     commonFun.clickWidget(check_Next_Btn)
+                    sleep(5000)
                 }
             } catch (error) {
                 log("检查Next页面时捕获到一个错误:", error)
@@ -324,7 +338,115 @@ function click_Welcome() {
         log("检查Signin页面时捕获到一个错误:", error)
     }
 }
-
+// Gmail第六步:添加你的手机号
+function click_Add_Phone() {
+    log("检查Add phone number是否存在")
+    try {
+        let check_page = text("Add phone number?").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("上滑2次")
+            randomSleep()
+            commonFun.swipeUpRandomSpeed()
+            commonFun.swipeUpRandomSpeed()
+        }
+    } catch (error) {
+        log("检查Add phone number页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第七步:点击跳过
+function click_SkipBtn() {
+    log("检查Skip是否存在")
+    try {
+        let check_page = text("Skip").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击Skip")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            sleep(3000)
+        }
+    } catch (error) {
+        log("检查Skip页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第八步:点击同意
+function click_AgreeBtn() {
+    log("检查欢迎界面是否存在")
+    try {
+        let check_page = text("I agree").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击I Agree")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            sleep(3000)
+        }
+    } catch (error) {
+        log("检查欢迎界面时捕获到一个错误:", error)
+    }
+}
+// Gmail第九步:点击Take me to gmail
+function click_TakeMeToBtn() {
+    log("检查Take Me To Gmail是否存在")
+    try {
+        let check_page = text("TAKE ME TO GMAIL").id("com.google.android.gm:id/action_done").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击Take Me To Gmail")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            sleep(3000)
+        }
+    } catch (error) {
+        log("检查Take me to gmail页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第九步:点击弹窗关闭按钮
+function click_PopUpBtn() {
+    log("检查首次登陆是否会有弹窗")
+    try {
+        let check_page = id("com.google.android.gm:id/dismiss_button").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击弹窗关闭按钮")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            randomSleep()
+        }
+    } catch (error) {
+        log("检查弹窗时捕获到一个错误:", error)
+    }
+}
+// Gmail第十步:点击头像查看信息
+function click_HeadPortrait() {
+    log("检查头像是否存在")
+    try {
+        let check_page = id("com.google.android.gm:id/og_apd_ring_view").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击头像")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            randomSleep()
+        }
+    } catch (error) {
+        log("检查Skip页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第十一步:获取账号信息
+function click_IdInfo() {
+    log("获取账号信息")
+    try {
+        let check_page = id("com.google.android.gm:id/account_display_name").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("用户名:↓↓↓↓")
+            randomSleep()
+            user_name = check_page.text()
+            log(user_name)
+            randomSleep()
+            isSuccess = true
+            desc = "登陆成功"
+            updateRegisterResult()
+        }
+    } catch (error) {
+        log("获取账号信息时捕获到一个错误:", error)
+    }
+}
 
 // **********************************方法编辑区**********************************
 
