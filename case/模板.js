@@ -9,6 +9,7 @@ var vpnInfos = [
     { "ip": "185.145.128.72", "port": 4113, "user": "u768$A0K4Lmeui8*GB", "pass": "88tr", "ptype": "sock5" },
     { "ip": "185.145.128.72", "port": 4113, "user": "u768$mpziPDECFK*GB", "pass": "88tr", "ptype": "sock5" }
 ]
+commonFun.logs(vpnInfos)
 
 // **********************************方法执行区**********************************
 commonFun.systemTimezoneSet_New("Europe/London")
