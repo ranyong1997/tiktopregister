@@ -7,22 +7,13 @@ var isUsed = false
 var isProcess = true
 var FIND_WIDGET_TIMEOUT = 750
 var gmail_package = "com.google.android.gm"
-var youtube_package = "com.google.android.youtube"
-var GJ_tools_package = "com.gxl.logsrecordmaster"
-// 获取动态代理
-var vpnData = httpUtilFunc.getProxyFromConnanys("connanys", { "regionid": "US", "timeout": 30 })
-log(vpnData)
-// 获取ip
-var global_ip = httpUtilFunc.getGlobalIp()
-log(global_ip)
-material_gain() // 素材获取
-matter_rollback()   // 回滚素材
-
-updateRegisterResult()  // 更新账号信息
-
+// 获取动态【GMail_20220117】代理
+var proxy_data = httpUtilFunc.getProxyData("sellerip", "GMail_20220117")
+var vpnData = proxy_data.proxy
+log("proxy_data---->", vpnData)
 
 // **********************************方法执行区**********************************
-// commonFun.systemTimezoneSet_New("Europe/London") // 设置时区
+commonFun.systemTimezoneSet_New("America/Los_Angeles") // 设置时区
 commonFun.systemTimezoneGet()   // 获取当前时区
 if (connectVPN()) {  // 判断是否已连接vpn
     randomSleep()
@@ -30,6 +21,7 @@ if (connectVPN()) {  // 判断是否已连接vpn
     One_Key_Login()
 }
 
+// One_Key_Login()
 
 // **********************************方法执行区**********************************
 
@@ -45,7 +37,7 @@ function connectVPN() {
             return false
         }
         try {
-            is_proxy_on = proxySettings.kitsunebiSetup2(vpnData)
+            is_proxy_on = proxySettings.kitsunebiSetup3(vpnData)
         } catch (error) {
             log("连接vpn时捕获到一个错误:", error)
         }
@@ -60,9 +52,6 @@ function randomSleep() {
     var randomSleep = random(500, 1500)
     sleep(randomSleep)
 }
-
-
-
 // **********************************方法保护区 勿动**********************************
 
 
@@ -77,18 +66,18 @@ function updateRegisterResult() {
                 "forceRecord": true,
                 "type": 1,
                 "appName": "Gmail",
-                "phone": "test_20220117 Ran_" + commonFun.androidId,
+                "phone": "test_20220118(Gmail)_guo_" + commonFun.androidId,
                 "deviceId": commonFun.deviceId,
                 "folderId": commonFun.folderId,
                 "androidId": commonFun.androidId,
                 "password": null,
-                "username": null,
-                "tag": "test_20220117_ran",
-                "phoneProvider": "facebook",
-                "dialCode": "44",
+                "username": user_name,
+                "tag": "test_20220118(Gmail)_guo",
+                "phoneProvider": null,
+                "dialCode": null,
                 "countryCode": "US",
-                "email": username,
-                "emailPassword": password,
+                "email": null,
+                "emailPassword": null,
                 "smsurl": null,
                 "isRegistered": false,
                 "isProcess": isProcess,
@@ -97,12 +86,13 @@ function updateRegisterResult() {
                 "country": null,
                 "emailProvider": null,
                 "proxy": vpnData,
-                "proxyProvider": "connanys",
-                "ip": global_ip,
+                "proxyProvider": "GMail_20220117",
+                "ip": null,
                 "isUsed": isUsed,
                 "desc": desc,
                 "isSuccess": isSuccess,
                 "deviceInfo": commonFun.model,
+                "nickname": user_name
             }
             httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
             var url = "http://" + commonFun.server + ":8000/user/registered"
@@ -119,34 +109,31 @@ function updateRegisterResult() {
     return null
 }
 
-
 // 一键登陆Gmail邮箱
 function One_Key_Login() {
     toastLog("开始Gmail一键登陆功能")
-    openGMSApp(commonFun.userId)
-    randomSleep()
-    // do {
-    //     if (!packageName(gmail_package).findOne(1)) {
-    //         log("Gmail启动中...")
-    //         launch(gmail_package)
-    //         sleep(3000)
-    //     } else {
-    //         log("目前还没有此app,请检查改机工具是否被隐藏")
-    //         openGMSApp(commonFun.userId)
-    //     }
-    //     try {
-    //         // 写方法区
-
-
-
-
-
-    //     } catch (error) {
-    //         log("一键登陆时捕获到一个错误:" + error)
-    //     }
-    // } while (true);
+    if (!packageName(gmail_package).findOne(1)) {
+        log("Gmail启动中...")
+        launch(gmail_package)
+        sleep(10000)
+    } else {
+        log("目前还没有此app,请检查改机工具是否被隐藏")
+        openGMSApp(commonFun.userId)
+    }
+    do {
+        try {
+            randomSleep()
+            click_HeadPortrait()
+            randomSleep()
+            click_IdInfo()
+            if (isSuccess = true) {
+                break
+            }
+        } catch (error) {
+            log("一键登陆时捕获到一个错误:" + error)
+        }
+    } while (true);
 }
-
 
 // 进入改机工具
 function openGMSApp(userId) {
@@ -180,40 +167,41 @@ function openGMSApp(userId) {
         throw "google相关app enable失败：" + error;
     }
 }
-
-// 从素材库获取账号密码
-function material_gain() {
+// Gmail第十一步:点击头像查看信息
+function click_HeadPortrait() {
+    log("检查头像是否存在")
     try {
-        log("正在素材获取")
-        var material_gain = httpUtilFunc.materialGet({
-            "app_id": "21a5ae2f6168064f2c664056ea56726b",
-            "app_secret": "132a34bba2167280f59f4bd249b2ae69",
-            "count": 1,
-            "type": 0,
-            "classify": 3,
-            "used_times": 0,
-            "used_times_model": "lte",
-            "lable": "gmail"
-        })
-        Gmail_info = material_gain.text_content.split(",")
-        log("Gmail邮箱密码获取--->>", Gmail_info)
-        username = Gmail_info[0]
-        password = Gmail_info[1]
-        log("账号为：", username, "密码为：", password)
-        material_INFO = material_gain
-        return Gmail_info
+        let check_page = id("com.google.android.gm:id/og_apd_ring_view").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击头像")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            randomSleep()
+        }
     } catch (error) {
-        log("获取安卓id时捕获到一个错误:" + error)
-        commonFun.taskResultSet("素材获取失败" + error, "w")
+        log("检查Skip页面时捕获到一个错误:", error)
     }
 }
-
-// 回滚素材库
-function matter_rollback() {
-    let app_id = "a01ed8c2a96ef33a28f21043318acf5f"
-    let app_secret = "c159d6d44650179ef5498d5081c87bdd"
-    httpUtilFunc.materialRollback(app_id, app_secret, material_INFO)
+// Gmail第十二步:获取账号信息
+function click_IdInfo() {
+    log("获取账号信息")
+    try {
+        let check_page = id("com.google.android.gm:id/account_display_name").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("用户名:↓↓↓↓")
+            randomSleep()
+            user_name = check_page.text()
+            log(user_name)
+            randomSleep()
+            isSuccess = true
+            desc = "登陆成功"
+            updateRegisterResult()
+        }
+    } catch (error) {
+        log("获取账号信息时捕获到一个错误:", error)
+    }
 }
-
-
 // **********************************方法编辑区**********************************
+
+
+

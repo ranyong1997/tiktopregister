@@ -7,11 +7,6 @@ var isUsed = false
 var isProcess = true
 var FIND_WIDGET_TIMEOUT = 750
 var gmail_package = "com.google.android.gm"
-var youtube_package = "com.google.android.youtube"
-var GJ_tools_package = "com.gxl.logsrecordmaster"
-// 获取动态代理(备选一)
-// var vpnData1 = httpUtilFunc.getProxyFromConnanys("connanys", { "regionid": "US", "timeout": 30 })
-// log("vpnData---->", vpnData1)
 // 获取动态【GMail_20220117】代理(备选二)
 var proxy_data = httpUtilFunc.getProxyData("sellerip", "GMail_20220117")
 var vpnData = proxy_data.proxy
@@ -26,13 +21,13 @@ matter_rollback()   // 回滚素材
 // **********************************方法执行区**********************************
 commonFun.systemTimezoneSet_New("America/Los_Angeles") // 设置时区
 commonFun.systemTimezoneGet()   // 获取当前时区
-if (connectVPN()) {  // 判断是否已连接vpn
-    randomSleep()
-    log("脚本执行")
-    One_Key_Login()
-}
+// if (connectVPN()) {  // 判断是否已连接vpn
+//     randomSleep()
+//     log("脚本执行")
+//     One_Key_Login()
+// }
 
-// One_Key_Login()
+One_Key_Login()
 
 // **********************************方法执行区**********************************
 
@@ -148,6 +143,7 @@ function One_Key_Login() {
             click_PopUpBtn()
             click_HeadPortrait()
             click_IdInfo()
+
             if(isSuccess = true){
                 break
             }
@@ -437,6 +433,11 @@ function click_IdInfo() {
         log("获取账号信息时捕获到一个错误:", error)
     }
 }
+// Gmail第十三步:点击
+
+
+
+
 // Gmail第十四步:如果没有登陆成功则回退素材
 //TODO:待补充
 // Gmail异常提示处理

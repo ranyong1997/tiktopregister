@@ -13,7 +13,7 @@ function init() {
         log("日志初始化异常:" + JSON.stringify(error))
     }
     try {
-        log("初始化 main文件  版本号:1.2.2  作者:ranyong")
+        log("初始化 main文件  版本号:1.2.3  作者:ranyong")
         sleep(1000)
         shell("cmd statusbar expand-notifications") // 返回主界面
         sleep(3000)
@@ -26,7 +26,7 @@ function init() {
     }
 }
 
-// init()
+init()
 // var mainTask = require("./case/tit_restore");
 // var mainTask = require("./case/tit_register_v22_4_5ID");
 // var mainTask = require("./case/tit_register_v22_4_5UK");
@@ -34,6 +34,7 @@ function init() {
 // var mainTask = require("./case/Gmail_login");
 // var mainTask = require("./case/tit_restore");
 // var mainTask = require("./case/tit_register_v22_4_5获取昵称");
-var mainTask = require("./case/Gmail_login");
+var mainTask = require("./case/Gmail_replaceVpns");
+// var mainTask = require("./case/demo");
 threads.shutDownAll()
 toastLog("脚本结束")

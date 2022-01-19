@@ -14,14 +14,14 @@ var resgisterStatus = ""
 var tiktop_packageName = "com.zhiliaoapp.musically"
 var facebook_packageName = "com.facebook.katana"
 var kitsunebi_packageName = "fun.kitsunebi.kitsunebi4android"
-// 获取ip
-var global_ip = httpUtilFunc.getLocalIp()
 
-commonFun.uninstallApp(kitsunebi_packageName)
+
+// commonFun.uninstallApp(kitsunebi_packageName)
 // 获取动态【doveip】代理
 var proxy_data = httpUtilFunc.getProxyData("doveip", "doveip")
 proxy_info = httpUtilFunc.getProxyFromDoveip(proxy_data.proxy, { "geo": "ID", "timeout": 10 })
 log("获取的代理信息: " + JSON.stringify(proxy_info))
+
 
 // **********************************方法执行区**********************************
 // commonFun.systemTimezoneSet_New("Jakarta/Indonesia")
@@ -29,20 +29,10 @@ commonFun.systemTimezoneGet()   // 获取当前时区
 checkFacebookInstall()   // 检测facebook是否安装
 checkTiktokInstall() // 检测tiktok是否安装
 checkVPNInstall()   // 检测vpn是否安装
-
-function doSomething() {
-    if (connectVPN()) {
-        alaways_running()
-        while (true) {
-            // 判断是否已连接vpn
-            log("脚本执行")
-            One_Key_Login()
-            break
-        }
-    }
+if (connectVPN()) {  // 判断是否已连接vpn
+    log("脚本执行")
+    alaways_running()
 }
-let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 10, () => { log("时间已经超时10分钟,程序退出") })
-
 function alaways_running() {
     Facebook_Account_Transfer()
 }
@@ -199,7 +189,7 @@ function Facebook_Account_Transfer() {
         log("正在迁移facebook账号")
         commonFun.Facebook_Account_Transfer(facebook_packageName, androidId)
         console.timeEnd('迁移耗时');
-        // One_Key_Login()
+        One_Key_Login()
     } catch (error) {
         log("迁移fb时捕获到一个错误:", error)
         matter_rollback()
@@ -326,6 +316,37 @@ function updateRegisterResult() {
     try {
         return commonFun.newThread(() => {
             var data = {
+                // "forceRecord": true,
+                // "type": 1,
+                // "appName": "tiktok",
+                // "phone": "test_20220112 Ran_" + commonFun.androidId,
+                // "deviceId": commonFun.deviceId,
+                // "folderId": commonFun.folderId,
+                // "androidId": commonFun.androidId,
+                // "password": null,
+                // "username": null,
+                // "tag": "test_20220112(印尼)_ran",
+                // "phoneProvider": "facebook",
+                // "dialCode": "44",
+                // "countryCode": "ID",
+                // "email": null,
+                // "emailPassword": null,
+                // "smsurl": null,
+                // "isRegistered": false,
+                // "isProcess": isProcess,
+                // "extra": null,
+                // "city": null,
+                // "country": null,
+                // "emailProvider": null,
+                // "proxy": null,
+                // "proxyProvider": "doveip",
+                // "ip": getGlobalIp(1000),
+                // "isUsed": isUsed,
+                // "desc": desc,
+                // "isSuccess": isSuccess,
+                // "deviceInfo": commonFun.model,
+                // "nickname": null,
+
                 "forceRecord": true,
                 "type": 1,
                 "appName": "tiktok",
@@ -385,6 +406,7 @@ function check_face_recognition() {
             resgisterStatus = enums.REGISTER_STATUS.FACE_RECOGNITION
             isSuccess = false
             desc = resgisterStatus
+            // updateRegisterResult()
             let log_server = commonFun.taskResultSet("该账号需要人脸验证", "w")
             commonFun.taskResultGet(log_server)
             matter_rollback()
@@ -500,7 +522,9 @@ function check_error() {   // 点击登陆出现错误toast
     // }
 }
 
-
+// 获取ip
+var global_ip = httpUtilFunc.getGlobalIp()
+log(global_ip)
 
 // 回滚素材
 function matter_rollback() {

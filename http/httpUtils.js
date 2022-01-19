@@ -728,30 +728,8 @@ httpUtilFunc.getGlobalIp = function (timeout) {
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://www.whatismyip.com/ request error ") }
     return ip
-
 }
 
-/**
- * 从 http://ip-api.com 获取当前网络IP和IP所属地理位置信息
- * @param {*} timeout 
- * @returns 示例数据: {"status":"success","country":"United States","countryCode":"US","region":"NY","regionName":"New York","city":"Buffalo","zip":"14202","lat":42.893,"lon":-78.8753,"timezone":"America/New_York","isp":"ColoCrossi
-ng","org":"ColoCrossing","as":"AS36352 ColoCrossing","query":"23.94.65.69"}
- */
-httpUtilFunc.getIpInfo = function (timeout) {
-    let ipInfo = {}
-    try {
-        timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
-        ipInfo = newThread(function () {
-            let res = http.get("http://ip-api.com/json/", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            return res.body.json()
-        }, {}, timeout, () => { throw "超时退出" })
-    } catch (error) { log("  http://ip-api.com/json/: " + commonFunc.objectToString(error)) }
-    return ipInfo
-}
 /**
  * 从 https://www.ip.cn 获取 Bypass 网络IP
  * @param {*} timeout 
@@ -786,21 +764,11 @@ httpUtilFunc.getLocalIp = function (timeout) {
  * @returns {Array} 返回素材列表 
  */
 httpUtilFunc.materialGetList = function (req_data) {
-    // let getMaterials = function( args ){
     try {
-        // let args_data = {
-        //     "type": type,
-        //     "count": count,
-        //     "classify": classify,
-        //     "used_times": used_times,
-        //     "lable": lable
-        // } 
         if (!commonFunc.isNotNullObject(req_data)) { throw "参数异常 " + commonFunc.objectToString(req_data) }
         httpUtilFunc.reportLog("素材申请参数: " + commonFunc.objectToString(req_data))
-        // if( !app_id || !app_secret ){ throw "参数异常 " + commonFunc.objectToString(req_data) }
         let app_id = req_data.app_id
         let app_secret = req_data.app_secret
-
         let args_data = {}
         args_data.type = req_data.type
         args_data.count = req_data.count || 1
@@ -808,7 +776,6 @@ httpUtilFunc.materialGetList = function (req_data) {
         args_data.used_times = typeof (req_data.used_times) == "number" ? req_data.used_times : null
         args_data.used_times_model = req_data.used_times_model || "lte"
         args_data.lable = req_data.lable || null
-
         let call = "material_get"
         let version = "1.0.0"
         let ts = new Date().getTime()

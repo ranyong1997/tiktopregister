@@ -14,10 +14,11 @@ var vpnInfos = [
 commonFun.systemTimezoneSet_New("Europe/London")
 // closeLocation()
 // closeVPNSettings()
-if (connectVPN()) {
-    randomSleep()
-    log("脚本执行")
-}
+// if (connectVPN()) {
+//     randomSleep()
+//     log("脚本执行")
+// }
+connectVPN()
 // **********************************方法执行区**********************************
 
 // **********************************方法保护区 勿动**********************************
