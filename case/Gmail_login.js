@@ -134,26 +134,27 @@ function One_Key_Login() {
         openGMSApp(commonFun.userId)
     }
     do {
-        try {
-            // 写方法区
-            click_GotIt()
-            click_Add()
-            click_Google()
-            click_Signin()
-            click_Welcome()
-            click_Add_Phone()
-            click_SkipBtn()
-            click_AgreeBtn()
-            click_TakeMeToBtn()
-            click_PopUpBtn()
-            click_HeadPortrait()
-            click_IdInfo()
-            if(isSuccess = true){
-                break
-            }
-        } catch (error) {
-            log("一键登陆时捕获到一个错误:" + error)
+        // try {
+        // 写方法区
+        click_GotIt()
+        click_Add()
+        click_Google()
+        click_Signin()
+        click_Welcome()
+        click_Add_Phone()
+        click_SkipBtn()
+        click_AgreeBtn()
+        click_TakeMeToBtn()
+        click_PopUpBtn()
+        click_AbnormalTip()
+        click_HeadPortrait()
+        click_IdInfo()
+        if (isSuccess = true) {
+            break
         }
+        // } catch (error) {
+        //     log("一键登陆时捕获到一个错误:" + error)
+        // }
     } while (true);
 }
 
@@ -439,21 +440,43 @@ function click_IdInfo() {
 }
 // Gmail第十四步:如果没有登陆成功则回退素材
 //TODO:待补充
+
 // Gmail异常提示处理
-// function click_AbnormalTip() {
-//     log("检查异常提示")
-//     try {
-//         let check_page = text("Confirm your recovery email").findOne(FIND_WIDGET_TIMEOUT)
-//         if (check_page != null) {
-//             log("点击头像")
-//             randomSleep()
-//             commonFun.clickWidget(check_page)
-//             randomSleep()
-//         }
-//     } catch (error) {
-//         log("检查Skip页面时捕获到一个错误:", error)
-//     }
-// }
+function click_AbnormalTip() {
+    log("检查提示框")
+    try {
+        let check_page = id("com.google.android.gm:id/in_gmail_opt_in_button").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("1.勾选第一个")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            randomSleep()
+            let check_page1 = id("com.google.android.gm:id/in_gmail_next").text("Next").findOne(FIND_WIDGET_TIMEOUT)
+            if (check_page1 != null) {
+                log("点击Next")
+                randomSleep()
+                commonFun.clickWidget(check_page1)
+                randomSleep()
+                let check_page2 = id("com.google.android.gm:id/cross_products_form_title").findOne(FIND_WIDGET_TIMEOUT)
+                if (check_page2 != null) {
+                    log("2.勾选第一个")
+                    randomSleep()
+                    commonFun.clickWidget(check_page2)
+                    randomSleep()
+                    let check_page3 = id("com.google.android.gm:id/cross_products_done").text("Done").findOne(FIND_WIDGET_TIMEOUT)
+                    if (check_page3 != null) {
+                        log("点击Done")
+                        randomSleep()
+                        commonFun.clickWidget(check_page3)
+                        randomSleep()
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        log("检查提示框时捕获到一个错误:", error)
+    }
+}
 
 // **********************************方法编辑区**********************************
 

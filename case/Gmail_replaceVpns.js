@@ -121,7 +121,18 @@ function One_Key_Login() {
         openGMSApp(commonFun.userId)
     }
     do {
-        try {
+        // try {
+            click_GotIt()
+            click_Add()
+            click_Google()
+            click_Signin()
+            click_Welcome()
+            click_Add_Phone()
+            click_SkipBtn()
+            click_AgreeBtn()
+            click_TakeMeToBtn()
+            click_PopUpBtn()
+            click_AbnormalTip()
             randomSleep()
             click_HeadPortrait()
             randomSleep()
@@ -129,9 +140,9 @@ function One_Key_Login() {
             if (isSuccess = true) {
                 break
             }
-        } catch (error) {
-            log("一键登陆时捕获到一个错误:" + error)
-        }
+        // } catch (error) {
+        //     log("一键登陆时捕获到一个错误:" + error)
+        // }
     } while (true);
 }
 
@@ -167,6 +178,187 @@ function openGMSApp(userId) {
         throw "google相关app enable失败：" + error;
     }
 }
+
+// Gmail第一步:点击GOT IT
+function click_GotIt() {
+    log("检查GOT IT是否存在")
+    try {
+        let check_page = text("GOT IT").id("com.google.android.gm:id/welcome_tour_got_it").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击GOT IT")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+        }
+    } catch (error) {
+        log("检查GOT IT页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第二步:点击Add an email address
+function click_Add() {
+    log("检查Add an email address是否存在")
+    try {
+        let check_page = text("Add an email address").id("com.google.android.gm:id/setup_addresses_add_another").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击Add an email address")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+        }
+    } catch (error) {
+        log("检查Add an email address页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第三步:点击Google
+function click_Google() {
+    log("检查Google是否存在")
+    try {
+        let check_page = text("Google").id("com.google.android.gm:id/account_setup_label").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击Google")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+        }
+    } catch (error) {
+        log("检查Google页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第四步:输入邮箱账号
+function click_Signin() {
+    log("检查Signin是否存在")
+    try {
+        let check_page = text("Learn more about Google Accounts").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("输入邮箱")
+            input(username)
+            randomSleep()
+            log("检查Next是否存在")
+            try {
+                let check_Next_Btn = text("Next").findOne(FIND_WIDGET_TIMEOUT)
+                if (check_Next_Btn != null) {
+                    log("点击Next")
+                    commonFun.clickWidget(check_Next_Btn)
+                    sleep(5000)
+                }
+            } catch (error) {
+                log("检查Next页面时捕获到一个错误:", error)
+            }
+        }
+    } catch (error) {
+        log("检查Signin页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第五步:输入邮箱密码
+function click_Welcome() {
+    log("检查Welcome是否存在")
+    try {
+        let check_page = text("Welcome").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("输入密码")
+            input(password)
+            randomSleep()
+            log("检查展示密码")
+            try {
+                let check_Show_pas = text("Show password").findOne(FIND_WIDGET_TIMEOUT)
+                if (check_Show_pas != null) {
+                    log("点击展示密码")
+                    commonFun.clickWidget(check_Show_pas)
+                    sleep(3000)
+                }
+            } catch (error) {
+                log("检查展示密码按钮时捕获到一个错误:", error)
+            }
+            log("检查Next是否存在")
+            try {
+                let check_Next_Btn = text("Next").findOne(FIND_WIDGET_TIMEOUT)
+                if (check_Next_Btn != null) {
+                    log("点击Next")
+                    randomSleep()
+                    commonFun.clickWidget(check_Next_Btn)
+                    sleep(5000)
+                }
+            } catch (error) {
+                log("检查Next页面时捕获到一个错误:", error)
+            }
+        }
+    } catch (error) {
+        log("检查Signin页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第六步:添加你的手机号
+function click_Add_Phone() {
+    log("检查Add phone number是否存在")
+    try {
+        let check_page = text("Add phone number?").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("上滑2次")
+            randomSleep()
+            commonFun.swipeUpRandomSpeed()
+            commonFun.swipeUpRandomSpeed()
+        }
+    } catch (error) {
+        log("检查Add phone number页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第七步:点击跳过
+function click_SkipBtn() {
+    log("检查Skip是否存在")
+    try {
+        let check_page = text("Skip").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击Skip")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            sleep(3000)
+        }
+    } catch (error) {
+        log("检查Skip页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第八步:点击同意
+function click_AgreeBtn() {
+    log("检查欢迎界面是否存在")
+    try {
+        let check_page = text("I agree").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击I Agree")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            sleep(3000)
+        }
+    } catch (error) {
+        log("检查欢迎界面时捕获到一个错误:", error)
+    }
+}
+// Gmail第九步:点击Take me to gmail
+function click_TakeMeToBtn() {
+    log("检查Take Me To Gmail是否存在")
+    try {
+        let check_page = text("TAKE ME TO GMAIL").id("com.google.android.gm:id/action_done").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击Take Me To Gmail")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            sleep(3000)
+        }
+    } catch (error) {
+        log("检查Take me to gmail页面时捕获到一个错误:", error)
+    }
+}
+// Gmail第十步:点击弹窗关闭按钮
+function click_PopUpBtn() {
+    randomSleep()
+    log("检查首次登陆是否会有弹窗")
+    try {
+        let check_page = id("com.google.android.gm:id/dismiss_button").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击弹窗关闭按钮")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            randomSleep()
+        }
+    } catch (error) {
+        log("检查弹窗时捕获到一个错误:", error)
+    }
+}
 // Gmail第十一步:点击头像查看信息
 function click_HeadPortrait() {
     log("检查头像是否存在")
@@ -199,6 +391,42 @@ function click_IdInfo() {
         }
     } catch (error) {
         log("获取账号信息时捕获到一个错误:", error)
+    }
+}
+
+function click_AbnormalTip() {
+    log("检查提示框")
+    try {
+        let check_page = id("com.google.android.gm:id/in_gmail_opt_in_button").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("1.勾选第一个")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            randomSleep()
+            let check_page1 = id("com.google.android.gm:id/in_gmail_next").text("Next").findOne(FIND_WIDGET_TIMEOUT)
+            if (check_page1 != null) {
+                log("点击Next")
+                randomSleep()
+                commonFun.clickWidget(check_page1)
+                randomSleep()
+                let check_page2 = id("com.google.android.gm:id/cross_products_form_title").findOne(FIND_WIDGET_TIMEOUT)
+                if (check_page2 != null) {
+                    log("2.勾选第一个")
+                    randomSleep()
+                    commonFun.clickWidget(check_page2)
+                    randomSleep()
+                    let check_page3 = id("com.google.android.gm:id/cross_products_done").text("Done").findOne(FIND_WIDGET_TIMEOUT)
+                    if (check_page3 != null) {
+                        log("点击Done")
+                        randomSleep()
+                        commonFun.clickWidget(check_page3)
+                        randomSleep()
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        log("检查提示框时捕获到一个错误:", error)
     }
 }
 // **********************************方法编辑区**********************************
