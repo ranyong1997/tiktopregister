@@ -393,7 +393,7 @@ function click_IdInfo() {
         log("获取账号信息时捕获到一个错误:", error)
     }
 }
-
+// 检查使用时间提示框
 function click_AbnormalTip() {
     log("检查提示框")
     try {
@@ -408,13 +408,13 @@ function click_AbnormalTip() {
                 log("点击Next")
                 randomSleep()
                 commonFun.clickWidget(check_page1)
-                randomSleep()
-                let check_page2 = id("com.google.android.gm:id/cross_products_form_title").findOne(FIND_WIDGET_TIMEOUT)
+                sleep(2000)
+                let check_page2 = id("com.google.android.gm:id/cross_products_opt_in_button").findOne(FIND_WIDGET_TIMEOUT)
                 if (check_page2 != null) {
                     log("2.勾选第一个")
                     randomSleep()
                     commonFun.clickWidget(check_page2)
-                    randomSleep()
+                    sleep(2000)
                     let check_page3 = id("com.google.android.gm:id/cross_products_done").text("Done").findOne(FIND_WIDGET_TIMEOUT)
                     if (check_page3 != null) {
                         log("点击Done")
