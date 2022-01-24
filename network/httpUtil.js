@@ -1,19 +1,11 @@
-const { shortSleep, timing, screenTip, getSerial, commonClick, widgetCompare, clickAlreadyFindWidget, clickWidget, longSleep, newThread, isNotNullObject } = require("../lib/common.js");
+const { shortSleep, newThread } = require("../lib/common.js");
 const commonFunc = require("../lib/common.js");
-
-// 用于 大文件下载
-importClass(java.io.InputStream);
-importClass(java.io.File);
-importClass(java.io.FileOutputStream);
-
 var httpUtilFunc = {};
 //初始化
 httpUtilFunc.init = function () {
-    // try { commonFunc.taskName = httpUtilFunc.taskNameGet() } catch (error) { log("任务名称获取失败:"+commonFunc.objectToString(error)) }
     try {
         log("init httpUtilFunc")
-        let deviceInfo = "\n   设备详情: " + "\n"
-        deviceInfo = deviceInfo + "   taskName=" + commonFunc.taskName + "\n"
+        let deviceInfo = "设备详情: " + "\n"
         deviceInfo = deviceInfo + "   happybay=" + commonFunc.happybayVersion + "\n"
         deviceInfo = deviceInfo + "   jsengine=" + commonFunc.jsengineVersion + "\n"
         deviceInfo = deviceInfo + "   androidId=" + commonFunc.androidId + "    deviceId=" + commonFunc.deviceId + "   folderId=" + commonFunc.folderId + "    userId=" + commonFunc.userId + "    brand=" + commonFunc.brand + "   model=" + commonFunc.model + "\n"
@@ -32,8 +24,9 @@ httpUtilFunc.accountLoginRecord = function (record_data) {
         record_data.username = record_data.username || null
         record_data.proxy = record_data.proxy || null
         record_data.proxyProvider = record_data.proxyProvider || null
+
         record_data.actionType = record_data.actionType || 2  //  1-注册; 2-登录
-        record_data.result = record_data.result || 0       //  0/1/-1  非空数字
+        record_data.result = record_data.result || 0      //  0/1/-1  非空数字
         record_data.desc = record_data.desc || null        //  描述信息
         record_data.deviceId = commonFunc.deviceId
         record_data.folderId = commonFunc.folderId
@@ -43,6 +36,7 @@ httpUtilFunc.accountLoginRecord = function (record_data) {
         let url = "http://" + commonFunc.server + ":8000/user/loginrecord"
         let res = http.postJson(url, record_data)
         res = res.body.json()
+        // log( JSON.stringify(res) )
         if (res.code == 200) {
             httpUtilFunc.reportLog("记录登陆完成")
             return true
@@ -53,6 +47,7 @@ httpUtilFunc.accountLoginRecord = function (record_data) {
         httpUtilFunc.reportLog("记录登陆失败 " + commonFunc.objectToString(error))
         throw error
     }
+    // return false
 }
 /**
  * 
@@ -72,8 +67,10 @@ httpUtilFunc.accountQuery = function (filter) {
         filter.username = filter.username || ""
         if (filter.isSuccess != null) { filter.isSuccess = filter.isSuccess ? 1 : 0 }
         if (filter.isSuccess == null) { filter.isSuccess = "" }
-
-        let url = "http://" + commonFunc.server + ":8000/user/search?datatype=" + filter.datatype + "&id=" + filter.id + "&appName=" + filter.appName + "&isSuccess=" + filter.isSuccess + "&androidId=" + filter.androidId + "&deviceId=" + filter.deviceId + "&folderId=" + filter.folderId + "&phone=" + filter.phone + "&username=" + filter.username
+        let url = "http://" + commonFunc.server + ":8000/user/search?datatype=" +
+            filter.datatype + "&id=" + filter.id + "&appName=" + filter.appName + "&isSuccess=" + filter.isSuccess +
+            "&androidId=" + filter.androidId + "&deviceId=" + filter.deviceId + "&folderId=" + filter.folderId +
+            "&phone=" + filter.phone + "&username=" + filter.username
         httpUtilFunc.reportLog("查询账号: " + url)
         var res = http.get(url);
         let res_json = res.body.json()
@@ -88,7 +85,6 @@ httpUtilFunc.accountQuery = function (filter) {
         }
         account ? httpUtilFunc.reportLog("查询账号结果: " + commonFunc.objectToString(account)) : httpUtilFunc.reportLog("查询账号失败: " + commonFunc.objectToString(res_json))
     } catch (error) {
-        // httpUtilFunc.reportLog( "查询账号失败: " + commonFunc.objectToString(error) )
         throw error
     }
     return account
@@ -99,7 +95,6 @@ httpUtilFunc.accountQuery = function (filter) {
  * @param {*} new_data 
  * @returns 
  */
-//TODO：更新账号
 httpUtilFunc.accountUpdate = function (account_id, new_data) {
     try {
         if (!account_id || !commonFunc.isNotNullObject(new_data)) { throw "参数异常" }
@@ -124,115 +119,73 @@ httpUtilFunc.accountUpdate = function (account_id, new_data) {
     }
 }
 /**
- * downloadFile 下载文件到本地
- * @param {String} file_url     下载链接
- * @param {String} file_path    存放路径
- * @param {Number} timeout 超时时间(毫秒)
- * @param {Boolean} force_download 覆盖下载, 默认为 false
- * @returns {String} proxy_info
+ * 
+ * @param {*} filter 
+ * @returns 
  */
+httpUtilFunc.queryProxy = function (filter) {
+    let proxy_data = null
+    try {
+        filter.datatype = filter.datatype || 4
+        filter.id = filter.id || filter.proxyId || ""
+        filter.proxy = filter.proxy || ""
+        filter.proxyProvider = filter.proxyProvider || ""
+        filter.tag = filter.tag || ""
+        filter.desc = filter.desc || ""
+        if (filter.isDeleted != null) { filter.isDeleted = filter.isSuccess ? 1 : 0 }
+        if (filter.isDeleted == null) { filter.isDeleted = "" }
+        let url = "http://" + commonFunc.server + ":8000/user/search?datatype=" + filter.datatype + "&id=" +
+            filter.id + "&proxy=" + filter.proxy + "&proxyProvider=" + filter.proxyProvider + "&tag=" + filter.tag +
+            "&desc=" + filter.desc + "&isDeleted=" + filter.isDeleted
+        httpUtilFunc.reportLog("查询代理: " + url)
+        var res = http.get(url);
+        let res_json = res.body.json()
+        let data_list = JSON.parse(res_json.data)
+        if (data_list.length) {
+            for (let index = data_list.length - 1; index > -1; index--) {
+                proxy_data = data_list[index].fields
+                proxy_data.id = data_list[index].pk
+                break
+            }
+        }
+        proxy_data ? httpUtilFunc.reportLog("查询代理结果: " + commonFunc.objectToString(proxy_data)) : httpUtilFunc.reportLog("查询代理失败: " + commonFunc.objectToString(res_json))
+    } catch (error) {
+        throw error
+    }
+    return proxy_data
+}
 httpUtilFunc.downloadFile = function (file_url, file_path, timeout, force_download) {
     try {
         timeout = typeof (timeout) == "number" ? timeout : 120000
         force_download = typeof (force_download) == "boolean" ? force_download : false
+        if (!file_url) { throw "file_url 异常: " + file_url }
+        try {
+            if (files.exists(file_path) && !force_download) {
+                log("文件已存在：" + file_url)
+                return true
+            }
+            files.remove(file_path)
+        } catch (error) { }
 
-        if (!force_download && files.exists(file_path)) { this.reportLog("文件已存在: " + file_url + " -> " + file_path); return true }
-        try { files.remove(file_path); sleep(2000) } catch (error) { }
-
-        this.reportLog("开始下载文件: " + file_url + " -> " + file_path)
         //  下载文件
         let is_download = newThread(function () {
+            log("开始下载文件：" + file_url)
             res = http.get(file_url)
             files.writeBytes(file_path, res.body.bytes())
             return true
-        }, false, timeout, () => { throw "超时退出" })
+        }, false, timeout)
 
         //  刷新设备媒体库
         if (is_download && files.exists(file_path)) {
-            sleep(2000)
             media.scanFile(file_path)
-            this.reportLog("文件下载完成: " + file_url + " -> " + file_path)
+            log("文件已载入设备")
             return true
         }
         throw "未知异常"
     } catch (error) {
-        this.reportLog("文件下载失败 " + commonFunc.objectToString(error))
-        throw "文件下载失败 " + commonFunc.objectToString(error)
+        log("文件下载失败 " + JSON.stringify(error))
     }
-    // return false
-}
-/**
- * downloadFile 下载文件到本地
- * @param {String} file_url     下载链接
- * @param {String} file_path    存放路径
- * @param {Number} timeout 超时时间(毫秒)
- * @param {Boolean} force_download 覆盖下载, 默认为 false
- * @returns {String} proxy_info
- */
-httpUtilFunc.downloadBigFile = function (file_url, file_path, timeout, force_download) {
-    try {
-        timeout = typeof (timeout) == "number" ? timeout : 1000 * 60 * 5
-        force_download = typeof (force_download) == "boolean" ? force_download : false
-
-        if (!force_download && files.exists(file_path)) { this.reportLog("文件已存在: " + file_url + " -> " + file_path); return true }
-        try { files.remove(file_path); sleep(2000) } catch (error) { }
-
-        this.reportLog("开始下载文件: " + file_url + " -> " + file_path)
-        //  下载文件
-        let res = null
-        newThread(function () {
-            res = http.get(file_url);
-        }, false, timeout, () => { throw "超时退出" })
-
-        //  使用 JAVA 的文件流方式下载
-        if (res) {
-            let is;
-            let buf = util.java.array("byte", 1024 * 11);
-            let len = 0;
-            let fos;
-            let lastProgress = 0;
-            try {
-                is = res.body.byteStream;
-                let total = res.body.contentLength;
-                log("fileContentLength=" + total);
-                let file = new File(file_path);
-                if (file.exists()) {
-                    let status = file.delete()
-                    log("file delete status=" + status);
-                }
-                fos = new FileOutputStream(file);
-                let sum = 0;
-                while ((len = is.read(buf)) != -1) {
-                    fos.write(buf, parseInt(0), parseInt(len));
-                    sum += len;
-                    let progress = parseInt(sum / total * 100);
-                    if (progress > lastProgress + 10) {
-                        log("current=" + progress);
-                    }
-                    lastProgress = progress;
-                }
-                fos.flush();
-                is_download = true
-            } catch (error) {
-                try { is && is.close() } catch (error) { }
-                try { fos && fos.close() } catch (error) { }
-                throw error
-            }
-        }
-
-        //  刷新设备媒体库
-        if (is_download && files.exists(file_path)) {
-            sleep(2000)
-            media.scanFile(file_path)
-            this.reportLog("文件下载完成: " + file_url + " -> " + file_path)
-            return true
-        }
-        throw "未知异常"
-    } catch (error) {
-        this.reportLog("文件下载失败 " + commonFunc.objectToString(error))
-        throw "文件下载失败 " + commonFunc.objectToString(error)
-    }
-    // return false
+    return false
 }
 httpUtilFunc.downLoadImg = function (imgUrl, imgPath, timeout) {
     try {
@@ -303,6 +256,7 @@ httpUtilFunc.downloadVideo = function (mediaUrl, mediaPath, timeout) {
  * @param {Object} filter {  "appName": "", "id": "", "isSuccess": "", "androidId": "", "deviceId": "", "folderId": "" }
  * @returns 
  */
+
 httpUtilFunc.getAccountOnDevice = function (filter) {
     let account = null
     try {
@@ -350,7 +304,7 @@ httpUtilFunc.getAccountOnDevice = function (filter) {
 //             filter.deviceId     = commonFunc.deviceId
 //             filter.folderId     = commonFunc.folderId
 //             httpUtilFunc.reportLog( "查询本机账号: " + JSON.stringify(filter) )  
-//             let url = "http://" + commonFunc.server + ":8000/user/search?datatype="+filter.datatype+"&appName="+filter.appName+"&isSuccess="+filter.isSuccess+"&deviceId="+filter.deviceId+"&folderId="+filter.folderId
+//             let url = "http://" + commonFunc.server + ":8000/user/search?datatype="+filter.datatype+"&appName="+filter.appName+"&isSuccess="+filter.isSuccess            
 //             var res = http.get(url);
 //             let res_json = res.body.json()
 //             // log( JSON.stringify(res_json) )
@@ -381,7 +335,7 @@ httpUtilFunc.getDeviceBindInfo = function (appName) {
     try {
         let deviceId = commonFunc.deviceId
         let folderId = commonFunc.folderId
-        log("查询绑定情况: ")
+        log("查询绑定情况: " + appName)
         bind_info = newThread(() => {
             let url = "http://" + commonFunc.server + ":8000/user/search?datatype=5&appName=" + appName + "&deviceId=" + deviceId + "&folderId=" + folderId
             let res = http.get(url);
@@ -393,6 +347,7 @@ httpUtilFunc.getDeviceBindInfo = function (appName) {
     } catch (error) { throw "查询绑定异常: " + JSON.stringify(error) }
     return bind_info
 }
+
 httpUtilFunc.getRegisterContact = function () {
     let contact = {}
     try {
@@ -421,8 +376,8 @@ httpUtilFunc.getPluginData = function () {
     let pluginData = null
     try {
         let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
-        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=a7551999-60eb-4ef8-9aa7-8d11982a170a"
-        log("读取配置:" + url)
+        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=fa43be62-83cb-48cc-b8c7-d69db40eca89"
+        log("   读取配置:" + url)
         commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
         let res_json = res.body.json()
@@ -444,6 +399,7 @@ httpUtilFunc.getPluginData = function () {
  */
 httpUtilFunc.getProxyData = function (proxy_provider, proxy_tag) {
     try {
+        // if( !proxy_provider || !proxy_tag ){ throw "代理来源或代理标签为空" }
         if (!proxy_tag) { throw "代理标签为空" }
         let url = null
         if (proxy_provider) {
@@ -452,12 +408,21 @@ httpUtilFunc.getProxyData = function (proxy_provider, proxy_tag) {
             url = "http://" + commonFunc.server + ":8000/proxy/getproxy?tag=" + proxy_tag
         }
         httpUtilFunc.reportLog("获取代理: " + url)
+        /**
+         * 这里有个疑问, 以这种方式获取到的代理, 如何区分app绑定?
+         * 例如 个代理, 最多可以被 WhatsApp 绑定 3个账号, 目前已经被 WhatsApp 绑定满3个
+         * 此时, 我需要 用同样这个 代理 去绑定 Facebook, 如何实现? (用当前这个api 还能取到这个代理吗? 参数是否应该加上 appName ? )
+         */
         return newThread(function () {
             let res = http.get(url)
             res = res.body.json()
             if (res.code == 200) {
                 let data = JSON.parse(res.data)
-                if (data.proxy) { return data }
+                // {"id":252,"proxy":"SOCKS5,192.210.187.138,10247","proxyProvider":"sk5go","bindMax":5,"bindNum":1,"tag":"2021061702","desc":"","isDeleted":false,"createTime":"2021-08-25T07:43:09.096Z","updateTime":"2021-08-25T07:43:09.096Z"}
+                if (data.proxy) {
+                    delete data.proxyId
+                    return data
+                }
             }
             throw res
         }, null, 1000 * 20, () => { throw "超时退出" })
@@ -495,145 +460,6 @@ httpUtilFunc.getProxyFromCloudam = function (base_url, args) {
     } catch (error) { throw "获取代理异常: " + commonFunc.objectToString(error) }
 }
 /**
- * 
- * @param {*} proxyType     代理类型 - 默认socks5
- * @param {*} timeliness    代理时效 - 0:短效; 1:长效
- * @param {*} appName       应用分类 - "whatsapp", "facebook", "tiktok"
- * @param {*} actionTag     使用场景 - 0:通用; 1:注册; 2:养号
- * @param {*} isStrict      地址严格 - 0:非严格; 1:严格
- * @param {*} countryCode   国家代码 - US
- * @returns 
- */
-httpUtilFunc.getProxyFromBytesfly = function (proxyType, timeliness, appName, actionTag, isStrict, countryCode) {
-    try {
-        function httpRequest(apiCall, body) {
-            try {
-                let commArgs = {
-                    "appId": 1,
-                    // "androidId": device.getAndroidId(),
-                    "appVersion": app.versionName,
-                    "appVersionNo": app.versionCode,
-                    // "brand": device.brand,
-                    "channel": "mainc",
-                    "deviceId": device.fingerprint,
-                    "gps": "",
-                    "idfa": "",
-                    "idfv": "",
-                    // "imei1": device.getIMEI(),
-                    "imei2": "",
-                    "imsi1": "",
-                    "imsi2": "",
-                    "ip": "",
-                    "language": "zh",
-                    "latitude": null,
-                    "longitude": null,
-                    "wifiMac": device.getMacAddress(),
-                    "networkTypeName": 1,
-                    "osType": 1,
-                    "osVersion": "",
-                    "sdkInt": device.sdkInt,
-                    "packageName": "",
-                    "resolution": device.width + "*" + device.height,
-                    "btMac": "",
-                    "province": "",
-                    "city": "",
-                    "zone": "",
-                    // "deviceModel": deivce.model,
-                    "eip": "",
-                    "oaid": ""
-                };
-                var args = {
-                    "body": body,
-                    "comm_args": commArgs
-                }
-                var ts = new Date().getTime()
-                var appId = "1"
-                var callStr = apiCall
-                var version = "1.0.0"
-                var ua = "script"
-                var sign = commonFunc.md5(ua + ts + callStr + JSON.stringify(args) + version)
-                var data = {
-                    "app_id": appId,
-                    "ts": ts,
-                    "call": callStr,
-                    "args": args,
-                    "version": version,
-                    "sign": sign,
-                    "ua": ua
-
-                }
-                return newThread(() => {
-                    // let requestUuTag = commonFunc.randomStr(16);
-                    // let result = http.postJson("http://192.168.2.194:3003/i/a", data);
-                    let result = http.postJson("http://bytesfly.tpddns.cn:8090/i/a", data);
-                    // toastLog("  result = "+result.body.string())
-                    return result;
-                }, null, 1000 * 60 * 3, () => { throw "超时退出" })
-            } catch (error) {
-                throw error
-            }
-            // return null;
-        }
-
-        vpn_proxy_type = 0                              //  0:socks; 1:http
-        vpn_proxy_timeliness = timeliness ? 1 : 0       //  0:短效; 1:长效
-        use_app_tag = 0                                 //  app分类
-        use_action_tag = 0                              //  使用场景 - 0:通用; 1:注册; 2:养号
-        addrStrict = isStrict ? 1 : 0                   //  
-        country = countryCode || "US"                   // 
-
-        switch (appName) {
-            case "whatsapp":
-                use_app_tag = 1
-                break;
-            case "facebook":
-                use_app_tag = 2
-                break;
-            case "tiktok":
-                use_app_tag = 12
-                break;
-            default:
-                break;
-        }
-        switch (actionTag) {
-            case 1:
-                use_action_tag = 1
-                break;
-            case 2:
-                use_action_tag = 2
-                break;
-            default:
-                use_action_tag = 0
-                break;
-        }
-        let body = {
-            "vpn_proxy_type": 0,
-            "vpn_proxy_timeliness": 0,
-            "use_app_tag": use_app_tag,
-            "use_action_tag": use_action_tag,
-            "addrStrict": 0,
-            "country": country,
-        }
-        log(commonFunc.objectToString(body))
-        let res = httpRequest("vpnProxyGet", body)
-        res = res.body.json()
-        log(commonFunc.objectToString(res))
-        // log(result);
-        // { data: { code: '000000',msg: 'success', data: { ips: [{ proxy_host: '198.2.192.91', proxy_port: 21963, proxy_real_addr: '96.40.102.207' }] }, proxy_way_id: 1, cost: 533 } }
-        if (res.data && res.data.code == "000000") {
-            let data = res.data.data.ips[0]
-            if (data.proxy_host && data.proxy_port) {
-                return "SOCKS5," + data.proxy_host + "," + data.proxy_port
-            }
-            throw res
-        } else {
-            throw res
-        }
-    } catch (error) {
-        throw "获取代理异常: " + commonFunc.objectToString(error)
-    }
-}
-/**
  * 获取 doveip 动态代理
  * @param {*} base_url 
  * @param {*} args 
@@ -659,6 +485,118 @@ httpUtilFunc.getProxyFromDoveip = function (base_url, args) {
             throw res
         }, null, 1000 * 20, () => { throw "超时退出" })
     } catch (error) { throw "获取代理异常: " + commonFunc.objectToString(error) }
+}
+
+
+
+/**
+ * 从 https://api.ipify.org 或 https://www.whatismyip.com 获取当前网络IP
+ * @param {*} timeout 
+ * @returns ip
+ */
+httpUtilFunc.getGlobalIp = function (timeout) {
+    let ip = null
+    try {
+        timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
+        ip = newThread(function () {
+            // let user_agent  = commonFunc.getRandomUA()
+            let res = http.get("https://api.ipify.org/?format=json", {
+                headers: {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            if (res.statusCode == 200) {
+                res = res.body.json()
+                return res.ip
+            }
+            throw res.statusCode
+        }, null, timeout, () => { throw "超时退出" })
+    } catch (error) { log("    https://api.ipify.org/?format=json: request error ") }
+    try {
+        ip = ip || newThread(function () {
+            let res = http.get("https://ipinfo.io/json", {
+                headers: {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            if (res.statusCode == 200) {
+                res = res.body.json()
+                return res.ip
+            }
+            throw res
+        }, null, timeout, () => { throw "超时退出" })
+    } catch (error) { log("    https://ipinfo.io/json: request error ") }
+    try {
+        ip = ip || newThread(function () {
+            let res = http.get("https://ifconfig.me/", {
+                headers: {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            res = res.body.string()
+            let reg = new RegExp(/id="ip_address">([^<]+)/)
+            if (reg.test(res)) {
+                return res.match(reg)[1]
+            }
+            throw res
+        }, null, timeout, () => { throw "超时退出" })
+    } catch (error) { log("    https://ifconfig.me/ request error ") }
+    try {
+        ip = ip || newThread(function () {
+            let res = http.get("https://www.whatismyip.com/", {
+                headers: {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            res = res.body.string()
+            let reg = new RegExp(/Detailed information about IP address ([^"]+)/)
+            if (reg.test(res)) {
+                return res.match(reg)[1]
+            }
+            throw res
+        }, null, timeout, () => { throw "超时退出" })
+    } catch (error) { log("    https://www.whatismyip.com/ request error ") }
+    return ip
+}
+/**
+ * 从 http://ip-api.com 获取当前网络IP和IP所属地理位置信息
+ * @param {*} timeout 
+ * @returns 示例数据: {"status":"success","country":"United States","countryCode":"US","region":"NY","regionName":"New York","city":"Buffalo","zip":"14202","lat":42.893,"lon":-78.8753,"timezone":"America/New_York","isp":"ColoCrossi
+ng","org":"ColoCrossing","as":"AS36352 ColoCrossing","query":"23.94.65.69"}
+ */
+httpUtilFunc.getIpInfo = function (timeout) {
+    let ipInfo = {}
+    try {
+        timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
+        ipInfo = newThread(function () {
+            let res = http.get("http://ip-api.com/json/", {
+                headers: {
+                    'User-Agent': commonFunc.getRandomUA()
+                }
+            })
+            return res.body.json()
+        }, {}, timeout, () => { throw "超时退出" })
+    } catch (error) { log("  http://ip-api.com/json/: " + commonFunc.objectToString(error)) }
+    ip = ipInfo.query
+    return ip
+}
+/**
+ * 从 https://www.ip.cn 获取 Bypass 网络IP
+ * @param {*} timeout 
+ * @returns ip
+ */
+httpUtilFunc.getLocalIp = function (timeout) {
+    let ip = null
+    timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
+    let res = http.get("https://api.ipify.org/?format=json", {
+        "headers": {
+            'User-Agent': commonFunc.getRandomUA()
+        }
+    })
+    if (res.statusCode == 200) {
+        res = res.body.json()
+        return res.ip
+    }
 }
 
 /**
@@ -728,203 +666,8 @@ httpUtilFunc.getGlobalIp = function (timeout) {
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://www.whatismyip.com/ request error ") }
     return ip
+
 }
-
-/**
- * 从 https://www.ip.cn 获取 Bypass 网络IP
- * @param {*} timeout 
- * @returns ip
- */
-httpUtilFunc.getLocalIp = function (timeout) {
-    let ip = null
-    try {
-        timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
-        ip = newThread(function () {
-            let res = http.get("https://www.ip.cn/api/index?ip=&type=0", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            if (res.statusCode == 200) {
-                res = res.body.json()
-                return res.ip
-            }
-            throw res.statusCode
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://www.ip.cn/api/index?ip=&type=0: " + commonFunc.objectToString(error)) }
-    return ip
-}
-/**
- * @param {Number} type 素材类型（0:纯文本；1:图片；2:视频；3:音频）
- * @param {Number} count 获取数量
- * @param {Number} classify classify 文本类型(0:默认；1:昵称；2:简介；3:外链; 4:对话模板) / 图片类型(0:默认；1:发布内容；2:头像) / 视频类型(0:默认；1:发布内容)
- * @param {Number} used_times 已使用次数低于n次(不传默认无限制)
- * @param {Number} used_times_model 已使用次数模型 lte:小于等于; eq:等于; gt:大于; gte:大于等于; 默认为 lte
- * @param {String} lable 标签(不传默认无限制)
- * @returns {Array} 返回素材列表 
- */
-httpUtilFunc.materialGetList = function (req_data) {
-    try {
-        if (!commonFunc.isNotNullObject(req_data)) { throw "参数异常 " + commonFunc.objectToString(req_data) }
-        httpUtilFunc.reportLog("素材申请参数: " + commonFunc.objectToString(req_data))
-        let app_id = req_data.app_id
-        let app_secret = req_data.app_secret
-        let args_data = {}
-        args_data.type = req_data.type
-        args_data.count = req_data.count || 1
-        args_data.classify = req_data.classify || 0
-        args_data.used_times = typeof (req_data.used_times) == "number" ? req_data.used_times : null
-        args_data.used_times_model = req_data.used_times_model || "lte"
-        args_data.lable = req_data.lable || null
-        let call = "material_get"
-        let version = "1.0.0"
-        let ts = new Date().getTime()
-        let sign = commonFunc.getmd5(app_id + ts + call + JSON.stringify(args_data) + version + app_secret)
-        let data_json = {
-            "data": {
-                "app_id": app_id,
-                "ts": ts,
-                "call": call,
-                "version": version,
-                "args": args_data,
-                "sign": sign
-            }
-        }
-        httpUtilFunc.reportLog("素材申请提交: " + commonFunc.objectToString(data_json))
-        let res = http.postJson("http://" + commonFunc.server + ":3002/i/a/", data_json)
-        res = res.body.json()
-        if (res.data && res.data.code == "000000") {
-            return res.data.data.materials
-        }
-        throw res
-    } catch (error) {
-        throw "素材申请异常: " + commonFunc.objectToString(error)
-    }
-}
-/**
- * 素材获取
- * @param {*} req_data 参数体 { "type":"", "classify":"", "used_times":"", "used_times_model":"", "lable":""}
- * @param {Number} type 素材类型（0:纯文本；1:图片；2:视频；3:音频）
- * @param {Number} classify 文本类型(0:默认；1:昵称；2:简介；3:外链; 4:对话模板) / 图片类型(0:默认；1:发布内容；2:头像) / 视频类型(0:默认；1:发布内容)
- * @param {Number} used_times 已使用次数低于n次(不传默认无限制)
- * @param {Number} used_times_model 已使用次数模型 lte:小于等于; eq:等于; gt:大于; gte:大于等于; 默认为 lte
- * @param {String} lable 标签(不传默认无限制)
- * @returns {Object} 返回素材对象 
- */
-httpUtilFunc.materialGet = function (req_data) {
-    try {
-        let material = httpUtilFunc.materialGetList(req_data)[0]
-        if (material.media_path) {
-            material.media_path = material.media_path.replace(new RegExp('http://[0-9\.]+:3302'), 'http://' + commonFunc.server + ':3302')
-        }
-        httpUtilFunc.reportLog("获取素材: " + commonFunc.objectToString(material))
-        return material
-    } catch (error) {
-        throw error
-    }
-}
-/**
- * 
- * @param {*} feedback_data { "app_id":"", "app_secret":"", "mid":"素材id", "task_type":"任务类型 0-未知; 1-发布视频", "task_result":"任务结果 1/0", "account_id":"账号唯一标识", "account_tags":"账号标签", "ip":"当前代理IP" }
- * @returns 
- */
-httpUtilFunc.materialFeedback = function (feedback_data) {
-    try {
-        if (!commonFunc.isNotNullObject(feedback_data)) { throw "参数异常 " + commonFunc.objectToString(feedback_data) }
-        httpUtilFunc.reportLog("素材反馈参数: " + commonFunc.objectToString(feedback_data))
-
-        let app_id = feedback_data.app_id
-        let app_secret = feedback_data.app_secret
-
-        let args_data = {}
-        args_data.mid = feedback_data.mid
-        args_data.task_type = feedback_data.task_type
-        args_data.task_result = feedback_data.task_result
-        args_data.tiktok_unique_id = feedback_data.account_id
-        args_data.tiktok_lables = feedback_data.account_tags
-        args_data.comment = feedback_data.comment || ""
-        try { args_data.task_ip = feedback_data.ip || httpUtilFunc.getGlobalIp() } catch (error) { }
-
-        args_data.task_id = commonFunc.taskid
-        args_data.task_name = commonFunc.taskName || null
-        args_data.script_name = commonFunc.pluginName
-
-        // args_data.box_no                = "unknow"
-        args_data.mobile_no = commonFunc.deviceId
-        args_data.folder_no = commonFunc.folderId
-        args_data.folder_bind_param_id = commonFunc.androidId
-        args_data.folder_device_model = commonFunc.brand + " " + commonFunc.model
-        args_data.folder_device_os_version = device.release
-
-
-        let call = "material_result"
-        let version = "1.0.0"
-        let ts = new Date().getTime()
-        let sign = commonFunc.getmd5(app_id + ts + call + JSON.stringify(args_data) + version + app_secret)
-        let data_json = {
-            "data": {
-                "app_id": app_id,
-                "ts": ts,
-                "call": call,
-                "version": version,
-                "args": args_data,
-                "sign": sign
-            }
-        }
-        httpUtilFunc.reportLog("素材反馈提交: " + commonFunc.objectToString(data_json))
-        let res = http.postJson("http://" + commonFunc.server + ":3002/i/a/", data_json)
-        res = res.body.json()
-        if (res.data && res.data.code == "000000") {
-            return true
-        }
-        throw res
-    } catch (error) {
-        httpUtilFunc.reportLog("素材反馈异常: " + commonFunc.objectToString(error))
-    }
-    return false
-}
-/**
- * 素材回滚, 用于业务失败时回滚素材资源
- * @param {*} app_id 
- * @param {*} app_secret 
- * @param {*} material 
- * @returns 
- */
-httpUtilFunc.materialRollback = function (app_id, app_secret, material) {
-    try {
-        if (!material) { return false }
-        if (!isNotNullObject(material) || !material.id) { throw "参数异常" + commonFunc.objectToString(material) }
-        httpUtilFunc.reportLog("素材回滚: " + commonFunc.objectToString(material))
-        let args_data = {
-            "mid": material.id
-        }
-        let call = "material_rollback"
-        let version = "1.0.0"
-        let ts = new Date().getTime()
-        let sign = commonFunc.getmd5(app_id + ts + call + JSON.stringify(args_data) + version + app_secret)
-        let data_json = {
-            "data": {
-                "app_id": app_id,
-                "ts": ts,
-                "call": call,
-                "version": version,
-                "args": args_data,
-                "sign": sign
-            }
-        }
-        let res = http.postJson("http://" + commonFunc.server + ":3002/i/a/", data_json)
-        res = res.body.json()
-        if (res.data && res.data.code == "000000") {
-            return true
-        }
-        throw res
-    } catch (error) {
-        httpUtilFunc.reportLog("素材回滚异常: " + commonFunc.objectToString(error))
-    }
-    return false
-}
-
-
 
 
 httpUtilFunc.isUrlAccessable = function (url, flag_content, timeout) {
@@ -949,8 +692,8 @@ httpUtilFunc.isUrlAccessable = function (url, flag_content, timeout) {
         thread.interrupt()
         if (errMsg) { throw errMsg }
     } catch (error) {
-        log("访问网址异常：" + commonFunc.objectToString(error))
-        // throw error
+        // log( JSON.stringify( error ) )
+        throw error
     }
     log("访问结果：" + is_accessable)
     return is_accessable
@@ -1058,6 +801,8 @@ httpUtilFunc.reportLog = function (context, logType) {
         let rep_thread = threads.start(function () {
             try {
                 let log_type = logType != null ? logType : 0
+                // let url = "http://192.168.91.3:83/api/logger/rptlogs"
+                // let url = "http://172.16.0.100:83/api/logger/rptlogs"
                 let url = "http://" + commonFunc.server + ":83/api/logger/rptlogs"
                 let data = {
                     "AndroidId": commonFunc.androidId,
@@ -1087,32 +832,6 @@ httpUtilFunc.reportLog = function (context, logType) {
         log("  上报结果：" + is_upload)
     }
     return is_upload
-}
-/**
- * 获取当前任务名称
- * @param {*} task_id 
- * @returns 
- */
-httpUtilFunc.taskNameGet = function (task_id, loop) {
-    try {
-        loop = typeof (loop) == "number" ? loop : 3
-        task_id = task_id ? task_id : commonFunc.taskid
-        let data = [task_id]
-        let url = "http://" + commonFunc.server + ":83/Task/list"
-        let res = http.postJson(url, data)
-        res = res.body.json()
-        if (res.code == 1 && res.detail.items.length) {
-            // httpUtilFunc.reportLog( "解绑设备: " + commonFunc.deviceId+"-"+commonFunc.folderId )
-            // log("taskName="+res.detail.items[0].taskName)
-            return res.detail.items[0].taskName
-        }
-        throw res
-    } catch (error) {
-        sleep(3000)
-        if (loop > 0) { return httpUtilFunc.taskNameGet(task_id, loop - 1) }
-        // httpUtilFunc.reportLog("解绑设备异常: " + commonFunc.objectToString(error))
-        throw error
-    }
 }
 /**
  * 
@@ -1180,7 +899,6 @@ httpUtilFunc.testGlobalNetwork = function () {
 httpUtilFunc.testLocalNetwork = function () {
 
 }
-// 获取插件信息
 httpUtilFunc.testTaskServer = function () {
     try {
         let deviceId = commonFunc.deviceId
@@ -1190,10 +908,10 @@ httpUtilFunc.testTaskServer = function () {
         let res = http.get(url);
         res = res.body.json()
         if (res.code != 200 || !res.data) { throw res }
+        // this.reportLog( "业务后台连接正常" )
         return true
-    } catch (error) { throw "业务后台连接异常: " + JSON.stringify(error) }
+    } catch (error) { throw "业务后台连接异常: " + commonFunc.objectToString(error) }
 }
-
 httpUtilFunc.updateDevice = function (appName, proxyData, accountData) {
     try {
         return newThread(() => {
@@ -1203,131 +921,28 @@ httpUtilFunc.updateDevice = function (appName, proxyData, accountData) {
                 "appName": appName,
             }
             if (proxyData) {
-                log(JSON.stringify(proxyData))
+                log(commonFunc.objectToString(proxyData))
                 data.proxyId = proxyData.proxyId || proxyData.id || null
                 data.proxy = proxyData.proxy || null
             }
             if (accountData) {
-                log(JSON.stringify(accountData))
+                log(commonFunc.objectToString(accountData))
                 data.accountId = accountData.accountId || accountData.id || null
             }
             // "proxyId": proxyData.proxyId,
             // "proxy": proxyData.proxy,
             // "accountId": isNotNullObject(accountData) ? accountData.accountId : null,
-            httpUtilFunc.reportLog("更新设备绑定账号: " + JSON.stringify(data))
+            httpUtilFunc.reportLog("更新设备绑定账号: " + commonFunc.objectToString(data))
             let url = "http://" + commonFunc.server + ":8000/proxy/updatedevice"
             var res = http.postJson(url, data);
             res = res.body.json()
-            httpUtilFunc.reportLog("更新设备绑定结果: " + res.data)
+            httpUtilFunc.reportLog("更新设备绑定结果: " + commonFunc.objectToString(res.data))
             if (res.code != 200) { throw res }
             return JSON.parse(res.data)
         }, null, 1000 * 10)
-    } catch (error) { httpUtilFunc.reportLog("更新设备绑定异常: " + JSON.stringify(error)) }
-    return null
-}
-
-
-// 获取动态代理
-httpUtilFunc.getProxyFromConnanys = function (base_url, args) {
-    try {
-        if (!args) { throw "getProxyFromDoveip 参数异常" }
-        let geo = args.regionid || "US"
-        let timeout = args.timeout || 30
-        let url = "http://connanys.com:8082/client_getendpoints"
-        log("尝试获取动态代理: " + url)
-        return newThread(function () {
-            let data_json = {
-                "user": "3182",
-                "pass": "ypiun8",
-                "protocol": 0,
-                "count": 1,
-                "portmap": 0,
-                "keeptime": timeout,
-                "autoswitch": 0,
-                "region": geo,
-                "sign": commonFunc.getmd5("3182" + "1" + timeout + "ypiun8" + "request")
-            }
-            log(data_json.sign)
-            log("代理申请提交: " + commonFunc.objectToString(data_json))
-            let res = http.postJson("http://connanys.com:8082/client_getendpoints", data_json)
-            res = res.body.json()
-            if (res.code == 0 && res.data.length) {
-                let data = res.data[0]
-                return data
-            }
-            throw res
-        }, null, 1000 * 20, () => { throw "超时退出" })
-    } catch (error) { throw "获取代理异常: " + commonFunc.objectToString(error) }
-}
-
-/**
- * 从 https://api.ipify.org 或 https://www.whatismyip.com 获取当前网络IP
- * @param {*} timeout 
- * @returns ip
- */
-httpUtilFunc.getGlobalIp = function (timeout) {
-    let ip = null
-    try {
-        timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
-        ip = newThread(function () {
-            // let user_agent  = commonFunc.getRandomUA()
-            let res = http.get("https://api.ipify.org/?format=json", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            if (res.statusCode == 200) {
-                res = res.body.json()
-                return res.ip
-            }
-            throw res.statusCode
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://api.ipify.org/?format=json: request error ") }
-    try {
-        ip = ip || newThread(function () {
-            let res = http.get("https://ipinfo.io/json", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            if (res.statusCode == 200) {
-                res = res.body.json()
-                return res.ip
-            }
-            throw res
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://ipinfo.io/json: request error ") }
-    try {
-        ip = ip || newThread(function () {
-            let res = http.get("https://ifconfig.me/", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            res = res.body.string()
-            let reg = new RegExp(/id="ip_address">([^<]+)/)
-            if (reg.test(res)) {
-                return res.match(reg)[1]
-            }
-            throw res
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://ifconfig.me/ request error ") }
-    try {
-        ip = ip || newThread(function () {
-            let res = http.get("https://www.whatismyip.com/", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            res = res.body.string()
-            let reg = new RegExp(/Detailed information about IP address ([^"]+)/)
-            if (reg.test(res)) {
-                return res.match(reg)[1]
-            }
-            throw res
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://www.whatismyip.com/ request error ") }
-    return ip
+        // } catch (error) { httpUtilFunc.reportLog( "更新设备绑定异常: " + commonFunc.objectToString(error) ) }
+    } catch (error) { throw "更新设备绑定异常: " + commonFunc.objectToString(error) }
+    // return null
 }
 
 httpUtilFunc.init()

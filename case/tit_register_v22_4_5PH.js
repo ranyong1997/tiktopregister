@@ -307,7 +307,7 @@ function material_gain() {
             "classify": 3,
             "used_times": 0,
             "used_times_model": "lte",
-            "lable": "FBDN"
+            "lable": "PH"
         })
         android_Id = material_gain.text_content
         log("安卓id获取--->>", android_Id)
@@ -329,16 +329,16 @@ function updateRegisterResult() {
                 "forceRecord": true,
                 "type": 1,
                 "appName": "tiktok",
-                "phone": "test_20220112 Ran_" + commonFun.androidId,
+                "phone": "test_20220124 Ran_" + commonFun.androidId,
                 "deviceId": commonFun.deviceId,
                 "folderId": commonFun.folderId,
                 "androidId": commonFun.androidId,
                 "password": null,
                 "username": username,
-                "tag": "test_20220112(印尼)_ran",
+                "tag": "test_20220124(菲律宾)_ran",
                 "phoneProvider": "facebook",
                 "dialCode": "44",
-                "countryCode": "ID",
+                "countryCode": "PH",
                 "email": null,
                 "emailPassword": null,
                 "smsurl": null,
