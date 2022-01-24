@@ -3,8 +3,10 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-22 18:26:39
- * @LastEditTime: 2022-01-24 18:52:37
+ * @LastEditTime: 2022-01-24 19:14:35
  */
+
+// TODO：每账号爬取大V数量如何控制；脚本如何停止；停止后如何完全重新运行
 const commonFunc = require("../lib/common");
 const httpUtilFunc = require("../http/httpUtils");
 const httpUtilFun = require("../network/httpUtil.js");
@@ -15,7 +17,6 @@ const taskDemo = {}
 var FIND_WIDGET_TIMEOUT = 1000
 var TT_PACKAGE = "com.zhiliaoapp.musically"
 taskDemo.init = function () {
-    // commonFunc.taskStepRecordSet(40, null, "初始化任务", null)
     commonFunc.showLog("init taskDemo")
     taskDemo.result = 0
     taskDemo.desc = ""
@@ -34,12 +35,10 @@ taskDemo.runTask = function () {
             throw "系统应用版本过低,请先升级: " + commonFunc.objectToString(error)
         }
         try {   //  初始化测试
-            // commonFunc.taskStepRecordSet(40, null, "连接群控后台", null)
             if (!commonFunc.server) { throw "未连接到群控后台" }
             //  业务后台连接检测
             let lan_test = null
             for (let index = 0; index < 5; index++) {
-                // commonFunc.taskStepRecordSet(40, null, "局域网测试", null)
                 try { lan_test = httpUtilFunc.testTaskServer() } catch (error) { }
                 commonFunc.showLog("局域网测试: " + lan_test)
                 if (lan_test) { break }
@@ -63,7 +62,6 @@ taskDemo.runTask = function () {
             randomSleep(3000)
         } catch (error) { throw error }
         try {   //  获取插件配置
-            // commonFunc.taskStepRecordSet(40, null, "获取插件配置", null)
             taskPluginData = httpUtilFunc.getPluginData()
             reportLog("插件配置: " + JSON.stringify(taskPluginData))
             crawl_number = taskPluginData.crawl_number
@@ -85,7 +83,6 @@ taskDemo.runTask = function () {
             reportLog("插件配置 异常 " + JSON.stringify(error))
             throw "插件配置 获取失败 " + JSON.stringify(error)
         }
-
         //  执行任务
         try {
             taskDemo.result = 1
@@ -108,7 +105,6 @@ taskDemo.runTask = function () {
     try { home(); sleep(2000) } catch (error) { }
     let task_result = "任务结果: " + taskDemo.result + " - \n" + commonFunc.taskResultGet()
     commonFunc.taskResultSet(task_result, "w")
-    // commonFunc.taskStepRecordSet(200, null, "执行成功", task_result)
     //  任务结果反馈    
     if (taskDemo.result == 1) {
         reportLog(task_result, 1)
@@ -121,13 +117,6 @@ taskDemo.runTask = function () {
 
 
 // ---------------------------------写方法区-----------------------
-
-// app_id = "2e6e1842780c037a64942f4141584731"
-// app_secret = "ca27b3460e37812276f3ceba1503f626"
-// used_times_model = "lte"
-// used_times = "2"
-// lable = "test_follow"
-
 // 素材获取
 function material_gain(lable, app_id, app_secret, used_times_model, used_counter) {
     try {
@@ -140,13 +129,12 @@ function material_gain(lable, app_id, app_secret, used_times_model, used_counter
             "type": 0,
             "classify": 9,
             "used_times_model": used_times_model,   // 匹配模式
-            // "used_times": 0, // 重置后需将这个设置为0
             "used_times": used_counter    // 使用次数
         })
         material_INFO = material_gain
         log("素材info--->>", material_INFO)
         uuid = material_gain.text_content
-        log("联系人--->>", uuid)
+        log("大V账号--->>", uuid)
         return material_INFO
     } catch (error) {
         log("获取安卓id时捕获到一个错误:" + error)
@@ -170,33 +158,6 @@ function One_Key_Login() {
         checkUsersInfoPage()
     } while (true)
 }
-
-
-
-function material_gain() {
-    try {
-        log("正在素材获取")
-        var material_gain = httpUtilFunc.materialGet({
-            "app_id": "2556dd6d0987e7e6f00c956a688e217a",
-            "app_secret": "200d5a8ed05c67a385797c0f3d067b1d",
-            "count": 1,
-            "type": 0,
-            "classify": 9,
-            // "used_times": 0, // 重置后需将这个设置为0
-            "used_times_model": "lte",
-            "lable": "test_follow"
-        })
-        material_INFO = material_gain
-        log("素材info--->>", material_INFO)
-        uuid = material_gain.text_content
-        log("联系人--->>", uuid)
-        return material_INFO
-    } catch (error) {
-        log("获取安卓id时捕获到一个错误:" + error)
-        commonFunc.taskResultSet("素材获取失败" + error, "w")
-    }
-}
-
 
 
 function checkHomePage() {
