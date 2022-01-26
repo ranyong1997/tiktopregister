@@ -496,7 +496,6 @@ httpUtilFunc.getProxyFromCloudam = function (base_url, args) {
 }
 /**
  * 
- * @param {*} proxyType     代理类型 - 默认socks5
  * @param {*} timeliness    代理时效 - 0:短效; 1:长效
  * @param {*} appName       应用分类 - "whatsapp", "facebook", "tiktok"
  * @param {*} actionTag     使用场景 - 0:通用; 1:注册; 2:养号
@@ -504,22 +503,19 @@ httpUtilFunc.getProxyFromCloudam = function (base_url, args) {
  * @param {*} countryCode   国家代码 - US
  * @returns 
  */
-httpUtilFunc.getProxyFromBytesfly = function (proxyType, timeliness, appName, actionTag, isStrict, countryCode) {
+httpUtilFunc.getProxyFromBytesfly = function (timeliness, appName, actionTag, isStrict, countryCode) {
     try {
         function httpRequest(apiCall, body) {
             try {
                 let commArgs = {
                     "appId": 1,
-                    // "androidId": device.getAndroidId(),
                     "appVersion": app.versionName,
                     "appVersionNo": app.versionCode,
-                    // "brand": device.brand,
                     "channel": "mainc",
                     "deviceId": device.fingerprint,
                     "gps": "",
                     "idfa": "",
                     "idfv": "",
-                    // "imei1": device.getIMEI(),
                     "imei2": "",
                     "imsi1": "",
                     "imsi2": "",
@@ -538,7 +534,6 @@ httpUtilFunc.getProxyFromBytesfly = function (proxyType, timeliness, appName, ac
                     "province": "",
                     "city": "",
                     "zone": "",
-                    // "deviceModel": deivce.model,
                     "eip": "",
                     "oaid": ""
                 };
@@ -563,25 +558,19 @@ httpUtilFunc.getProxyFromBytesfly = function (proxyType, timeliness, appName, ac
 
                 }
                 return newThread(() => {
-                    // let requestUuTag = commonFunc.randomStr(16);
-                    // let result = http.postJson("http://192.168.2.194:3003/i/a", data);
                     let result = http.postJson("http://bytesfly.tpddns.cn:8090/i/a", data);
-                    // toastLog("  result = "+result.body.string())
                     return result;
                 }, null, 1000 * 60 * 3, () => { throw "超时退出" })
             } catch (error) {
                 throw error
             }
-            // return null;
         }
-
         vpn_proxy_type = 0                              //  0:socks; 1:http
         vpn_proxy_timeliness = timeliness ? 1 : 0       //  0:短效; 1:长效
         use_app_tag = 0                                 //  app分类
         use_action_tag = 0                              //  使用场景 - 0:通用; 1:注册; 2:养号
         addrStrict = isStrict ? 1 : 0                   //  
         country = countryCode || "US"                   // 
-
         switch (appName) {
             case "whatsapp":
                 use_app_tag = 1
@@ -618,8 +607,6 @@ httpUtilFunc.getProxyFromBytesfly = function (proxyType, timeliness, appName, ac
         let res = httpRequest("vpnProxyGet", body)
         res = res.body.json()
         log(commonFunc.objectToString(res))
-        // log(result);
-        // { data: { code: '000000',msg: 'success', data: { ips: [{ proxy_host: '198.2.192.91', proxy_port: 21963, proxy_real_addr: '96.40.102.207' }] }, proxy_way_id: 1, cost: 533 } }
         if (res.data && res.data.code == "000000") {
             let data = res.data.data.ips[0]
             if (data.proxy_host && data.proxy_port) {

@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2021-12-23 19:59:44
- * @LastEditTime: 2022-01-26 10:17:23
+ * @LastEditTime: 2022-01-26 14:34:53
  */
 function init() {
     // 设置日志文件
@@ -26,7 +26,7 @@ function init() {
         sleep(2000)
     } catch (error) { }
     try {
-        log("初始化 main文件  版本号:1.2.4  作者:ranyong")
+        log("初始化 main文件  版本号:1.2.5  作者:ranyong")
         sleep(1000)
         shell("cmd statusbar expand-notifications") // 返回主界面
         sleep(3000)
@@ -39,7 +39,6 @@ function init() {
     }
     try { http.__okhttp__.setTimeout(120000) } catch (error) { } //  设置网络请求超时时间(全局)
 }
-
 init()
 // var mainTask = require("./case/tit_restore");
 // var mainTask = require("./case/tit_register_v22_4_5ID");
@@ -51,6 +50,7 @@ init()
 // var mainTask = require("./case/Gmail_replaceVpns");
 // var mainTask = require("./case/demo");
 
+
 //  爬取用户信息业务
 // var mainTask = require("./case/taskReptile_Uuid");
 // mainTask.runTask()
@@ -58,6 +58,3 @@ init()
 //  TT注册可视化业务
 var mainTask = require("./case/tit_register_v22_4_5_develop");
 mainTask.runTask()
-
-threads.shutDownAll()
-toastLog("脚本结束")

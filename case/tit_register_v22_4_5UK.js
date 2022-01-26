@@ -477,7 +477,6 @@ function check_web_fb_login() {
 
 
 function check_error() {   // 点击登陆出现错误toast
-    // while (true) {
     var txt1 = "Couldn't log in"
     var txt = "" //声明一个全局变量
     threads.start(function () {
@@ -494,7 +493,6 @@ function check_error() {   // 点击登陆出现错误toast
         });
     })
     return true;
-    // }
 }
 
 
