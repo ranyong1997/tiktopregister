@@ -44,7 +44,6 @@ let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 10, () 
 function alaways_running() {
     Facebook_Account_Transfer()
 }
-// alaways_running()
 
 
 // **********************************方法执行区**********************************
