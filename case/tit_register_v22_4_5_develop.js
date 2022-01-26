@@ -2,11 +2,9 @@
  * @Descripttion: 
  * @version: 
  * @Author: 冉勇
- * @Date: 2022-01-22 18:26:39
- * @LastEditTime: 2022-01-25 11:53:41
+ * @Date: 2022-01-25 20:12:22
+ * @LastEditTime: 2022-01-25 20:25:28
  */
-
-// TODO：每账号爬取大V数量如何控制；脚本如何停止；停止后如何完全重新运行
 const commonFunc = require("../lib/common");
 const httpUtilFunc = require("../http/httpUtils");
 const httpUtilFun = require("../network/httpUtil.js");
@@ -16,6 +14,7 @@ const { newThread, randomSleep, taskResultSet, shortSleep, longSleep } = require
 const taskDemo = {}
 var FIND_WIDGET_TIMEOUT = 1000
 var TT_PACKAGE = "com.zhiliaoapp.musically"
+
 taskDemo.init = function () {
     commonFunc.showLog("init taskDemo")
     taskDemo.result = 0
@@ -47,7 +46,7 @@ taskDemo.runTask = function () {
             }
             if (!lan_test) {
                 log("业务后台连接异常")
-                commonFunc.uninstallApp("fun.kitsunebi.kitsunebi4android")
+                // commonFunc.uninstallApp("fun.kitsunebi.kitsunebi4android")
                 //  业务后台连接检测
                 for (let index = 0; index < 90; index++) {
                     try {
@@ -65,22 +64,43 @@ taskDemo.runTask = function () {
         try {   //  获取插件配置
             taskPluginData = httpUtilFunc.getPluginData()
             reportLog("插件配置: " + JSON.stringify(taskPluginData))
-            crawl_number = taskPluginData.crawl_number
-            lable = taskPluginData.material_keyword
+            keyword_FB = taskPluginData.keyword_FB
+            systemLanguage = taskPluginData.systemLanguage
+            systemTimezone = taskPluginData.systemTimezone
+            proxyCountry = taskPluginData.proxyCountry
+            proxyProvider = taskPluginData.proxyProvider
+            proxyProvider = taskPluginData.proxyProvider
+            proxyTag = taskPluginData.proxyTag
+            updataBirthday = taskPluginData.updataBirthday
+            updatePhoto = taskPluginData.updatePhoto
+            materialTag = taskPluginData.materialTag
+            backupTag = taskPluginData.backupTag
+            backupTag2 = taskPluginData.backupTag2
+            relevance = taskPluginData.relevance
             material_username = taskPluginData.material_username
-            app_id = taskPluginData.appid
-            app_secret = taskPluginData.appid_key
+            appid = taskPluginData.appid
+            appid_key = taskPluginData.appid_key
             used_times_model = taskPluginData.used_times_model
             used_counter = taskPluginData.used_counter
-            log("每账号爬取大V数", crawl_number)
-            log("素材关键字", lable)
+            log("Facebook关键字", keyword_FB)
+            log("系统语言", systemLanguage)
+            log("系统时区", systemTimezone)
+            log("代理归属国", proxyCountry)
+            log("代理来源", proxyProvider)
+            log("代理标签", proxyTag)
+            log("修改头像", updatePhoto)
+            log("修改生日", updataBirthday)
+            log("素材标签", materialTag)
+            log("备份标签", backupTag)
+            log("备份标签2", backupTag2)
+            log("关联", relevance)
             log("素材账号", material_username)
             log("AppId", app_id)
             log("密钥", app_secret)
             log("匹配模式", used_times_model)
             log("使用次数", used_counter)
             commonFunc.taskStepRecordSet(200, null, "获取插件配置信息", "获取插件配置信息:" + JSON.stringify(taskPluginData))
-            material_gain(lable, app_id, app_secret, used_times_model, used_counter)
+            // material_gain(lable, app_id, app_secret, used_times_model, used_counter)
         } catch (error) {
             reportLog("插件配置 异常 " + JSON.stringify(error))
             commonFunc.taskStepRecordSet(200, null, "获取插件配置异常", "获取插件配置异常信息:" + JSON.stringify(error))
@@ -152,120 +172,6 @@ function material_gain(lable, app_id, app_secret, used_times_model, used_counter
         commonFunc.taskResultSet("素材获取失败" + error, "w")
     }
 }
-
-
-function One_Key_Login() {
-    randomSleep()
-    toastLog("开始爬取粉丝数据")
-    do {
-        if (!packageName(TT_PACKAGE).findOne(1)) {
-            log("TikTok 启动中...")
-            commonFunc.taskStepRecordSet(200, null, "Tiktok启动中", null)
-            launchApp("TikTok")
-            sleep(3000)
-        }
-        checkHomePage()
-        checkSerchPage()
-        checkUsersPage()
-        checkUsersInfoPage()
-    } while (true)
-}
-
-
-function checkHomePage() {
-    log("检查主界面")
-    var HomePageText = text("Home").findOne(FIND_WIDGET_TIMEOUT)
-    commonFunc.taskStepRecordSet(200, null, "检查主界面", null)
-    if (HomePageText != null) {
-        log("检查头像框")
-        var click_head = id("com.zhiliaoapp.musically:id/f__").findOne(FIND_WIDGET_TIMEOUT).bounds()
-        commonFunc.taskStepRecordSet(200, null, "检查头像框", null)
-        if (click_head != null) {
-            log("获取头像坐标")
-            log(click_head)
-            log("点击搜索按钮")
-            var x = click_head.centerX() - 17
-            var y = click_head.centerY() - 523
-            click(x, y)
-            commonFunc.taskStepRecordSet(200, null, "点击搜索按钮", null)
-            shortSleep()
-        }
-    }
-}
-
-function checkSerchPage() {
-    log("检查搜索页面")
-    var SerchText = id("com.zhiliaoapp.musically:id/dsw").findOne(FIND_WIDGET_TIMEOUT)
-    commonFunc.taskStepRecordSet(200, null, "检查搜索页面", null)
-
-    if (SerchText != null) {
-        log("输入素材")
-        setText(uuid)
-        commonFunc.taskStepRecordSet(200, null, "输入大V账号", "输入大V账号" + uuid)
-        shortSleep()
-        log("点击Search")
-        commonFunc.taskStepRecordSet(200, null, "点击搜索", null)
-        commonFunc.clickWidget(SerchText)
-    }
-}
-
-function checkUsersPage() {
-    log("检查搜索结果页面")
-    var SerchedText = text("Users").findOne(FIND_WIDGET_TIMEOUT)
-    if (SerchedText != null) {
-        log("点击Users")
-        shortSleep()
-        commonFunc.taskStepRecordSet(200, null, "点击Users", null)
-        commonFunc.clickWidget(SerchedText)
-        shortSleep()
-        log("检查Users页面")
-        var SerchOne = text("Users").findOne(FIND_WIDGET_TIMEOUT).bounds()
-        commonFunc.taskStepRecordSet(200, null, "检查Users页面", null)
-        if (SerchOne != null) {
-            shortSleep()
-            let x = SerchOne.centerX() + 119
-            let y = SerchOne.centerY() + 235
-            click(x, y)
-            commonFunc.taskStepRecordSet(200, null, "点击第一个抖主", null)
-            log("抖主主页停留3秒")
-            commonFunc.taskStepRecordSet(200, null, "抖主主页停留3秒", null)
-            longSleep()
-        }
-    }
-}
-
-function checkUsersInfoPage() {
-    log("检查抖主主页")
-    var SersInfoText = text("Followers").id("com.zhiliaoapp.musically:id/b77").findOne(FIND_WIDGET_TIMEOUT)
-    if (SersInfoText != null) {
-        log("点击粉丝列表")
-        commonFunc.taskStepRecordSet(200, null, "点击粉丝列表", null)
-        shortSleep()
-        commonFunc.clickWidget(SersInfoText)
-        longSleep()
-        log("循环滑动")
-        commonFunc.taskStepRecordSet(200, null, "循环滑动", null)
-        commonFunc.scrollShortUp()
-        check_last_use()
-
-
-    }
-}
-
-function check_last_use() {
-    tag = [];
-    let list = selector().find();
-    for (var i = 0; i < list.length; i++) {
-        var object = list.get(i);
-        if (object.text() != "") {
-            text_ = object.text()
-            tag.push(text_)
-        }
-    }
-    last_name = tag[tag.length - 3]
-    log("单页最后一个粉丝名为：", last_name)
-}
-
 
 // ---------------------------------写方法区-----------------------
 

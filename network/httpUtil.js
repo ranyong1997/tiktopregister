@@ -801,8 +801,6 @@ httpUtilFunc.reportLog = function (context, logType) {
         let rep_thread = threads.start(function () {
             try {
                 let log_type = logType != null ? logType : 0
-                // let url = "http://192.168.91.3:83/api/logger/rptlogs"
-                // let url = "http://172.16.0.100:83/api/logger/rptlogs"
                 let url = "http://" + commonFunc.server + ":83/api/logger/rptlogs"
                 let data = {
                     "AndroidId": commonFunc.androidId,
