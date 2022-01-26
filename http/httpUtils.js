@@ -555,7 +555,6 @@ httpUtilFunc.getProxyFromBytesfly = function (timeliness, appName, actionTag, is
                     "version": version,
                     "sign": sign,
                     "ua": ua
-
                 }
                 return newThread(() => {
                     let result = http.postJson("http://bytesfly.tpddns.cn:8090/i/a", data);

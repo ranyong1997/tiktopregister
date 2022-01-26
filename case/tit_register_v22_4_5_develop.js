@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-01-26 19:52:50
+ * @LastEditTime: 2022-01-26 23:08:12
  */
 const commonFun = require("../lib/common");
 const httpUtilFunc = require("../http/httpUtils");
@@ -27,6 +27,11 @@ var TT_PACKAGE = "com.zhiliaoapp.musically"
 var facebook_packageName = "com.facebook.katana"
 var kitsunebi_packageName = "fun.kitsunebi.kitsunebi4android"
 
+// 获取到素材库内容，文本和链接
+// 代理获取且得到正确的参数
+// 新代理添加规则
+// 连接vpn
+// 运行TT注册
 
 taskDemo.init = function () {
     commonFun.showLog("init taskDemo")
@@ -113,6 +118,34 @@ taskDemo.runTask = function () {
                 used_times_model = taskPluginData.used_times_model
                 used_counter = taskPluginData.used_counter
                 commonFun.taskStepRecordSet(200, null, "获取插件配置信息", "获取插件配置信息:" + JSON.stringify(taskPluginData))
+                // {
+                //     "param":{
+                //         "pluginName":"Tiktok_v22.4.5 注册插件 - 开发版",
+                //         "pluginVersion":"2021125",
+                //         "proxyName":"Kitsunebi_v1.8.0",
+                //         "proxyLink":"http://192.168.91.3:8012/upload/e3acddc3-4ce1-4286-8ad6-f2c0e8bac093.apk",
+                //         "appName":"Tiktok_22.4.5",
+                //         "appLink":"http://192.168.91.3:8012/upload/7c207a62-dafc-48ce-ae55-af6d1d05c737.apk",
+                //         "keyword_FB":"素材关键字",
+                //         "systemLanguage":"en-US",
+                //         "systemTimezone":"America/New_York",
+                //         "proxyCountry":"GB", 代理归属国
+                //         "proxyProvider":"我是供应商",
+                //         "proxyTag":"我是代理标签",
+                //         "register":"on",
+                //         "materialTag":"我是素材标签",
+                //         "backupTag":"我是备份标签",
+                //         "backupTag2":"我是还原标签",
+                //         "relevance":"on",
+                //         "material_username":"custom",
+                //         "appid":"appid",
+                //         "appid_key":"密码",
+                //         "type":"0",
+                //         "classify":"3",
+                //         "used_times_model":"lte",
+                //         "used_counter":"0"
+                //     }
+                // }
             } catch (error) {
                 log("  插件配置 获取失败 " + commonFun.objectToString(error))
                 throw "插件配置 获取失败 " + JSON.stringify(error)
@@ -162,19 +195,19 @@ taskDemo.runTask = function () {
                             try {
                                 let proxy_data = httpUtilFunc.getProxyData(taskPluginData.proxyProvider, taskPluginData.proxyTag)
                                 if (taskPluginData.proxyProvider == "doveip") {
-                                    proxy_info = httpUtilFunc.getProxyFromDoveip(proxy_data.proxy, { "geo": taskPluginData.proxyCountry, "timeout": 10 })
+                                    proxy_info = httpUtilFunc.getProxyFromDoveip(proxy_data.proxy, { "geo": proxyCountry, "timeout": 10 })
                                 }
                                 else if (taskPluginData.proxyProvider == "cloudam") {
-                                    proxy_info = httpUtilFunc.getProxyFromCloudam(proxy_data.proxy, { "regionid": taskPluginData.proxyCountry })
+                                    proxy_info = httpUtilFunc.getProxyFromCloudam(proxy_data.proxy, { "regionid": proxyCountry })
                                 }
                                 else if (taskPluginData.proxyProvider == "connanys") {
-                                    proxy_info = httpUtilFunc.getProxyFromConnanys(proxy_data.proxy, { "regionid": taskPluginData.proxyCountry, "timeout": 30 })
+                                    proxy_info = httpUtilFunc.getProxyFromConnanys(proxy_data.proxy, { "regionid": proxyCountry, "timeout": 30 })
                                 }
                                 else if (taskPluginData.proxyProvider == "bytesfly") {
-                                    proxy_info = httpUtilFunc.getProxyFromBytesfly("SOCKS5", 0, "tiktok", 1, 0, taskPluginData.proxyCountry)
+                                    proxy_info = httpUtilFunc.getProxyFromBytesfly("SOCKS5", 0, "tiktok", 1, 0, proxyCountry)
                                 }
-                                else if (taskPluginData.proxyProvider == "xxx") {// 新增代理
-                                    proxy_info = httpUtilFunc.getProxyFromBytesfly("SOCKS5", 0, "tiktok", 1, 0, taskPluginData.proxyCountry)
+                                else if (taskPluginData.proxyProvider == proxyTag) {// 新增代理
+                                    proxy_info = httpUtilFunc.getProxyFromBytesfly("SOCKS5", 0, "tiktok", 1, 0, proxyCountry)
                                 }
                                 else {
                                     proxy_info = proxy_data.proxy
@@ -236,14 +269,6 @@ taskDemo.runTask = function () {
                 }
 
 
-
-
-
-
-
-
-
-
                 // 注册脚本
                 try {
                     if (register != "") {
@@ -251,6 +276,7 @@ taskDemo.runTask = function () {
                         checkTiktokInstall() // 检测tiktok是否安装
                         checkVPNInstall()   // 检测vpn是否安装
                         function doSomething() {
+                            // 如果上面调好可以联网，这个可以去除connectVPN
                             if (connectVPN()) {
                                 alaways_running()
                                 while (true) {
@@ -309,38 +335,12 @@ taskDemo.runTask = function () {
 
 
 // ---------------------------------写方法区-----------------------
-// 素材获取
-// function material_gain(materialTag, appid, appid_key, type, classify, used_times_model, used_counter) {
-//     try {
-//         log("正在素材获取")
-//         var material_gain = httpUtilFunc.materialGet({
-//             "lable": materialTag, // 标签
-//             "app_id": appid,   // app_id
-//             "app_secret": appid_key,   // 密钥
-//             "count": 1, // 取数量 默认1个
-//             "type": type, // 素材类型（0:纯文本；1:图片；2:视频；3:音频）
-//             "classify": classify,  // 文本类型(0:默认；1:昵称；2:简介；3:外链; 4:对话模板) / 图片类型(0:默认；1:发布内容；2:头像) / 视频类型(0:默认；1:发布内容)
-//             "used_times_model": used_times_model,   // 匹配模式
-//             "used_times": used_counter    // 使用次数
-//         })
-//         material_INFO = material_gain
-//         log("素材info--->>", material_INFO)
-//         commonFun.taskStepRecordSet(200, null, "获取素材信息", "获取素材信息：" + material_INFO)
-//         return material_INFO
-//     } catch (error) {
-//         log("获取素材时捕获到一个错误:" + error)
-//         commonFun.taskResultSet("素材获取失败" + error, "w")
-//     }
-// }
-
 // 回滚素材
 function matter_rollback() {
-    let app_id = "a01ed8c2a96ef33a28f21043318acf5f"
-    let app_secret = "c159d6d44650179ef5498d5081c87bdd"
+    let app_id = appid
+    let app_secret = appid_key
     httpUtilFunc.materialRollback(app_id, app_secret, material_INFO)
 }
-
-
 
 // **********************************【注册】方法保护区 勿动**********************************
 //  点击VPN连接按钮
@@ -485,12 +485,12 @@ function checkSwipe_up_Page() {
 function Facebook_Account_Transfer() {
     var androidId = material_gain()
     try {
-        console.time('迁移耗时');
+        console.time('FB迁移耗时');
         log("正在迁移facebook账号")
         commonFun.Facebook_Account_Transfer(facebook_packageName, androidId)
-        console.timeEnd('迁移耗时');
+        console.timeEnd('FB迁移耗时');
     } catch (error) {
-        log("迁移fb时捕获到一个错误:", error)
+        log("迁移FB时捕获到一个错误:", error)
         matter_rollback()
         engines.stopAll();
     }
