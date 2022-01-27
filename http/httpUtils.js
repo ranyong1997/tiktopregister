@@ -340,42 +340,6 @@ httpUtilFunc.getAccountOnDevice = function (filter) {
     }
     return account
 }
-// httpUtilFunc.getAccountOnDevice_old = function( filter ){
-//     let account = null
-//     try {   
-
-//             filter.datatype     = filter.datatype || 2
-//             filter.appName      = filter.appName || ""
-//             filter.isSuccess    = filter.isSuccess != null ? filter.isSuccess : 1
-//             filter.deviceId     = commonFunc.deviceId
-//             filter.folderId     = commonFunc.folderId
-//             httpUtilFunc.reportLog( "查询本机账号: " + JSON.stringify(filter) )  
-//             let url = "http://" + commonFunc.server + ":8000/user/search?datatype="+filter.datatype+"&appName="+filter.appName+"&isSuccess="+filter.isSuccess+"&deviceId="+filter.deviceId+"&folderId="+filter.folderId
-//             var res = http.get(url);
-//             let res_json = res.body.json()
-//             // log( JSON.stringify(res_json) )
-//             let data_list = JSON.parse( res_json.data )
-//             if( data_list.length ){
-//                 // log( data_list.length )
-//                 for (let index = data_list.length-1; index > -1; index--) {
-//                     if( filter.id != null && filter.id != data_list[index].pk ){ continue }
-//                     let temp_data = data_list[index].fields
-//                     if( temp_data.deviceId == filter.deviceId && temp_data.folderId == filter.folderId ){
-//                         account = temp_data
-//                         account.id = data_list[index].pk
-//                         account.accountId = account.id
-//                         // return account
-//                         break
-//                     }
-//                 }
-//             }
-
-//     } catch (error) {
-//         httpUtilFunc.reportLog( "本机账号查询失败: " + JSON.stringify( error ) )        
-//     }
-//     httpUtilFunc.reportLog( "获取本机账号: " + JSON.stringify(account) )  
-//     return account
-// }
 httpUtilFunc.getDeviceBindInfo = function (appName) {
     let bind_info = null
     try {
@@ -420,8 +384,8 @@ httpUtilFunc.getRegisterContact = function () {
 httpUtilFunc.getPluginData = function () {
     let pluginData = null
     try {
-        let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
-        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=a7551999-60eb-4ef8-9aa7-8d11982a170a"
+        // let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
+        let url = "http://192.168.91.3:83/task/getplugindata?taskid=d8527ae8-e80d-4e13-8a8b-0c99ab9643ad"
         log("读取配置:" + url)
         commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
@@ -735,6 +699,7 @@ httpUtilFunc.getLocalIp = function (timeout) {
                 res = res.body.json()
                 return res.ip
             }
+            log("当前网络ip为：", res.ip)
             throw res.statusCode
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://www.ip.cn/api/index?ip=&type=0: " + commonFunc.objectToString(error)) }
@@ -910,9 +875,6 @@ httpUtilFunc.materialRollback = function (app_id, app_secret, material) {
     return false
 }
 
-
-
-
 httpUtilFunc.isUrlAccessable = function (url, flag_content, timeout) {
     let is_accessable = false
     try {
@@ -942,7 +904,6 @@ httpUtilFunc.isUrlAccessable = function (url, flag_content, timeout) {
     return is_accessable
 }
 httpUtilFunc.randomAnswer = function () {
-    //  http://random-answer.goodplace.eu/
     return newThread(function () {
         try {
             var result = http.get("http://random-answer.goodplace.eu/");
@@ -1088,15 +1049,12 @@ httpUtilFunc.taskNameGet = function (task_id, loop) {
         let res = http.postJson(url, data)
         res = res.body.json()
         if (res.code == 1 && res.detail.items.length) {
-            // httpUtilFunc.reportLog( "解绑设备: " + commonFunc.deviceId+"-"+commonFunc.folderId )
-            // log("taskName="+res.detail.items[0].taskName)
             return res.detail.items[0].taskName
         }
         throw res
     } catch (error) {
         sleep(3000)
         if (loop > 0) { return httpUtilFunc.taskNameGet(task_id, loop - 1) }
-        // httpUtilFunc.reportLog("解绑设备异常: " + commonFunc.objectToString(error))
         throw error
     }
 }
@@ -1142,6 +1100,12 @@ httpUtilFunc.taskEnvironmentFolderUnbind = function () {
     }
     // return false    
 }
+/**
+ * 强制停止任务
+ * @param {*} taskid 任务id
+ * @param {*} desc 描述
+ * @returns 
+ */
 httpUtilFunc.taskStop = function (taskid, desc) {
     try {
         taskid = commonFunc.taskid
@@ -1171,7 +1135,8 @@ httpUtilFunc.testTaskServer = function () {
     try {
         let deviceId = commonFunc.deviceId
         let folderId = commonFunc.folderId
-        let url = "http://" + commonFunc.server + ":8000/user/search?datatype=5&appName=" + "testTaskServer" + "&deviceId=" + deviceId + "&folderId=" + folderId
+        // let url = "http://" + commonFunc.server + ":8000/user/search?datatype=5&appName=" + "testTaskServer" + "&deviceId=" + deviceId + "&folderId=" + folderId
+        let url = "http://192.168.91.3:8000/user/search?datatype=5&appName=testTaskServer&deviceId=AA2036037A&folderId=1"
         this.reportLog("业务后台连接检测: " + url)
         let res = http.get(url);
         res = res.body.json()

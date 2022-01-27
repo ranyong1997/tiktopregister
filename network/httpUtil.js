@@ -375,8 +375,8 @@ httpUtilFunc.getRegisterContact = function () {
 httpUtilFunc.getPluginData = function () {
     let pluginData = null
     try {
-        let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
-        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=fa43be62-83cb-48cc-b8c7-d69db40eca89"
+        // let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
+        let url = "http://192.168.91.3:83/task/getplugindata?taskid=fa43be62-83cb-48cc-b8c7-d69db40eca89"
         log("   读取配置:" + url)
         commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
