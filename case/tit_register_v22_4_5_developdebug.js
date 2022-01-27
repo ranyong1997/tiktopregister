@@ -3,13 +3,20 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-01-27 16:42:39
+ * @LastEditTime: 2022-01-27 10:57:57
  */
-
-
-// taskip写死 需要重置  在httpUtilFunc.getPluginData
+// const commonFun = require("../lib/common");
+// const httpUtilFunc = require("../http/httpUtils");
+// const httpUtilFun = require("../network/httpUtil.js");
+// const proxySttings = require("../network/proxySttings.js");
+// const { reportLog } = require("../network/httpUtil.js");
+// const { newThread, randomSleep, taskResultSet, shortSleep, longSleep } = require("../lib/common.js");
+// const taskDemo = {}
+// var FIND_WIDGET_TIMEOUT = 1000
+// var TT_PACKAGE = "com.zhiliaoapp.musically"
 const commonFun = require("../lib/common");
 const httpUtilFunc = require("../http/httpUtils");
+const httpUtilFun = require("../network/httpUtil.js");
 const proxySttings = require("../network/proxySttings.js");
 const { reportLog } = require("../network/httpUtil.js");
 const proxySettings = require("../vpn/proxySettings.js")
@@ -30,6 +37,7 @@ var facebook_packageName = "com.facebook.katana"
 var kitsunebi_packageName = "fun.kitsunebi.kitsunebi4android"
 
 
+
 taskDemo.init = function () {
     commonFun.showLog("init taskDemo")
     taskDemo.result = 0
@@ -45,9 +53,11 @@ taskDemo.runTask = function () {
         }
         try {   //  初始化测试
             if (!commonFun.server) { throw "未连接到群控后台" }
-            //  初始化网络测试   
-            if (!httpUtilFunc.getLocalIp() && !commonFun.uninstallApp("fun.kitsunebi.kitsunebi4android")) { reportLog("设备环境异常") }
+            //  初始化网络测试                
+            if (!httpUtilFunc.getGlobalIp() && !commonFun.uninstallApp("fun.kitsunebi.kitsunebi4android")) { reportLog("设备环境异常") }
             randomSleep(3000)
+
+            commonFun.showLog("")
             try { ui.run(function () { commonFun.statusBox.close() }); } catch (error) { }
         } catch (error) { httpUtilFunc.taskStop(null, error); throw error }
         try {
@@ -112,22 +122,7 @@ taskDemo.runTask = function () {
                 classify = taskPluginData.classify
                 used_times_model = taskPluginData.used_times_model
                 used_counter = taskPluginData.used_counter
-                log("facebook关键字: " + keyword_FB)
-                log("系统语言: " + systemLanguage)
-                log("系统时区: " + systemTimezone)
-                log("代理归属国: " + proxyCountry)
-                log("代理来源: " + proxyProvider)
-                log("素材标签: " + materialTag)
-                log("备份标签: " + backupTag)
-                log("备份标签2: " + backupTag2)
-                log("appid: " + appid)
-                log("appid_key: " + appid_key)
-                log("素材类型: " + type)
-                log("文本类型: " + classify)
-                log("素材匹配: " + used_times_model)
-                log("使用次数: " + used_counter)
                 commonFun.taskStepRecordSet(200, null, "获取插件配置信息", "获取插件配置信息:" + JSON.stringify(taskPluginData))
-                material_gain(keyword_FB, appid, appid_key, type, classify, used_times_model, used_counter)
             } catch (error) {
                 log("  插件配置 获取失败 " + commonFun.objectToString(error))
                 throw "插件配置 获取失败 " + JSON.stringify(error)
@@ -136,8 +131,8 @@ taskDemo.runTask = function () {
             try {
                 try {   //  ip、语言、时区检测
                     taskDemo.result = 1
-                    //  获取本机ip
-                    local_ip = httpUtilFunc.getLocalIp()
+                    //  本机ip
+                    let local_ip = httpUtilFun.getIpInfo(1000) // ip获取失败
                     reportLog("本机 IP: " + local_ip)
                     commonFun.taskStepRecordSet(200, null, "获取本机ip", "获取本机ip：" + local_ip)
                     // 系统语言、时区获取设置
@@ -157,7 +152,12 @@ taskDemo.runTask = function () {
                             throw "系统时区错误"
                         }
                     }
+                    reportLog("当前系统语言: " + commonFun.systemLanguageGet())
+                    reportLog("当前系统时区: " + commonFun.systemTimezoneGet())
                 } catch (error) { throw error }
+                log("注册脚本or 修改头像脚本")
+                // 素材获取
+                material_gain(materialTag, appid, appid_key, type, classify, used_times_model, used_counter)
                 // 代理获取
                 let proxy_info = null
                 let ipInfo = {}
@@ -183,7 +183,7 @@ taskDemo.runTask = function () {
                                 else if (taskPluginData.proxyProvider == "bytesfly") {
                                     proxy_info = httpUtilFunc.getProxyFromBytesfly("SOCKS5", 0, "tiktok", 1, 0, taskPluginData.proxyCountry)
                                 }
-                                else if (taskPluginData.proxyProvider == "xxx") {// 新增代理规则
+                                else if (taskPluginData.proxyProvider == "xxx") {// 新增代理
                                     proxy_info = httpUtilFunc.getProxyFromBytesfly("SOCKS5", 0, "tiktok", 1, 0, taskPluginData.proxyCountry)
                                 }
                                 else {
@@ -222,7 +222,6 @@ taskDemo.runTask = function () {
                                 reportLog(taskDemo.desc)
                                 continue
                             }
-                            // ip检测出问题
                             if (!is_proxy_on) { continue }
                             randomSleep(3000)
                             global_ip = null
@@ -245,8 +244,14 @@ taskDemo.runTask = function () {
                     ipInfo = httpUtilFunc.getIpInfo()
                     reportLog("代理网络 " + JSON.stringify(ipInfo))
                 }
-                log("注册脚本or 修改头像脚本")
-                // 素材获取
+
+
+
+
+
+
+
+
 
 
                 // 注册脚本
@@ -309,23 +314,25 @@ taskDemo.runTask = function () {
     }()
 }
 
+
+
+
+
 // ---------------------------------写方法区-----------------------
 // 素材获取
-function material_gain(keyword_FB, appid, appid_key, type, classify, used_times_model, used_counter) {
+function material_gain(materialTag, appid, appid_key, type, classify, used_times_model, used_counter) {
     try {
         log("正在素材获取")
-        var material_gain = httpUtilFunc.materialGet({
-            "lable": keyword_FB, // FB素材标签
+        var material_gain = commonFun.materialGet({
+            "lable": materialTag, // 标签
             "app_id": appid,   // app_id
             "app_secret": appid_key,   // 密钥
-            "count": 1, // 需要数据条数
-            "type": type,   // 类型（0:纯文本；1:图片；2:视频；3:音频）
-            "classify": classify,   // 分类（文本类；图片类；视频类）
+            "count": 1, // 取数量 默认1个
+            "type": type, // 素材类型（0:纯文本；1:图片；2:视频；3:音频）
+            "classify": classify,  // 文本类型(0:默认；1:昵称；2:简介；3:外链; 4:对话模板) / 图片类型(0:默认；1:发布内容；2:头像) / 视频类型(0:默认；1:发布内容)
             "used_times_model": used_times_model,   // 匹配模式
-            // "used_times": used_counter    // 使用次数
+            "used_times": used_counter    // 使用次数
         })
-        android_Id = material_gain.text_content
-        log("安卓id获取--->>", android_Id)
         material_INFO = material_gain
         log("素材info--->>", material_INFO)
         commonFun.taskStepRecordSet(200, null, "获取素材信息", "获取素材信息：" + material_INFO)
@@ -335,6 +342,7 @@ function material_gain(keyword_FB, appid, appid_key, type, classify, used_times_
         commonFun.taskResultSet("素材获取失败" + error, "w")
     }
 }
+
 // ---------------------------------写方法区-----------------------
 
 taskDemo.init()
