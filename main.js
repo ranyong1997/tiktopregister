@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2021-12-23 19:59:44
- * @LastEditTime: 2022-01-26 14:34:53
+ * @LastEditTime: 2022-01-27 10:59:34
  */
 function init() {
     // 设置日志文件
@@ -56,5 +56,6 @@ init()
 // mainTask.runTask()
 
 //  TT注册可视化业务
-var mainTask = require("./case/tit_register_v22_4_5_develop");
+// var mainTask = require("./case/tit_register_v22_4_5_develop");
+var mainTask = require("./case/tit_register_v22_4_5_developdebug");
 mainTask.runTask()
