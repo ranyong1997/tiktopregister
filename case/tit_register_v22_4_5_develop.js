@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-01-27 10:51:29
+ * @LastEditTime: 2022-01-28 12:26:19
  */
 const commonFun = require("../lib/common");
 const httpUtilFunc = require("../http/httpUtils");
@@ -646,7 +646,7 @@ function updateRegisterResult() {
                 "nickname": username
             }
             httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
-            var url = "http://" + commonFun.server + ":8000/user/registered"
+            url = "http://" + commonFun.server + ":8000/user/registered"
             var res = http.postJson(url, data);
             res = res.body.json()
             httpUtilFunc.reportLog("更新注册账号结果: " + JSON.stringify(res))

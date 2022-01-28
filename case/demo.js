@@ -1,3 +1,10 @@
+/*
+ * @Descripttion: 
+ * @version: 
+ * @Author: 冉勇
+ * @Date: 2022-01-27 11:00:02
+ * @LastEditTime: 2022-01-28 14:52:50
+ */
 
 const { longSleep, shortSleep } = require("../lib/common");
 const commonFunc = require("../lib/common");
@@ -14,10 +21,7 @@ function checkUsersInfoPage() {
         while (true) {
             check_last_use()
             commonFunc.scrollShortUp()
-            // if (check_first_use == check_first_use) {
-            //     log("划到底！")
-            //     break
-            // }
+
         }
     }
 }
@@ -52,3 +56,4 @@ function check_last_use() {
         return true
     }
 }
+

@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2021-12-23 19:59:44
- * @LastEditTime: 2022-01-27 10:59:34
+ * @LastEditTime: 2022-01-28 17:05:22
  */
 function init() {
     // 设置日志文件
@@ -52,10 +52,10 @@ init()
 
 
 //  爬取用户信息业务
-// var mainTask = require("./case/taskReptile_Uuid");
-// mainTask.runTask()
+var mainTask = require("./case/taskReptile_Uuid_19.2");
+mainTask.runTask()
 
 //  TT注册可视化业务
 // var mainTask = require("./case/tit_register_v22_4_5_develop");
-var mainTask = require("./case/tit_register_v22_4_5_developdebug");
-mainTask.runTask()
+// var mainTask = require("./case/tit_register_v22_4_5_developdebug");
+// mainTask.runTask()

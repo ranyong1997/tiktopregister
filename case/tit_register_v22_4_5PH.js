@@ -41,7 +41,7 @@ function doSomething() {
         }
     }
 }
-let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 10, () => { log("时间已经超时10分钟,程序退出") })
+let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 1, () => { log("时间已经超时10分钟,程序退出") })
 
 function alaways_running() {
     Facebook_Account_Transfer()

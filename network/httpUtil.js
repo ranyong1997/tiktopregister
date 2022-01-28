@@ -443,7 +443,6 @@ httpUtilFunc.getProxyFromCloudam = function (base_url, args) {
         let duplicate = args.duplicate || true
         let amount = args.amount || 1
         let type = args.type || "text"
-
         let uri = "?protocol=" + protocol + "&regionid=" + regionid + "&needpwd=" + needpwd + "&duplicate=" + duplicate + "&amount=" + amount + "&type=" + type
         let url = base_url + uri.toLowerCase()
         log("尝试获取动态代理: " + url)

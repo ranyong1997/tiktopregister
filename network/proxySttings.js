@@ -352,7 +352,6 @@ proxySttings.kitsunebiSetup = function (proxy_info, proxy_provider, force_update
     let server_type = null
     let username = null
     let password = null
-
     try {
         let _split = proxy_info.split(",")
         server_type = _split[0]
@@ -369,7 +368,6 @@ proxySttings.kitsunebiSetup = function (proxy_info, proxy_provider, force_update
     if (!app.getAppName("fun.kitsunebi.kitsunebi4android")) { throw "未安装 fun.kitsunebi.kitsunebi4android" }
     try { shell("pm enable --user " + commonFunc.userId + " fun.kitsunebi.kitsunebi4android") } catch (error) { }
     sleep(3000)
-
     let is_proxy_set = false
     let is_rule_set = false
     let is_proxy_ready = false
@@ -402,7 +400,6 @@ proxySttings.kitsunebiSetup = function (proxy_info, proxy_provider, force_update
                             clickIfWidgetClickable(id("android:id/button1").text("YES").findOne(2000))
                             sleep(1000)
                         }
-
                         //  添加新的节点
                         clickIfWidgetClickable(id("fun.kitsunebi.kitsunebi4android:id/add_btn").findOne(2000))
                         sleep(3000)
@@ -410,7 +407,6 @@ proxySttings.kitsunebiSetup = function (proxy_info, proxy_provider, force_update
                         sleep(3000)
                         clickIfWidgetExists(text("Manual").findOne(1000))
                         sleep(3000)
-
                     }
                     else
                         if (!is_rule_set) {
@@ -445,8 +441,6 @@ proxySttings.kitsunebiSetup = function (proxy_info, proxy_provider, force_update
 
                             for (let index = 0; index < 3; index++) {
                                 clickIfWidgetClickable(id("fun.kitsunebi.kitsunebi4android:id/measure_latency_btn").findOne(1000)) && toastLog("刷新节点")
-                                // sleep(1000)
-
                                 if (id("android:id/message").textStartsWith("Invalid").findOne(3000)) {
                                     clickIfWidgetClickable(text("OK").findOne(1))
                                     toastLog("无效节点")
@@ -454,17 +448,14 @@ proxySttings.kitsunebiSetup = function (proxy_info, proxy_provider, force_update
                                     force_update = true
                                     break
                                 }
-                                // let running_btn = id("fun.kitsunebi.kitsunebi4android:id/running_indicator").findOne(3000)
                                 clickIfWidgetExists(text(server_name).findOne(1000))
                                 sleep(3000)
-
                                 //  适配廖的代理
                                 if (proxy_provider == "liao_proxy" && clickIfWidgetExists(text(server_name).findOne(1000))) {
                                     id("fun.kitsunebi.kitsunebi4android:id/running_indicator").text("running").findOne(3000) || clickIfWidgetClickable(text("OK").findOne(1))
                                     id("fun.kitsunebi.kitsunebi4android:id/running_indicator").text("running").findOne(3000) || clickIfWidgetClickable(id("fun.kitsunebi.kitsunebi4android:id/fab").findOne(1)) && toastLog("启动代理")
                                     clickIfWidgetClickable(text("OK").findOne(3000))
                                 }
-
                                 let latency = id("fun.kitsunebi.kitsunebi4android:id/ep_latency").textMatches(/\d+ ms/).findOne(6000)
                                 if (latency) {
                                     toastLog("网络延迟: " + latency.text())
@@ -479,14 +470,12 @@ proxySttings.kitsunebiSetup = function (proxy_info, proxy_provider, force_update
                                     }
                                 } else {
                                     try { err_msg = id("fun.kitsunebi.kitsunebi4android:id/ep_latency").findOne(1000).text() } catch (error) { }
-
                                     //  适配廖的代理
                                     if (proxy_provider == "liao_proxy" && clickIfWidgetExists(text(server_name).findOne(1000))) {
                                         try {
                                             let url = "http://2.2.2.2/switch-ip?cityid=68000"
                                             let res = http.get(url);
                                             res = res.body.json()
-                                            // log( "switch-ip?cityid=68000: " + commonFunc.objectToString(res) )
                                             if (res.code != 0) { throw res }
                                         } catch (error) { err_msg = "switch-ip?cityid=68000 error: " + commonFunc.objectToString(error) }
                                         sleep(10000)

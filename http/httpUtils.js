@@ -384,8 +384,8 @@ httpUtilFunc.getRegisterContact = function () {
 httpUtilFunc.getPluginData = function () {
     let pluginData = null
     try {
-        // let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
-        let url = "http://192.168.91.3:83/task/getplugindata?taskid=d8527ae8-e80d-4e13-8a8b-0c99ab9643ad"
+        let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
+        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=64aafa9f-fd9a-451b-b800-054c02ba11f4"
         log("读取配置:" + url)
         commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
@@ -1210,6 +1210,42 @@ httpUtilFunc.getProxyFromConnanys = function (base_url, args) {
         }, null, 1000 * 20, () => { throw "超时退出" })
     } catch (error) { throw "获取代理异常: " + commonFunc.objectToString(error) }
 }
+
+
+// 获取Sellerip动态代理
+httpUtilFunc.getProxyFromSellerip = function (base_url, args) {
+    try {
+        if (!args) { throw "getProxyFromSellerip 参数异常" }
+        if (!base_url) { throw "getProxyFromSellerip 参数异常" }
+        let geo = args.regionid || "US"
+        let timeout = args.timeout || 30
+        let url = "http://blackkat.cc:8082/client_getendpoints"
+        log("尝试获取动态代理: " + url)
+        return newThread(function () {
+            let data_json = {
+                "user": "3191",
+                "pass": "vgc9k7w",
+                "protocol": 1,
+                "count": 1,
+                "portmap": 1,
+                "keeptime": timeout,
+                "autoswitch": 0,
+                "region": "US",
+                "sign": commonFunc.getmd5("3191" + 1 + geo + "vgc9k7w" + "request")
+            }
+            log(data_json.sign)
+            log("代理申请提交: " + commonFunc.objectToString(data_json))
+            let res = http.postJson(url, data_json)
+            res = res.body.json()
+            if (res.code == 0 && res.data.length) {
+                let data = res.data[0]
+                return data
+            }
+            throw res
+        }, null, 1000 * 20, () => { throw "超时退出" })
+    } catch (error) { throw "获取代理异常: " + commonFunc.objectToString(error) }
+}
+
 
 /**
  * 从 https://api.ipify.org 或 https://www.whatismyip.com 获取当前网络IP
