@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-01-28 12:10:08
+ * @LastEditTime: 2022-02-09 14:53:37
  */
 
 
@@ -48,11 +48,13 @@ taskDemo.runTask = function () {
         try {   //  初始化测试
             if (!commonFun.server) { throw "未连接到群控后台" }
             //  初始化网络测试   
-            if (!httpUtilFunc.getLocalIp() && !commonFun.uninstallApp(kitsunebi_packageName)) { reportLog("设备环境异常") }
+            // if (!httpUtilFunc.getLocalIp() && !commonFun.uninstallApp(kitsunebi_packageName)) { reportLog("设备环境异常") }
             randomSleep(3000)
             try { ui.run(function () { commonFun.statusBox.close() }); } catch (error) { }
         } catch (error) { httpUtilFunc.taskStop(null, error); throw error }
         try {
+            global_ip = httpUtilFunc.getGlobalIp()
+            log("当前网络ip--->", global_ip)
             let timestamp = new Date().getTime()
             log("现在时间---->", timestamp)
             try {   // 版本检测
@@ -139,10 +141,6 @@ taskDemo.runTask = function () {
             try {
                 try {   //  ip、语言、时区检测
                     taskDemo.result = 1
-                    //  获取本机ip
-                    local_ip = httpUtilFunc.getLocalIp()
-                    reportLog("本机 IP: " + local_ip)
-                    commonFun.taskStepRecordSet(200, null, "获取本机ip", "获取本机ip：" + local_ip)
                     // 系统语言、时区获取设置
                     if (taskPluginData.systemLanguage != "") {
                         reportLog("检测系统语言: " + commonFun.systemLanguageGet())
@@ -203,7 +201,6 @@ taskDemo.runTask = function () {
                             } catch (error) {
                                 taskDemo.desc = commonFun.objectToString(error)
                                 reportLog(taskDemo.desc)
-                                // proxy_info = null
                                 randomSleep(30000)
                                 if (taskDemo.desc.match("IP 列表为空")) {
                                     home()
@@ -232,14 +229,16 @@ taskDemo.runTask = function () {
                                 reportLog(taskDemo.desc)
                                 continue
                             }
+                            //  获取本机ip
+                            local_ip = httpUtilFunc.getLocalIp()
+                            reportLog("本机 IP: " + local_ip)
+                            commonFun.taskStepRecordSet(200, null, "获取本机ip", "获取本机ip：" + local_ip)
                             // ip检测
                             if (!is_proxy_on) { continue }
                             randomSleep(3000)
-                            global_ip = null
                             for (let index = 0; index < 3; index++) {
                                 is_proxy_on = false
                                 commonFun.showLog("代理IP检测: " + global_ip)
-                                global_ip = httpUtilFunc.getGlobalIp()
                                 reportLog("检测IP: " + local_ip + " -> " + global_ip)
                                 commonFun.showLog("代理IP检测: " + global_ip)
                                 if (global_ip) { is_proxy_on = true; break }
@@ -255,12 +254,9 @@ taskDemo.runTask = function () {
                     ipInfo = httpUtilFunc.getIpInfo()
                     reportLog("代理网络 " + JSON.stringify(ipInfo))
                 }
-
-
                 log("注册脚本or 修改头像脚本")
                 // 素材获取
                 material_gain(keyword_FB, appid, appid_key, type, classify, used_times_model, used_counter)
-                // 注册脚本
             } catch (error) {
                 throw error
             }
@@ -275,17 +271,17 @@ taskDemo.runTask = function () {
                 checkFacebookInstall()   // 检测facebook是否安装
                 checkTiktokInstall() // 检测tiktok是否安装
                 function doSomething() {
-                    if (true) {
-                        log("脚本执行")
-                        One_Key_Login()
-                    }
-                    // Facebook_Account_Transfer()
-                    // sleep(2000)
-                    // while (true) {
+                    // if (true) {
                     //     log("脚本执行")
                     //     One_Key_Login()
-                    //     break
                     // }
+                    Facebook_Account_Transfer()
+                    sleep(2000)
+                    while (true) {
+                        log("脚本执行")
+                        One_Key_Login()
+                        break
+                    }
                 }
                 let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 12, () => { log("时间已超时12分钟,程序退出") })
             } else if (updatePhoto != "") {
@@ -301,7 +297,6 @@ taskDemo.runTask = function () {
                 toastLog("停止脚本")
             }
         } catch (error) {
-            log("获取素材时捕获到一个错误:" + error)
             throw error
         }
         sleep(3000)
@@ -555,7 +550,7 @@ function updateRegisterResult() {
                 "nickname": username
             }
             httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
-            var url = "http://" + commonFun.server + ":8000/user/registered"
+            url = "http://" + commonFun.server + ":8000/user/registered"
             var res = http.postJson(url, data);
             res = res.body.json()
             httpUtilFunc.reportLog("更新注册账号结果: " + JSON.stringify(res))
@@ -594,9 +589,10 @@ function check_face_recognition() {
 
 // 进行tiktok备份
 function tiktio_backupUplive() {
+    console.time('备份耗时');
     commonFun.backupUpApp(tiktop_packageName)
-    randomSleep()
     commonFun.backupUpAppInfo(tiktop_packageName, backupTag)
+    console.timeEnd('备份耗时');
 }
 
 // tiktok登陆成功
@@ -674,10 +670,9 @@ function clickProfile() {
             commonFun.taskResultSet("任务配置-" + url, "a")
             let log_server = commonFun.taskResultSet("-Result-" + desc, "w")
             commonFun.taskResultGet(log_server)
-            engines.stopAll();
-            toastLog("停止脚本")
-
         }
+        engines.stopAll();
+        toastLog("停止脚本")
     } catch (error) {
         commonFun.taskResultSet("创建失败" + error, "w")
     }

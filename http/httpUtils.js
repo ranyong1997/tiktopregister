@@ -384,8 +384,9 @@ httpUtilFunc.getRegisterContact = function () {
 httpUtilFunc.getPluginData = function () {
     let pluginData = null
     try {
-        let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
-        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=64aafa9f-fd9a-451b-b800-054c02ba11f4"
+        // let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
+        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=64aafa9f-fd9a-451b-b800-054c02ba11f4" // 爬取粉丝
+        let url = "http://192.168.91.3:83/task/getplugindata?taskid=571e6b82-eb4f-4826-b95a-3b75b9d32f55" // 注册
         log("读取配置:" + url)
         commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
