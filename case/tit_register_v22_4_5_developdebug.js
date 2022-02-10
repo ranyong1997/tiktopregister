@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-10 12:06:22
+ * @LastEditTime: 2022-02-10 16:25:44
  */
 
 
@@ -48,7 +48,6 @@ taskDemo.runTask = function () {
         try {   //  初始化测试
             if (!commonFun.server) { throw "未连接到群控后台" }
             //  初始化网络测试   
-            // if (!httpUtilFunc.getLocalIp() && !commonFun.uninstallApp(kitsunebi_packageName)) { reportLog("设备环境异常") }
             randomSleep(3000)
             try { ui.run(function () { commonFun.statusBox.close() }); } catch (error) { }
         } catch (error) { httpUtilFunc.taskStop(null, error); throw error }
@@ -128,8 +127,8 @@ taskDemo.runTask = function () {
                 log("备份标签2: " + backupTag2)
                 log("appid: " + appid)
                 log("appid_key: " + appid_key)
-                log("素材类型: " + type)
-                log("文本类型: " + classify)
+                // log("素材类型: " + type)
+                // log("文本类型: " + classify)
                 log("素材匹配: " + used_times_model)
                 log("使用次数: " + used_counter)
                 commonFun.taskStepRecordSet(200, null, "获取插件配置信息", "获取插件配置信息:" + JSON.stringify(taskPluginData))
@@ -159,8 +158,6 @@ taskDemo.runTask = function () {
                         }
                     }
                 } catch (error) { throw error }
-                // 以上代码走通
-
                 // 代理获取 需要联调
                 proxy_info = null
                 let ipInfo = {}
@@ -234,12 +231,16 @@ taskDemo.runTask = function () {
                             reportLog("本机 IP: " + local_ip)
                             commonFun.taskStepRecordSet(200, null, "获取本机ip", "获取本机ip：" + local_ip)
                             // ip检测
-                            if (!is_proxy_on) { continue }
-                            randomSleep(3000)
+                            global_ip = null
                             for (let index = 0; index < 3; index++) {
-                                is_proxy_on = false
-                                commonFun.showLog("代理IP检测: " + global_ip)
+                                commonFunc.showLog("代理IP检测: " + global_ip)
+                                global_ip = httpUtilFunc.getGlobalIp()
                                 reportLog("检测IP: " + local_ip + " -> " + global_ip)
+                                commonFunc.showLog("代理IP检测: " + global_ip)
+                                if (global_ip) { return true } else { taskDemo.desc = "代理已连接, 但IP检测失败 " + local_ip + " -> " + global_ip }
+                                try { if (httpUtilFunc.isUrlAccessable("https://www.tiktok.com", "This page is not available in your area")) { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " + "This page is not available in your area"; continue } } catch (error) { }
+                                try { if (httpUtilFunc.isUrlAccessable("https://www.tiktok.com", "tiktok")) { return true } } catch (error) { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " + commonFunc.objectToString(error) }
+                                randomSleep(5000)
                             }
                         }
                     }, false, 1000 * 60 * 30, () => { throw "代理连接超时退出 " + taskDemo.desc })
@@ -260,8 +261,9 @@ taskDemo.runTask = function () {
             if (register != "") {
                 log("选择注册")
                 // 素材获取
-                material_gain()
+                material_gain(keyword_FB, used_times_model, used_counter)
                 checkFacebookInstall()   // 检测facebook是否安装
+                launch(facebook_packageName)
                 checkTiktokInstall() // 检测tiktok是否安装
                 function doSomething() {
                     Facebook_Account_Transfer()
@@ -269,15 +271,15 @@ taskDemo.runTask = function () {
                     log("脚本执行")
                     One_Key_Login()
                 }
-                let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 10, () => { log("时间已超时10分钟,程序退出") })
+                let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 12, () => { log("时间已超时12分钟,程序退出") })
             } else if (updatePhoto != "") {
                 log("选择修改头像")
                 // 素材获取
-                material_gain_url()
+                material_gain_url(used_times_model, used_counter)
                 change_head_portrait()
                 kill_tt()
             } else if (register == "on" && updatePhoto == "on") {
-                // 没法判断同时开启
+                // 暂时没法判断同时开启
                 log("又注册又修改头像")
             } else {
                 log("退出程序")
@@ -315,7 +317,7 @@ function material_gain(keyword_FB, used_times_model, used_counter) {
             "count": 1, // 需要数据条数
             "type": 0,   // 类型（0:纯文本；1:图片；2:视频；3:音频）
             "classify": 3,   // 分类（文本类；图片类；视频类）
-            "used_times_model": "lte",   // 匹配模式
+            "used_times_model": used_times_model,   // 匹配模式
             "used_times": used_counter    // 使用次数  // 上线需要将这个解开
         })
         android_Id = material_gain.text_content
@@ -375,7 +377,7 @@ function checkFacebookInstall() {
         randomSleep()
         log("正在打开Facebook")
         launch(facebook_packageName);
-        randomSleep()
+        sleep(8000)
         home()
     }
 }
@@ -426,7 +428,7 @@ function One_Key_Login() {
             checkpop_up()
         }
         try {
-            sleep(3000)
+            sleep(5000)
             checkpop_up()
             checkSignUpPage()
             sleep(2000)
@@ -763,10 +765,12 @@ function check_error() {   // 点击登陆出现错误toast
             while (true) if (txt == txt1) {
                 log("检测到不可登陆" + txt + "即将停止该任务")
                 home()
-                sleep(4000)
+                sleep(1000)
                 fail_register = true
                 httpUtilFunc.materialRollback(appid, appid_key, material_INFO)
+                engines.stopAll();
             }
+            
         });
     })
     return true;
@@ -793,8 +797,8 @@ function checkpop_up() {
     if (swipe_element != null) {
         log("检测用户引导")
         log("上滑一小截1次");
-        commonFunc.swipeUpRandomSpeed()
-        commonFunc.swipeUpRandomSpeed()
+        commonFun.swipeUpRandomSpeed()
+        commonFun.swipeUpRandomSpeed()
     }
     log("检测系统写入操作")
     var allow = text("ALLOW").findOne(FIND_WIDGET_TIMEOUT)
