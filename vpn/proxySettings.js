@@ -638,4 +638,162 @@ proxySettings.kitsunebiSetup3 = function (proxy_info, proxy_provider, force_upda
     return is_proxy_ready
 }
 
+/**
+ * 
+ * @param {*} url 
+ * @returns 
+ */
+proxySettings.v2rayInstall = function (url) {
+    if (!app.getAppName("com.v2ray.ang")) {
+        if (!httpUtilFunc.downloadFile(url, "/storage/emulated/obb/com.v2ray.ang_2000426.apk", 1000 * 60 * 2, false) || !commonFunc.installApk("/storage/emulated/obb/com.v2ray.ang_2000426.apk", 1000 * 60 * 2)) {
+            return false
+        }
+    }
+    return true
+}
+/**
+ * 
+ * @returns 
+ */
+proxySettings.v2rayUninstall = function () {
+    return commonFunc.uninstallApp("com.v2ray.ang")
+}
+
+/**
+ * 
+ * @param {String} proxy_info 代理信息, 字符串模板: proxyType,server,port,username,password; 举例: SOCKS5,47.86.113.126,24001,user001,psw001
+ * @param {Boolean} force_update 是否重新连接, true-强制重连, 断开当前连接, 并重新配置代理
+ */
+proxySettings.v2raySetup = function (proxy_info, force_update, timeout) {
+    let server_name = null
+    let server_address = null
+    let server_port = null
+    let server_type = null
+    let username = null
+    let password = null
+    try {
+        let _split = proxy_info.split(",")
+        server_type = _split[0]
+        server_address = _split[1]
+        server_port = _split[2]
+        username = _split.length > 3 ? _split[3] : ""
+        password = _split.length > 4 ? _split[4] : ""
+        server_name = proxy_info
+        if (!server_address) { throw "" }
+        if (!new RegExp(/^\d+$/).test(server_port)) { throw "" }
+    } catch (error) {
+        throw "代理 参数异常" + commonFunc.objectToString(error)
+    }
+    let proxy_bid = "com.v2ray.ang"
+    if (!app.getAppName(proxy_bid)) { throw "未安装 " + proxy_bid }
+    try { shell("pm enable --user " + commonFunc.userId + " " + proxy_bid) } catch (error) { }
+    sleep(3000)
+    timeout = typeof (timeout) == "number" ? timeout : 1000 * 60 * 2
+
+    let err_msg = null
+    let is_proxy_set = false
+    let is_rule_set = false
+    let is_proxy_ready = false
+    try {
+        is_proxy_ready = newThread(function () {
+            while (true) {
+                if (!packageName(proxy_bid).findOne(1)) {
+                    home()
+                    sleep(1000)
+                    log("launching " + proxy_bid)
+                    launch(proxy_bid)
+                    sleep(3000)
+                }
+                //  首页
+                // if( className("android.widget.TextView").text("Configuration file").findOne(1000) && className("android.widget.TextView").desc("Add config").findOne(1) ){
+                if (id("com.v2ray.ang:id/tv_test_state").visibleToUser().findOne(3000)) {
+                    if (!force_update) {
+                        is_proxy_set = true
+                    }
+                    if (!is_proxy_set) {
+                        //  清空现有节点列表
+                        let config_list = id("com.v2ray.ang:id/layout_remove").find()
+                        config_list.forEach(element => {
+                            clickIfWidgetClickable(element)
+                            sleep(2000)
+                        });
+
+                        //  添加新的节点
+                        clickIfWidgetClickable(desc("Add config").findOne(2000))
+                        sleep(3000)
+                        commonFunc.clickIfParentsClickable(text("Type manually[Socks]").visibleToUser().findOne(1000))
+                        sleep(3000)
+                    }
+                    else {
+                        if (!clickIfWidgetExists(text(server_name).findOne(1000))) {
+                            is_proxy_set = false
+                            force_update = true
+                            toastLog("查找节点: " + server_name)
+                            continue
+                        }
+                        let test_status = null
+                        for (let index = 0; index < 5; index++) {
+                            clickIfWidgetExists(text(server_name).findOne(1000))
+                            sleep(3000)
+                            log("点击测试: " + clickIfWidgetClickable(id("com.v2ray.ang:id/layout_test").clickable().findOne(3000)))
+                            sleep(10000)
+                            try { test_status = id("com.v2ray.ang:id/tv_test_state").findOne(5000).text() } catch (error) { }
+                            if (!test_status) { back(); continue }
+                            log(test_status)
+                            if (test_status.match("Success.*")) {
+                                return true
+                            }
+                            else if (test_status.match("Not connected.*")) {
+                                log("点击启动: " + clickIfWidgetClickable(id("com.v2ray.ang:id/fab").className("android.widget.ImageButton").clickable().findOne(3000)))
+                                sleep(3000)
+                                clickIfWidgetClickable(text("OK").findOne(1000))
+                                sleep(3000)
+                            }
+                            else if (test_status.match("Testing.*")) {
+                                sleep(5000)
+                            }
+                            else {
+                                err_msg = test_status
+                                log("点击测试: " + clickIfWidgetClickable(id("com.v2ray.ang:id/layout_test").clickable().findOne(3000)))
+                                sleep(10000)
+                            }
+                            sleep(3000)
+                        }
+                    }
+                }
+                else if (id("com.v2ray.ang:id/et_address").findOne(1)) {
+                    try {
+                        is_proxy_set = false
+                        log("新增节点")
+                        id("com.v2ray.ang:id/et_remarks").findOne(1000).setText(server_name) && toastLog("输入: " + server_name)
+                        sleep(1000)
+                        id("com.v2ray.ang:id/et_address").findOne(1000).setText(server_address) && toastLog("输入: " + server_address)
+                        sleep(1000)
+                        id("com.v2ray.ang:id/et_port").findOne(1000).setText(server_port) && toastLog("输入: " + server_port)
+                        sleep(1000)
+                        id("com.v2ray.ang:id/et_security").findOne(1000).setText(username) && toastLog("输入: " + username)
+                        sleep(1000)
+                        id("com.v2ray.ang:id/et_id").findOne(1000).setText(password) && toastLog("输入: " + password)
+                        sleep(1000)
+                        is_proxy_set = clickIfWidgetClickable(id("com.v2ray.ang:id/save_config").findOne(2000))
+                        log("保存节点: " + is_proxy_set + " - " + server_name)
+                        // sleep(2000)
+                    } catch (error) {
+                        log("新增节点异常: " + commonFunc.objectToString(error))
+                        back()
+                    }
+                    !id("com.v2ray.ang:id/tv_test_state").visibleToUser().findOne(3000) && back()
+                }
+                else if (proxySettings.isOtherPage()) { }
+                else {
+                    log("unknow page")
+                    back()
+                    sleep(3000)
+                }
+                sleep(1000)
+            }
+        }, false, timeout, () => { throw "超时退出 " + err_msg + " " + currentActivity() })
+    } catch (error) { throw "代理设置失败: " + commonFunc.objectToString(error) }
+    return is_proxy_ready
+}
 module.exports = proxySettings;

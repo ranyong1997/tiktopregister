@@ -1,24 +1,25 @@
+
 //可能调用结构还要改动
-const { clickIfWidgetExists, clickIfWidgetClickable, swipeWithBezier, randomSleep, md5, swipeUpSlowly, newThread, clickIfParentsClickable, isNotNullObject } = require("../common/common.js");
+const { clickIfWidgetExists, clickIfWidgetClickable, swipeWithBezier, randomSleep, md5, swipeUpSlowly, newThread, clickIfParentsClickable, isNotNullObject } = require("../lib/common.js");
 const { reportLog } = require("../network/httpUtil.js");
 const commonFunc = require("../lib/common.js");
 const httpUtilFunc = require("../network/httpUtil.js");
 
 //  用于图片识别的裁剪处理
 importClass(android.graphics.Bitmap);
-images.requestScreenCapture(true)
+images.requestScreenCapture(false)
+
+importClass(android.content.Intent);
+importClass(android.net.Uri);
 
 var _ids = {
+    //  version : Tiktok_19.2.4
     "Tab_Home": "com.ss.android.ugc.trill:id/c5v",
     "Tab_Discover": "com.ss.android.ugc.trill:id/c5u",
     "Tab_Post": "com.ss.android.ugc.trill:id/c5t",
     "Tab_Inbox": "com.ss.android.ugc.trill:id/c5w",
     "Tab_Me": "com.ss.android.ugc.trill:id/c5x",
-
-
-
     "Discover_Topic": "com.ss.android.ugc.trill:id/ef8",    //  发现页的话题
-
     "Me_Username": "com.ss.android.ugc.trill:id/ek8",    //  Me 界面 账号昵称
     "Me_Nav_Right": "com.ss.android.ugc.trill:id/c9o",    //  Me 界面 顶部导航栏右侧菜单
     "Profile_Photo": "com.ss.android.ugc.trill:id/b5j",    //  头像按钮
@@ -28,11 +29,9 @@ var _ids = {
     "Profile_Bio_EditText": "com.ss.android.ugc.trill:id/apu",    //  Bio 编辑框
     "Profile_Website_Desc": "com.ss.android.ugc.trill:id/erv",    //  Website 文本
     "Profile_Website_EditText": "com.ss.android.ugc.trill:id/apu",    //  Website 编辑框
-
     "Post_Select_Video": "com.ss.android.ugc.trill:id/b_g",     //  发布视频 选择视频 角标
     "Post_Desc_EditText": "com.ss.android.ugc.trill:id/ame",     //  发布视频 描述编辑框
     "Post_Post_Button": "com.ss.android.ugc.trill:id/csk",     //  发布视频 完成发布 按钮
-
     "Dialog_Close_UsernameUpdate": "com.ss.android.ugc.trill:id/bi6",    //  弹窗提示修改用户名的 关闭按钮
 }
 
@@ -41,17 +40,16 @@ var targetApp = {};
 targetApp.init = function () {
     log("init targetApp")
     targetApp.appName = "tiktok"
-    targetApp.bid = "com.ss.android.ugc.trill"
+    targetApp.bid = "com.zhiliaoapp.musically"
     targetApp.versionName = commonFunc.getAppVersionName(targetApp.bid)
-
     httpUtilFunc.reportLog("应用版本: " + targetApp.bid + " - " + (targetApp.versionName ? targetApp.versionName : '未安装'))
     httpUtilFunc.reportLog("创建媒体文件夹: " + files.createWithDirs("/storage/emulated/" + commonFunc.userId + "/DCIM/" + targetApp.appName + "/"))
 }
-
-//  清理 Camera 文件夹
 targetApp.clearTaskCache = function () {
+    //  清理 Camera 文件夹
     try {
         let folder_path = "/storage/emulated/" + commonFunc.userId + "/DCIM/Camera/"
+        log("清理缓存: " + folder_path)
         let file_list = files.listDir(folder_path)
         for (let idx = 0; idx < file_list.length; idx++) {
             let filename = file_list[idx]
@@ -64,6 +62,7 @@ targetApp.clearTaskCache = function () {
         let file_list = files.listDir(folder_path)
         for (let idx = 0; idx < file_list.length; idx++) {
             let filename = file_list[idx]
+            // log("删除文件：" + filename + " -> " + files.remove(root_path + filename))
             files.remove(folder_path + filename)
         }
     } catch (error) { log("清理缓存异常: " + commonFunc.objectToString(error)) }
@@ -156,9 +155,9 @@ targetApp.isOtherPage = function () {
 }
 
 targetApp.accountManager = {}
-/** editProfile  修改资料
- *  
- *  
+
+/**
+ * editProfile  修改资料
  */
 targetApp.editProfile = function (account, profile) {
     let new_account = account
@@ -230,11 +229,9 @@ targetApp.editProfile = function (account, profile) {
                         events.onToast(function (toast) {
                             toast_msg = toast.getText()
                             reportLog("监听资料修改事件: " + toast_msg);
-                            // try { t_thread.interrupt() } catch (error) { }
                         });
                     })
                     if (!is_name_set) {
-
                         //  检查当前用户昵称
                         if (desc("Name" + new_name).findOne(1000) || (save_name && desc("Name" + save_name).findOne(1))) {
                             is_name_set = true
@@ -257,7 +254,7 @@ targetApp.editProfile = function (account, profile) {
                                     // new_account.name = save_name
                                 }
                             }
-                            randomSleep()
+                            randomSleep(1000, 2000)
                         }
                         if (!is_name_set) { throw "昵称修改失败" }
                         new_account.name = save_name
@@ -277,11 +274,10 @@ targetApp.editProfile = function (account, profile) {
                             else if (id("com.ss.android.ugc.trill:id/title").text("Username").findOne(1000)) {
                                 //  30天内不可修改昵称
                                 let username_desc = textContains("You can change it again").findOne(1000)
-                                // if( username_desc ){ clickIfWidgetClickable( text("Cancel").clickable().findOne(1) ); throw "限制修改昵称: " + username_desc.text() }
                                 if (username_desc) { clickIfWidgetClickable(text("Cancel").clickable().findOne(1)); reportLog("限制修改昵称: " + username_desc.text()); break }
                                 //  可以修改昵称
                                 setText(new_username); randomSleep()
-                                reportLog("输入昵称: " + new_username)
+                                reportLog("输入用户名: " + new_username)
                                 try { save_username = id("com.ss.android.ugc.trill:id/bd1").findOne(1000).text() } catch (error) { }
                                 if (clickIfWidgetClickable(text("Save").clickable().findOne(6000))) {
                                     reportLog("保存名称: " + save_username)
@@ -292,13 +288,12 @@ targetApp.editProfile = function (account, profile) {
                                     let temp_btn = btn_list[random(1, btn_list.length - 1)]
                                     new_username = temp_btn.text()
                                     clickIfWidgetClickable(temp_btn)
-                                    // randomSleep()
                                 } else {
                                     new_username = new_username + random(0, 9)
                                 }
                             }
                             else if (clickIfWidgetClickable(text("SET USERNAME").clickable().findOne(1))) { id("com.ss.android.ugc.trill:id/title").text("Edit profile").findOne(5000); randomSleep() }
-                            randomSleep()
+                            randomSleep(1000, 2000)
                         }
                         if (desc("Username" + save_username).findOne(1)) {
                             is_username_set = true
@@ -319,13 +314,11 @@ targetApp.editProfile = function (account, profile) {
                             else if (id("com.ss.android.ugc.trill:id/title").text("Bio").findOne(1000)) {
                                 //  可以修改昵称
                                 setText(new_bio); randomSleep()
-                                reportLog("输入昵称: " + new_bio)
+                                reportLog("输入bio: " + new_bio)
                                 try { save_bio = id(_ids.Profile_Bio_EditText).findOne(1000).text() } catch (error) { }
                                 if (clickIfWidgetClickable(text("Save").clickable().findOne(6000))) {
                                     reportLog("保存Bio: " + save_bio)
-
                                     randomSleep(10000)
-                                    // is_bio_set = true
                                 }
                                 else { back() }
                             }
@@ -335,13 +328,13 @@ targetApp.editProfile = function (account, profile) {
                                 continue;
                             }
                             else if (!is_bio_set && clickIfWidgetClickable(id(_ids.Profile_Bio_Desc).findOne(1))) { randomSleep(3000) }
-                            randomSleep()
+                            randomSleep(1000, 2000)
                         }
                         if (!is_bio_set) { throw "Bio 修改失败" }
                         new_account.bio = save_bio
                     }
                     else if (!is_website_set) {
-                        if (desc("Website" + new_website).findOne(1000) || (save_website && desc("Website" + save_website).findOne(1))) {
+                        if (desc("Website" + new_website).findOne(3000) || (save_website && desc("Website" + save_website).findOne(1))) {
                             is_website_set = true
                             new_account.website = save_website || new_website
                             continue;
@@ -359,7 +352,6 @@ targetApp.editProfile = function (account, profile) {
                                 if (clickIfWidgetClickable(text("Save").clickable().findOne(6000)) || clickIfWidgetExists(text("Save").clickable().findOne(1000))) {
                                     reportLog("保存外链: " + save_website)
                                     randomSleep(10000)
-                                    // is_website_set = true
                                 }
                                 else { back() }
                             }
@@ -369,7 +361,7 @@ targetApp.editProfile = function (account, profile) {
                                 continue;
                             }
                             else if (!is_website_set && clickIfWidgetClickable(id(_ids.Profile_Website_Desc).findOne(1))) { randomSleep(3000) }
-                            randomSleep()
+                            randomSleep(1000, 2000)
                         }
                         if (!is_website_set && id("com.ss.android.ugc.trill:id/title").text("Website").findOne(1000)) { throw "外链保存无响应" } // 点击保存无响应
                         if (!is_website_set) { throw "Website 修改失败" }
@@ -385,6 +377,7 @@ targetApp.editProfile = function (account, profile) {
                         if (clickIfWidgetClickable(text("ALLOW").findOne(1))) { randomSleep(3000) }
                         clickIfWidgetClickable(text("Select from Gallery").clickable().findOne(1000)) && randomSleep(3000)
                         if (clickIfWidgetClickable(text("ALLOW").findOne(1))) { randomSleep(3000) }
+
                         for (let index = 0; index < 10; index++) {
                             if (text("Image size is too small").findOne(1000)) {
                                 clickIfWidgetClickable(text("OK").visibleToUser().clickable().findOne(1000))
@@ -454,7 +447,7 @@ targetApp.getAboutInfo = function () {
  *  ret  0-未登录； 1-已登录； -1:其他异常
  */
 targetApp.getLoginStatus = function (timeout) {
-    if (!app.getAppName(targetApp.bid)) { throw "应用未安装: " + targetApp.bid }
+    if (!app.getAppName(targetApp.bid)) { return -2 }
     let app_enable = parseInt(context.getPackageManager().getApplicationEnabledSetting(targetApp.bid))
     if (app_enable > 1) { throw "应用状态: " + app_enable + " - " + targetApp.bid }
     timeout = typeof (timeout) == "number" ? timeout : 1000 * 60 * 2
@@ -491,7 +484,6 @@ targetApp.getLoginStatus = function (timeout) {
                         toastLog("Failed to upload: " + restart_btn_point)
                         click(restart_btn_point.x, restart_btn_point.y)
                         sleep(15000)
-                        // continue
                     }
                 } catch (error) { toastLog("图片检测异常: " + commonFunc.objectToString(error)) }
             }
@@ -547,6 +539,7 @@ targetApp.getLoginStatus = function (timeout) {
                 return 0
             }
             else if (textContains("was logged out").findOne(1)) {
+                // toastLog( "账号已掉线" )
                 return 2
             }
             else if (textContains("permanently banned").findOne(1)) {
@@ -577,10 +570,11 @@ targetApp.doLogin = function (account) {
                     }
                     let nickname_view = textStartsWith("@").visibleToUser().findOne(10000)
                     if (nickname_view) {
+                        toastLog(" 账号昵称: " + nickname_view.text())
                         return true
                     }
                     if (text("Edit profile").clickable().visibleToUser().findOne(3000) || text("Set up profile").clickable().visibleToUser().findOne(1)) {
-                        // reportLog( "账号昵称显示异常: " )
+                        reportLog("账号昵称显示异常: ")
                         return true
                     }
                 }
@@ -607,7 +601,6 @@ targetApp.doLogin = function (account) {
                     randomSleep(1000, 3000)
                 }
                 else if (textContains("permanently banned").findOne(1000)) {
-                    // toastLog( "Your account was permanently banned" )
                     throw "Your account was permanently banned"
                 }
                 else if (targetApp.isOtherPage()) { }
@@ -693,7 +686,6 @@ targetApp.getUnregisterAccount = function (req_data) {
             let url = "http://" + commonFunc.server + ":8000/user/unregaccount?appName=" + req_data.appName + "&countryCode=" + req_data.countryCode + "&phoneProvider=" + req_data.phoneProvider + "&tag=" + req_data.tag
             reportLog("请求账号: " + url)
             let res = http.get(url)
-
             res = res.body.json()
             if (res.code == 200) {
                 let data = JSON.parse(res.data)
@@ -723,7 +715,6 @@ targetApp.getVideoInfo = function () {
             return videoInfo
         }
     } catch (error) { }
-
     try {   //  作者昵称
         videoInfo.creator = id("com.ss.android.ugc.trill:id/title").visibleToUser().findOne(1).text().match(/@(.*)/)[1]
     } catch (error) { }
@@ -866,7 +857,6 @@ targetApp.doCleanDrafts = function (timeout) {
                             log("清理草稿")
                             randomSleep(3000)
                             clickIfWidgetClickable(id("android:id/button1").text("DISCARD").clickable().findOne(3000))
-
                             sleep(5000)
                         }
                         else { back() }
@@ -949,6 +939,7 @@ targetApp.doCommentUrlVideo = function (account, video_url, material_req_data, m
             }
             return false
         }
+
         comment_num = typeof (comment_num) == "number" ? comment_num : 0
         mention_num = typeof (mention_num) == "number" ? mention_num : 0
         mention_num = mention_num < 6 ? mention_num : 4
@@ -957,14 +948,13 @@ targetApp.doCommentUrlVideo = function (account, video_url, material_req_data, m
         let material = null
         log("评论视频: " + video_url)
         if (!video_url) { throw "视频 url 为空" }
-        //  清空浏览器
-        commonFunc.forceStopApp("com.android.browser")
-        commonFunc.clearData("com.android.browser")
+        commonFunc.taskStepRecordSet(40, null, "评论视频:" + video_url, null) //
         let comment_success_count = 0
         let comment_failed_count = 0
         let mention_success_count = 0
         let mention_failed_count = 0
         let err_msg = ""
+
         for (let comment_idx = 0; comment_idx < comment_num; comment_idx++) {
             try {
                 if (author) {
@@ -979,7 +969,7 @@ targetApp.doCommentUrlVideo = function (account, video_url, material_req_data, m
                     }
                 }
                 author = author || targetApp.doOpenUrlVideo(video_url)
-                if (!author) { throw "目标视频打开失败" }
+                if (!author) { throw "目标视频打开失败 " + video_url }
                 let content = null
                 try {
                     material = null
@@ -1021,12 +1011,11 @@ targetApp.doCommentUrlVideo = function (account, video_url, material_req_data, m
                                         mention_success_count += 1
                                     } catch (error) {
                                         mention_failed_count += 1
-                                        commonFunc.taskResultSet("艾特失败:" + error, "a")
+                                        // commonFunc.taskResultSet( "艾特失败:" + error, "a" ) 
                                         if (error == "Couldn't load. Try again later.") { throw error }
                                         else if (error.match("素材申请异常")) { throw "艾特" + error }
                                     }
                                     idx_mention += 1
-                                    // is_mention_ready = true
                                 }
                                 else {
                                     is_mention_ready = true
@@ -1036,6 +1025,9 @@ targetApp.doCommentUrlVideo = function (account, video_url, material_req_data, m
                             else if (clickIfWidgetClickable(id("com.ss.android.ugc.trill:id/a5q").visibleToUser().findOne(1000))) {
                                 toastLog("点击评论入口")
                                 randomSleep(3000)
+                            }
+                            else if (clickIfWidgetExists(id("android:id/text1").text("For You").visibleToUser().selected(false).findOne(1))) {
+                                sleep(3000)
                             }
                             else { back() }
                             sleep(3000)
@@ -1047,7 +1039,6 @@ targetApp.doCommentUrlVideo = function (account, video_url, material_req_data, m
                 }, false, comment_timeout, () => { throw "界面异常超时退出" })
                 if (!comment_result) { throw "" }
                 comment_success_count += 1
-                commonFunc.taskResultSet("评论成功:" + (comment_idx + 1) + "-" + content, "a")
                 log("")
                 //  休息等待
                 let temp_rest_time = parseInt((gap_time) / 10)
@@ -1059,17 +1050,16 @@ targetApp.doCommentUrlVideo = function (account, video_url, material_req_data, m
                 err_msg = ""
             } catch (error) {
                 comment_failed_count += 1
-                commonFunc.taskResultSet("评论异常:" + commonFunc.objectToString(error), "a")
                 err_msg = "评论异常:" + commonFunc.objectToString(error)
                 break
+                // throw error
             }
         }
         if (!comment_success_count) { throw err_msg }
-        commonFunc.tastStepRecord({ "链接": video_url, "评论": comment_success_count, "艾特": mention_success_count, "异常信息": err_msg })
-
-        if (err_msg.match("Couldn't load. Try again later.")) { throw error }
-        else if (err_msg.match("素材申请异常")) { throw error }
-        else if (err_msg.match("链接失效")) { throw error }
+        commonFunc.taskStepRecordSet(40, null, "评论:成功-" + comment_success_count + "/" + comment_num + " 失败-" + comment_failed_count + "; 艾特:成功-" + mention_success_count + " 失败-" + mention_failed_count + (err_msg ? " \n异常信息:" + err_msg : ""), null) //
+        if (err_msg.match("Couldn't load. Try again later.")) { throw err_msg }
+        else if (err_msg.match("素材申请异常")) { throw err_msg }
+        else if (err_msg.match("链接失效")) { throw err_msg }
         return true
     } catch (error) {
         throw error
@@ -1094,8 +1084,10 @@ targetApp.doDragImageVerify = function () {
                     files.remove(root_path + filename)
                 }
             } catch (error) { }
+
             let bg_btn = idContains("captcha-verify-image").findOne(1)
             let icon = bg_btn.parent().child(1)
+
             let img_left = parseInt(bg_btn.bounds().left * 480 / device.width)
             let img_right = parseInt(bg_btn.bounds().right * 480 / device.width)
             let img_top = parseInt(bg_btn.bounds().top * 854 / device.height)
@@ -1173,7 +1165,6 @@ targetApp.doDragImageVerify = function () {
                 let rect = icon_clip_rects[idx_rect]
                 for (let idx_1 = 0; idx_1 < 10; idx_1++) {
                     let thres1 = 200 - 5 * idx_1
-
                     let s_path = root_path + "s_img_" + thres1 + ".png"
                     let icon_path = root_path + "icon_img_" + idx_rect + "_" + thres1 + ".png"
                     let s_img = images.read(bg_path)
@@ -1199,11 +1190,8 @@ targetApp.doDragImageVerify = function () {
                             big_img.recycle()
                             tar_img.recycle()
                             let drag_distance = parseInt((p.x - rect.x) * device.width / 480)
-
-                            //  仅用于测试, 滑块识别匹配时 在匹配位置 显示一个悬浮窗, 便于调试
                             log("滑块验证 识别成功，耗时 " + (new Date().getTime() - timestamp) / 1000 + "s")
                             return { "x1": drag_x, "y1": drag_y, "x2": drag_x + drag_distance, "y2": drag_y }
-                        } else {
                         }
                     }
                     try {
@@ -1225,7 +1213,6 @@ targetApp.doDragImageVerify = function () {
             randomSleep(3000)
         }
         if (!desc("verify captcha").visibleToUser().findOne(3000)) { return true }
-
         log("第 " + idx_loop + " 次尝试识别")
         try {
             let p = getBinaryMatchPoints()
@@ -1238,8 +1225,6 @@ targetApp.doDragImageVerify = function () {
         } catch (error) {
             log("识别失败:" + commonFunc.objectToString(error))
         }
-
-        // sleep(8000)
         if (clickIfWidgetClickable(desc("Refresh").findOne(1000))) { sleep(10000) }
 
     }
@@ -1274,7 +1259,6 @@ targetApp.doFollow = function (account, task_info, gap_time, visit_time) {
         let is_followed = false
         is_followed = newThread(() => {
             while (true) {
-                // clickIfWidgetClickable( text("ALLOW").findOne(1) ) && randomSleep()
                 //  发现页 搜索框
                 if (id("com.ss.android.ugc.trill:id/apy").visibleToUser().findOne(3000) || id("com.ss.android.ugc.trill:id/edt").visibleToUser().findOne(1)) {
                     log("搜索用户: " + username)
@@ -1319,7 +1303,6 @@ targetApp.doFollow = function (account, task_info, gap_time, visit_time) {
                     }
                     if (id("com.ss.android.ugc.trill:id/d_b").text("Message").visibleToUser().clickable().findOne(1000)) {
                         log("已关注: " + username)
-                        //  按 10% 的概率随机触发关注推荐的人
                         return true
                     }
                     else if (text("Requested").visibleToUser().findOne(1000)) {
@@ -1404,27 +1387,29 @@ targetApp.doOpenUrlVideo = function (video_url, timeout) {
                     if (text("JUST ONCE").visibleToUser().findOne(1000) && clickIfParentsClickable(text("Browser").visibleToUser().findOne(1000))) { randomSleep(2000) }
                     targetApp.isOtherPage()
                     if (desc("Stop page load").visibleToUser().findOne(1000)) { log("网页加载中.."); sleep(3000) }
-                    else if (desc("Open App").findOne(1000)) { break }
-                    randomSleep()
+                    else if (id("com.android.browser:id/url").className("android.widget.EditText").textStartsWith("https://www.tiktok.com/@").findOne(1)) { break }
+                    sleep(2000)
                 }
                 sleep(3000)
-                if (loop > 2 && descContains("this page isn't available").visibleToUser().findOne(1)) { throw "链接失效" }
-                let openAppDesc = desc("Open App").findOne(3000)
-                if (openAppDesc) {
-                    let urlEdit = id("com.android.browser:id/url").className("android.widget.EditText").findOne(3000)
-                    if (urlEdit && urlEdit.text().indexOf("https://www.tiktok.com/@") != -1) {
-                        let author = urlEdit.text().match(/https:\/\/www.tiktok.com\/@([^\/]+)/)[1]
-                        log(author)
-                        if (clickIfWidgetClickable(openAppDesc)) {
-                            randomSleep(3000)
-                            for (let index = 0; index < 5; index++) {
-                                if (text("@" + author).visibleToUser().findOne(1000)) {
-                                    log("已打开 " + author + "'s video")
-                                    return author
-                                }
-                                sleep(3000)
-                            }
+                if (loop > 2 && (descContains("this page isn't available").visibleToUser().findOne(1) || descContains("頁面無法使用").visibleToUser().findOne(1))) { throw "链接失效" }
+                let urlEdit = id("com.android.browser:id/url").className("android.widget.EditText").textStartsWith("https://www.tiktok.com/@").findOne(3000)
+                if (urlEdit && urlEdit.text().indexOf("https://www.tiktok.com/@") != -1) {
+                    let author = urlEdit.text().match(/https:\/\/www.tiktok.com\/@([^\/]+)/)[1]
+                    log(author)
+                    let intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlEdit.text()));
+                    intent.setPackage(targetApp.bid)
+                    context.startActivity(intent);
+                    sleep(5000)
+                    randomSleep(3000)
+                    for (let index = 0; index < 5; index++) {
+                        if (text("@" + author).visibleToUser().findOne(1000)) {
+                            log("已打开 " + author + "'s video")
+                            return author
                         }
+                        else if (clickIfWidgetExists(id("android:id/text1").text("For You").visibleToUser().selected(false).findOne(1))) {
+                            sleep(3000)
+                        }
+                        sleep(3000)
                     }
                 }
             }
@@ -1432,30 +1417,21 @@ targetApp.doOpenUrlVideo = function (video_url, timeout) {
     } catch (error) {
         throw "视频链接打开异常 " + error
     }
-    // return null
 }
 /**
  * 4、账号可以开始自动定时的发布视频
  * ret Boolean
  */
+// targetApp.postVideo = function( account, url, desc, hashtags ){
 targetApp.postVideo = function (account, post_data) {
     try {
-        if (!isNotNullObject(post_data) || !post_data.url) { throw "参数异常 " + commonFunc.objectToString(post_data) }
+        if (!isNotNullObject(post_data) || (!post_data.url && !post_data.filepath)) { throw "参数异常 " + commonFunc.objectToString(post_data) }
+        if (!files.exists(post_data.filepath)) { throw "未检测到下载的视频文件: " + post_data.filepath }
         let videoUrl = post_data.url
         let content = post_data.desc
         let tags = post_data.hashtags || []
         let videoPath = "/storage/emulated/" + commonFunc.userId + "/DCIM/tiktok/post.mp4"
         let errMsg = ""
-        //  1. 下载视频
-        try {
-            files.createWithDirs("/storage/emulated/" + commonFunc.userId + "/DCIM/tiktok/");
-            randomSleep()
-            let jsengineVersion = "4.1.1 Alpha2-gxl-819"
-            if (commonFunc.jsengineVersion < jsengineVersion) { httpUtilFunc.downloadFile(videoUrl, videoPath, null, true) }
-            else { httpUtilFunc.downloadBigFile(videoUrl, videoPath, null, true) }
-            log("扫描媒体文件:" + media.scanFile("/sdcard/DCIM/tiktok/post.mp4"))
-        } catch (error) { throw error }
-        //  
         let is_video_post = false
         is_video_post = newThread(() => {
             let current_username = targetApp.getLoginUsername()
@@ -1485,7 +1461,6 @@ targetApp.postVideo = function (account, post_data) {
                                     try {
                                         toastLog("检测是否提示上传失败")
                                         let screenshot_path = '/storage/emulated/0/CloudMobile/cache/screen_480x854.png'
-                                        // let screenshot_path = '/storage/emulated/0/CloudMobile/screen_480x854.png'
                                         let template_path = files.cwd() + '/res/upload_restart_30x30.png'
                                         try { files.remove(screenshot_path); sleep(2000) } catch (error) { }
                                         shell("screencap -p " + screenshot_path); sleep(2000)
@@ -1506,7 +1481,7 @@ targetApp.postVideo = function (account, post_data) {
                                             restart_btn_point.x = parseInt((restart_btn_point.x + 15) * device.width / 480)
                                             restart_btn_point.y = parseInt((restart_btn_point.y + 15) * device.height / 854)
                                             upload_process = "重新发布视频: " + restart_btn_point + " - "
-                                            // reportLog( upload_process )
+                                            commonFunc.taskStepRecordSet(40, null, "点击重新发布视频: " + restart_btn_point, null)
                                             reportLog(upload_process + click(restart_btn_point.x, restart_btn_point.y))
                                             sleep(15000)
                                             continue
@@ -1557,6 +1532,7 @@ targetApp.postVideo = function (account, post_data) {
                             commonFunc.swipeUpSlowly()
                         }
                     }
+
                     return newThread(() => {
                         while (true) {
                             if (text("Edit profile").clickable().findOne(1000) || text("Set up profile").clickable().findOne(1000)) {
@@ -1643,6 +1619,7 @@ targetApp.postVideo = function (account, post_data) {
                                 break
                             }
                         }
+                        else if (clickIfWidgetClickable(text("Post Now").visibleToUser().findOne(1))) { sleep(3000) }
                         else if (text("Post").visibleToUser().findOne(1)) {
                             back()
                             log("点击返回")
@@ -1673,9 +1650,102 @@ targetApp.postVideo = function (account, post_data) {
         return is_video_post
     } catch (error) {
         let msg = "上传结果: 失败 - " + commonFunc.objectToString(error) + "\n"
-        msg = msg + JSON.stringify(post_data) + "\n"
-        msg = msg + JSON.stringify(account) + "\n"
         reportLog(msg)
+        throw error
+    }
+}
+/**
+ * 
+ * @param {*} account 
+ * @param {*} username 
+ */
+targetApp.doAtmosphereWithUsername = function (account, username, stayTime, followChance) {
+    try {
+        //  搜索并进入直播间
+        newThread(() => {
+            while (true) {
+                //  发现页 搜索框
+                if (id("com.ss.android.ugc.trill:id/apy").visibleToUser().findOne(3000) || id("com.ss.android.ugc.trill:id/edt").visibleToUser().findOne(1)) {
+                    log("搜索用户: " + username)
+                    //  1. 点击输入框
+                    clickIfWidgetExists(id("com.ss.android.ugc.trill:id/apy").visibleToUser().findOne(1000) || id("com.ss.android.ugc.trill:id/edt").visibleToUser().findOne(1000)) && randomSleep(3000)
+                    //  2. 输入 目标用户名
+                    setText(username) && randomSleep(3000)
+                    //  3. 点击搜索
+                    clickIfWidgetExists(className("android.widget.TextView").text("Search").visibleToUser().findOne(2000)) && randomSleep(3000)
+                    //  点击 Users 栏目
+                    clickIfParentsClickable(id("android:id/text1").text("Users").visibleToUser().findOne(2000)) && randomSleep(3000)
+                    //  搜索结果 用户名列表
+                    id("com.ss.android.ugc.trill:id/efw").text(username).visibleToUser().findOne(10000)
+                    for (let index = 0; index < 8; index++) {
+                        if (clickIfParentsClickable(id("com.ss.android.ugc.trill:id/efw").text(username).visibleToUser().findOne(3000))) {
+                            log("找到用户: " + username)
+                            break
+                        } else if (id("com.ss.android.ugc.trill:id/efw").visibleToUser().findOne(1000)) {
+                            commonFunc.swipeUpSlowly()
+                            randomSleep()
+                        } else {
+                            break
+                        }
+                    }
+                    if (!id("com.ss.android.ugc.trill:id/ek8").text("@" + username).visibleToUser().findOne(10000)) {
+                        errMsg = "搜索不到"
+                        log(errMsg + ": " + username)
+                        back(); randomSleep()
+                    }
+                }
+                else if (id("com.ss.android.ugc.trill:id/ekk").text(username).visibleToUser().findOne(1000)) {
+                    log("已进入直播间: " + username)
+                    return true
+                }
+                else if (id("com.ss.android.ugc.trill:id/ek8").text("@" + username).visibleToUser().findOne(1)) {
+                    log("目标主页: " + username)
+                    randomSleep(3000)
+                    if (text("LIVE").visibleToUser().findOne(3000) && clickIfWidgetClickable(id("com.ss.android.ugc.trill:id/b5j").visibleToUser().clickable().findOne(3000))) {
+                        log("点击进入直播间")
+                        id("com.ss.android.ugc.trill:id/ekk").text(username).visibleToUser().findOne(3000)
+                    } else {
+                        log("该账号没有在直播")
+                        throw "该账号没有在直播"
+                    }
+                }
+                else if (clickIfWidgetClickable(id(_ids.Tab_Discover).clickable().visibleToUser().findOne(1))) { toastLog("前往发现页"); randomSleep() }
+                else if (targetApp.isOtherPage()) { }
+                else if (!packageName(targetApp.bid).findOne(1)) {
+                    toastLog("启动应用中...")
+                    launch(targetApp.bid)
+                    randomSleep(3000)
+                }
+                else { toastLog("unknow page"); back(); randomSleep(3000) }
+                randomSleep(2000)
+            }
+        }, false, 1000 * 60 * 2, () => { throw errMsg ? errMsg : "搜索主页超时退出" })
+
+        stayTime = typeof (stayTime) == "number" ? stayTime : random(20, 50)
+        followChance = typeof (followChance) == "number" ? followChance : 0
+        if (id("com.ss.android.ugc.trill:id/ekk").text(username).visibleToUser().findOne(3000)) {
+            log("直播间内: " + username)
+            if (random(0, 99) < followChance && clickIfWidgetClickable(text("Follow").visibleToUser().clickable().findOne(1000))) {
+                log("关注主播")
+                commonFunc.taskStepRecordSet(null, null, "关注主播: " + username, null)
+            }
+            newThread(() => {
+                while (true) {
+                    if (targetApp.isOtherPage()) { }
+                    if (id("com.ss.android.ugc.trill:id/ekk").text(username).visibleToUser().findOne(1)) {
+                        toastLog("直播间内")
+                    }
+                    randomSleep(5000)
+                }
+            }, false, 1000 * stayTime, () => { })
+            back(); sleep(3000)
+            back(); sleep(3000)
+            back(); sleep(3000)
+            return true
+        } else {
+            throw "未识别到直播间界面"
+        }
+    } catch (error) {
         throw error
     }
 }
@@ -1702,7 +1772,6 @@ targetApp.doRemoveViolation = function (delete_mode, views_min, delete_violation
                         randomSleep(3000)
                     }
                     if (clickIfWidgetExists(textContains("Your account has multiple Community Guidelines violations").findOne(1000))) {
-                        commonFunc.taskResultSet("已阅读违规警告信息", "a")
                         randomSleep(5000)
                         back()
                     }
@@ -1737,7 +1806,6 @@ targetApp.doRemoveViolation = function (delete_mode, views_min, delete_violation
                             }
                         }
                         if (violation_video) {
-                            // log("检测到违规或0播视频")
                             try {
                                 let violation_view = null
                                 if (violation_video.parent().id() == "com.ss.android.ugc.trill:id/a8o") {
@@ -1752,6 +1820,7 @@ targetApp.doRemoveViolation = function (delete_mode, views_min, delete_violation
                                 clickIfWidgetClickable(violation_view) || clickIfWidgetExists(violation_view)
                                 randomSleep(5000)
                             } catch (error) { }
+                            // if( id("com.ss.android.ugc.trill:id/czn").text("Community Guidelines violation: See details").visibleToUser().findOne(6000) ){
                             if (text("Community Guidelines violation: See details").visibleToUser().findOne(6000)) {
                                 log("删除违规视频")
                                 finish_flag = 0
@@ -1765,8 +1834,6 @@ targetApp.doRemoveViolation = function (delete_mode, views_min, delete_violation
                                 randomSleep(3000)
                                 back()
                                 sleep(3000)
-                                // back()
-                                // sleep(3000)
                             }
                             else {
                                 log("未识别到视频界面")
@@ -1848,9 +1915,11 @@ targetApp.doRemoveViolation = function (delete_mode, views_min, delete_violation
             throw "未识别到应用首页"
         }
     } catch (error) {
+        // log(error)
         throw error
     }
 }
+
 /**
  * 给粉丝列表发送名片
  * @param {*} account 
@@ -1864,6 +1933,7 @@ targetApp.doSendContact = function (account, profile_name, visit_time, send_num)
     let err_msg = null
 
     send_num = typeof (send_num) == "number" ? send_num : 0
+
     //  1. 先关注 目标账号
     try {
         if (!targetApp.doFollow(account, { "username": profile_name }, null, visit_time)) { throw profile_name }
@@ -1878,6 +1948,7 @@ targetApp.doSendContact = function (account, profile_name, visit_time, send_num)
     //  2. 分享 目标名片
     try {
         let timeout = 1000 * 60 * 8
+        // let sent_users = []
         newThread(() => {
             let unknow_page = false
             let not_found_flag = 0
@@ -1963,7 +2034,7 @@ targetApp.doSendContact = function (account, profile_name, visit_time, send_num)
         err_msg = "异常信息:" + commonFunc.objectToString(err_msg)
         if (!sent_count) { throw err_msg }
     }
-    commonFunc.taskResultSet("私信名片: 完成-" + sent_count + "/" + send_num + (err_msg ? " \n" + err_msg : ""), "a")
+    commonFunc.taskStepRecordSet(40, null, "私信名片: 完成-" + sent_count + "/" + send_num + (err_msg ? " \n" + err_msg : ""), null) //
     return true
 }
 /**
@@ -2081,12 +2152,11 @@ targetApp.doSendDirectMessage = function (account, message_req_data, send_num, g
         err_msg = "异常信息:" + commonFunc.objectToString(error)
         if (!sent_count) { throw err_msg }
     }
-    commonFunc.taskResultSet("私信任务: 完成-" + sent_count + "/" + send_num + (err_msg ? " \n" + err_msg : ""), "a")
+    commonFunc.taskStepRecordSet(40, null, "私信任务: 完成-" + sent_count + "/" + send_num + (err_msg ? " \n" + err_msg : ""), null) //
 }
 targetApp.randomSwitchPage = function () {
     //  随机点击各个控件，两分钟后退出
     newThread(() => {
-        // reportLog(  )        
         for (let idx_loop = 0; idx_loop < 100; idx_loop++) {
             //  随机点击四个主菜单中的一个
             let idx_btn = random(5, 7)
@@ -2099,6 +2169,7 @@ targetApp.randomSwitchPage = function () {
                 clickIfWidgetClickable(id("com.ss.android.ugc.trill:id/bu" + idx_btn).clickable().findOne(3000))
             }
             else {
+
             }
             sleep(random(1000, 10000))
         }
@@ -2133,7 +2204,6 @@ targetApp.register = function (unregister_data) {
             lastCode = newThread(function () {
                 for (let index = 0; index < 1; index++) {
                     let msg = ""
-                    // let res = http.get( smsurl )
                     let res = http.get(smsurl, {
                         headers: {
                             'User-Agent': user_agent
@@ -2200,7 +2270,6 @@ targetApp.register = function (unregister_data) {
                 if (nickname_view) {
                     account.desc == "已有账号登录: " + nickname_view.text()
                     toastLog(account.desc)
-                    // return 1
                 }
             }
             else if (targetApp.isOtherPage()) { }
@@ -2256,7 +2325,6 @@ targetApp.register = function (unregister_data) {
             }
         }
         if (text("When’s your birthday?").visibleToUser().findOne(1000)) { throw "生日设置跳转失败," + "尝试访问网址: www.tiktok.com - " + httpUtilFunc.isUrlAccessable("www.tiktok.com", "tiktok") }
-
         //  3. 输入号码界面     
         if (id("com.ss.android.ugc.trill:id/c3q").text("Send code").visibleToUser().findOne(10000)) {
             randomSleep()
@@ -2270,7 +2338,6 @@ targetApp.register = function (unregister_data) {
                             if (dial_view.text() != ("+" + dialCode)) { throw "拨号代码异常: " + dial_view.text() }
                         }
                     } catch (error) { throw error }
-
                     setText(phoneNumber)
                     randomSleep()
                     reportLog("发送验证码 " + clickIfParentsClickable(send_btn))
@@ -2338,7 +2405,6 @@ targetApp.register = function (unregister_data) {
             }
             try { id("com.ss.android.ugc.trill:id/czd").visibleToUser().findOne(1) && reportLog(id("com.ss.android.ugc.trill:id/czd").visibleToUser().findOne(1).text()) } catch (error) { }
             reportLog("获取的验证码: " + verifyCode)
-
             if (verifyCode) {
                 newThread(() => {
                     while (true) {
@@ -2398,7 +2464,6 @@ targetApp.register = function (unregister_data) {
             if (clickIfWidgetClickable(id(_ids.Tab_Me).findOne(3000)) && id(_ids.Tab_Me).selected().findOne(3000)) {
                 sleep(500)
                 try {
-                    // account.username = id("com.ss.android.ugc.trill:id/title").textMatches(".+").visibleToUser().findOne(10000).text()
                     account.username = textStartsWith("@").visibleToUser().findOne(10000).text().match(/@(\S+)/)[1]
                     reportLog("账号昵称: " + account.username)
                     account.isSuccess = true
@@ -2440,7 +2505,6 @@ targetApp.reportLogin = function (account) {
         let url = "http://" + commonFunc.server + ":8000/user/loginrecord"
         let res = http.postJson(url, post_data)
         res = res.body.json()
-        // log( JSON.stringify(res) )
         if (res.code == 200) {
             reportLog("记录登陆完成")
             return true
@@ -2554,7 +2618,6 @@ targetApp.switchToPro = function (account, category) {
         let max_timeout = 1000 * 60 * 3
         if (!isNotNullObject(account)) { throw "账号参数异常: " + JSON.stringify(account) }
         if (!category) { throw "参数异常: " + JSON.stringify(category) }
-        // if( !new_website ){ throw "参数异常: " + JSON.stringify( new_website ) }
         let categories = [
             "Art & Crafts ",
             "Automotive & Transportation ",
@@ -2585,6 +2648,7 @@ targetApp.switchToPro = function (account, category) {
         if (categories.indexOf(category) < 0) { category = categories[random(0, categories.length - 1)] }
         let category_prefix = category
         try { category_prefix = category_prefix.match(/([a-zA-Z]+).*/)[1] } catch (error) { }
+
         newThread(() => {
             while (true) {
                 if (clickIfWidgetClickable(id(_ids.Tab_Me).findOne(3000)) && id(_ids.Tab_Me).selected().findOne(3000)) {
@@ -2645,6 +2709,7 @@ targetApp.switchToPro = function (account, category) {
                         clickIfWidgetExists(desc("Next").findOne(1000)) && randomSleep(2000)
                         clickIfWidgetClickable(desc("Next").clickable().findOne(1000))
                         randomSleep(3000)
+                        // if( clickIfWidgetExists( desc("Next").clickable().findOne(1000) ) && randomSleep(5000) ){}
                         if (!desc("Choose a category").findOne(3000)) { break }
                         swipeUpSlowly()
                         sleep(2000)
@@ -2765,8 +2830,6 @@ targetApp.watchVideos = function (timeout, regObj) {
                     }
                     //  每次进入先随机查看 0-10 好友视频
                     if (id("android:id/text1").text("For You").selected().findOne(1)) {
-                        // log( "推荐视频界面" )
-                        // if( id("com.ss.android.ugc.trill:id/dur").findOne(3000) && clickIfWidgetExists( id("android:id/text1").text("For You").findOne(1) ) ){
                         if (video_count < left_num && clickIfWidgetExists(id("android:id/text1").text("Following").findOne(1))) {
                             log("查看好友视频列表")
                             randomSleep(3000)
@@ -2802,7 +2865,6 @@ targetApp.watchVideos = function (timeout, regObj) {
                 }
             }
         }, null, timeout)
-
         reportLog("脚本运行结束，已浏览视频数：" + video_list.length)
         return video_list
     } catch (error) {
@@ -2811,6 +2873,7 @@ targetApp.watchVideos = function (timeout, regObj) {
 }
 targetApp.watchVideos_v18441 = function (viedoNum, regObj) {
     let swipeUpSlowly = function (duration) {
+        // log("上滑一小截1次");
         var time_random = random(50, 200);
         var x1 = parseInt(device.width / (random(15, 25) / 10));
         var y1 = parseInt(device.height * (random(70, 80) / 100));
@@ -2878,12 +2941,15 @@ targetApp.watchVideos_v18441 = function (viedoNum, regObj) {
                 }
                 //  每次进入先随机查看 0-10 好友视频
                 if (id("android:id/text1").text("For You").selected().findOne(1)) {
+                    // log( "推荐视频界面" )
+                    // if( id("com.ss.android.ugc.trill:id/dur").findOne(3000) && clickIfWidgetExists( id("android:id/text1").text("For You").findOne(1) ) ){
                     if (video_count < left_num && clickIfWidgetExists(id("android:id/text1").text("Following").findOne(1))) {
                         log("查看好友视频列表")
                         randomSleep(3000)
                     }
                 }
                 else if (id("android:id/text1").text("Following").selected().findOne(1)) {
+                    // log( "好友视频界面" )
                     if (video_count++ > left_num && clickIfWidgetExists(id("android:id/text1").text("For You").findOne(1))) {
                         log("查看推荐视频列表")
                         randomSleep(3000)
@@ -2907,6 +2973,7 @@ targetApp.watchVideos_v18441 = function (viedoNum, regObj) {
                         back()
                         toastLog("未识别到视频")
                         randomSleep(3000)
+                        // viedoNum = viedoNum -5
                         count_down--
                         continue
                     }
@@ -2919,11 +2986,11 @@ targetApp.watchVideos_v18441 = function (viedoNum, regObj) {
                     last_video = video_flag
                     toast("观看视频中...")
                     log("观看视频中：" + JSON.stringify(videoInfo))
+                    // let start_watch = new 
                     try {   //  点赞
                         let liek_reg = {
                             "rate": "100",
                             "creator": [
-
                             ],
                             "content": [
                                 "cute",
@@ -3005,7 +3072,6 @@ targetApp.watchVideos_v18441 = function (viedoNum, regObj) {
                                     randomSleep(2000)
                                 }
                             }
-                        } else {
                         }
                     } catch (error) {
 
@@ -3030,6 +3096,7 @@ targetApp.watchVideos_v18441 = function (viedoNum, regObj) {
             }
             if (count_down < 0) {
                 errMsg = "界面异常 退出运行"
+                // reportLog( errMsg, 2 )
                 throw errMsg
             }
         }
@@ -3039,7 +3106,6 @@ targetApp.watchVideos_v18441 = function (viedoNum, regObj) {
         throw error
     }
 }
-
 
 targetApp.init()
 module.exports = targetApp;

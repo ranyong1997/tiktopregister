@@ -3,21 +3,30 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2021-12-23 19:59:44
- * @LastEditTime: 2022-02-10 15:41:36
+ * @LastEditTime: 2022-02-10 17:48:47
  */
 function init() {
     // 设置日志文件
     try {
-        // 初始化日志文件 存放在 /sdcard/CloudMobile/ 中
-        let log_file = "/sdcard/CloudMobile/" + require("./project.json").name + ".log"; // 日志文件
+        let log_file = "/storage/emulated/obb/logs/" + require("project.json").name + ".log"; // 日志文件
         files.createWithDirs(log_file);
+        files.createWithDirs("/storage/emulated/0/CloudMobile/cache/cache.init");
         console.setGlobalLogConfig({
             "file": log_file,
-            "maxFileSize": 1024 * 1024 //  1M 
+            "maxFileSize": 1024 * 1024 * 10  //  1M 
         });
-        log("初始化日志:" + log_file)
+        log("初始化日志：" + log_file)
     } catch (error) {
-        log("日志初始化异常:" + JSON.stringify(error))
+        log("日志初始化异常：" + JSON.stringify(error))
+        try {
+            let log_file = "/storage/emulated/0/logs/" + require("project.json").name + ".log"; // 日志文件
+            files.createWithDirs(log_file);
+            console.setGlobalLogConfig({
+                "file": log_file,
+                "maxFileSize": 1024 * 1024 * 10  //  1M 
+            });
+            log("初始化日志：" + log_file)
+        } catch (error) { }
     }
     try {
         //  唤醒屏幕
