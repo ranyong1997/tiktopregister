@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-09 14:53:37
+ * @LastEditTime: 2022-02-10 12:06:22
  */
 
 
@@ -13,13 +13,13 @@ const httpUtilFunc = require("../http/httpUtils");
 const { reportLog } = require("../network/httpUtil.js");
 const proxySettings = require("../vpn/proxySettings.js")
 const enums = require("../util/enums")
-// const targetApp = require("../app/tiktokApp.js");
-const { newThread, randomSleep, taskResultSet, shortSleep, longSleep } = require("../lib/common.js");
+const { newThread, randomSleep, clickIfWidgetClickable, taskResultSet, shortSleep, longSleep } = require("../lib/common.js");
 const taskDemo = {}
 let taskPluginData = null
-var FIND_WIDGET_TIMEOUT = 1000
+var FIND_WIDGET_TIMEOUT = 750
 var registerDone = false
 var isSuccess = true
+var change_picture = false
 var desc = ""
 var fail_register = false
 var isUsed = false
@@ -240,13 +240,6 @@ taskDemo.runTask = function () {
                                 is_proxy_on = false
                                 commonFun.showLog("代理IP检测: " + global_ip)
                                 reportLog("检测IP: " + local_ip + " -> " + global_ip)
-                                commonFun.showLog("代理IP检测: " + global_ip)
-                                if (global_ip) { is_proxy_on = true; break }
-                                try { if (httpUtilFunc.isUrlAccessable("https://www.tiktok.com", "This page is not available in your area")) { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " + "This page is not available in your area"; break } } catch (error) { }
-                                try {
-                                    if (httpUtilFunc.isUrlAccessable("https://www.tiktok.com", "tiktok")) { is_proxy_on = true; break } else { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " }
-                                } catch (error) { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " + commonFun.objectToString(error) }
-                                randomSleep(5000)
                             }
                         }
                     }, false, 1000 * 60 * 30, () => { throw "代理连接超时退出 " + taskDemo.desc })
@@ -255,8 +248,6 @@ taskDemo.runTask = function () {
                     reportLog("代理网络 " + JSON.stringify(ipInfo))
                 }
                 log("注册脚本or 修改头像脚本")
-                // 素材获取
-                material_gain(keyword_FB, appid, appid_key, type, classify, used_times_model, used_counter)
             } catch (error) {
                 throw error
             }
@@ -268,36 +259,31 @@ taskDemo.runTask = function () {
         try {
             if (register != "") {
                 log("选择注册")
+                // 素材获取
+                material_gain()
                 checkFacebookInstall()   // 检测facebook是否安装
                 checkTiktokInstall() // 检测tiktok是否安装
                 function doSomething() {
-                    // if (true) {
-                    //     log("脚本执行")
-                    //     One_Key_Login()
-                    // }
                     Facebook_Account_Transfer()
                     sleep(2000)
-                    while (true) {
-                        log("脚本执行")
-                        One_Key_Login()
-                        break
-                    }
+                    log("脚本执行")
+                    One_Key_Login()
                 }
-                let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 12, () => { log("时间已超时12分钟,程序退出") })
+                let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 10, () => { log("时间已超时10分钟,程序退出") })
             } else if (updatePhoto != "") {
                 log("选择修改头像")
+                // 素材获取
+                material_gain_url()
+                change_head_portrait()
+                kill_tt()
             } else if (register == "on" && updatePhoto == "on") {
                 // 没法判断同时开启
                 log("又注册又修改头像")
-            }
-            else {
-                log("你即没有选注册脚本又没有选修改头像")
-                log("即将停止脚本")
-                engines.stopAll();
-                toastLog("停止脚本")
+            } else {
+                log("退出程序")
             }
         } catch (error) {
-            throw error
+            // throw error
         }
         sleep(3000)
         try { threads.shutDownAll() } catch (error) { }
@@ -317,30 +303,67 @@ taskDemo.runTask = function () {
 
 // ---------------------------------写方法区-----------------------
 // 素材获取
-function material_gain(keyword_FB, appid, appid_key, type, classify, used_times_model, used_counter) {
+function material_gain(keyword_FB, used_times_model, used_counter) {
     try {
         log("正在素材获取")
+        let app_id = taskPluginData.appid
+        let appid_key = taskPluginData.appid_key
         var material_gain = httpUtilFunc.materialGet({
             "lable": keyword_FB, // FB素材标签
-            "app_id": appid,   // app_id
+            "app_id": app_id,   // app_id
             "app_secret": appid_key,   // 密钥
             "count": 1, // 需要数据条数
-            "type": type,   // 类型（0:纯文本；1:图片；2:视频；3:音频）
-            "classify": classify,   // 分类（文本类；图片类；视频类）
-            "used_times_model": used_times_model,   // 匹配模式
-            // "used_times": used_counter    // 使用次数  // 上线需要将这个解开
+            "type": 0,   // 类型（0:纯文本；1:图片；2:视频；3:音频）
+            "classify": 3,   // 分类（文本类；图片类；视频类）
+            "used_times_model": "lte",   // 匹配模式
+            "used_times": used_counter    // 使用次数  // 上线需要将这个解开
         })
         android_Id = material_gain.text_content
         log("安卓id获取--->>", android_Id)
         material_INFO = material_gain
         log("素材info--->>", material_INFO)
         commonFun.taskStepRecordSet(200, null, "获取素材信息", material_INFO)
-        return material_INFO
+        return material_INFO, android_Id
     } catch (error) {
         log("获取素材时捕获到一个错误:" + error)
         commonFun.taskResultSet("素材获取失败" + error, "w")
     }
 }
+
+// 头像url素材获取
+function material_gain_url(materialTag, used_times_model, used_counter) {
+    try {
+        log("正在素材获取")
+        let app_id = taskPluginData.appid
+        log("app_id--->", app_id)
+        let appid_key = taskPluginData.appid_key
+        log("appid_key--->", appid_key)
+        var material_gain_url = httpUtilFunc.materialGet({
+            "lable": materialTag, // 头像素材标签
+            "app_id": app_id,   // app_id
+            "app_secret": appid_key,   // 密钥
+            "count": 1, // 需要数据条数
+            "type": 1,   // 类型（0:纯文本；1:图片；2:视频；3:音频）
+            "classify": 2,   // 分类（文本类；图片类；视频类）
+            "used_times_model": used_times_model,   // 匹配模式
+            "used_times": used_counter    // 使用次数  // 上线需要将这个解开
+        })
+        media_path = material_gain_url.media_path
+        log("头像url获取--->>", media_path)
+        material_INFO = material_gain_url
+        log("素材info--->>", material_INFO)
+        // 下载图片
+        try {
+            httpUtilFunc.downloadFile(media_path, "/storage/emulated/" + commonFun.userId + "/DCIM/tiktok/photo.png", null, true)
+        } catch (error) { throw error }
+        commonFun.taskStepRecordSet(200, null, "获取素材信息", material_INFO)
+        return material_INFO, media_path
+    } catch (error) {
+        log("获取素材时捕获到一个错误:" + error)
+        commonFun.taskResultSet("素材获取失败" + error, "w")
+    }
+}
+
 
 // 检测Facebook是否安装对应版本
 function checkFacebookInstall() {
@@ -403,7 +426,8 @@ function One_Key_Login() {
             checkpop_up()
         }
         try {
-            sleep(5000)
+            sleep(3000)
+            checkpop_up()
             checkSignUpPage()
             sleep(2000)
             check_web_fb_login()
@@ -579,7 +603,6 @@ function check_face_recognition() {
             desc = resgisterStatus
             let log_server = commonFun.taskResultSet("该账号需要人脸验证", "w")
             commonFun.taskResultGet(log_server)
-            httpUtilFunc.materialRollback(appid, appid_key, material_INFO)
         }
     } catch (error) {
         log("该账号需要人脸识别:" + error)
@@ -670,11 +693,30 @@ function clickProfile() {
             commonFun.taskResultSet("任务配置-" + url, "a")
             let log_server = commonFun.taskResultSet("-Result-" + desc, "w")
             commonFun.taskResultGet(log_server)
+            engines.stopAll();
+            toastLog("停止脚本")
         }
-        engines.stopAll();
-        toastLog("停止脚本")
+
     } catch (error) {
         commonFun.taskResultSet("创建失败" + error, "w")
+    }
+}
+
+// tiktok登陆成功
+function clickProfile1() {
+    log("登陆成功后点击我的页面")
+    var login_in = text("Home").findOne(FIND_WIDGET_TIMEOUT)
+    if (login_in != null) {
+        log("该账号已登陆成功")
+        commonFun.swipeUpSlowly()
+        randomSleep()
+        var click_profile = text("Profile").findOne(FIND_WIDGET_TIMEOUT)
+        if (click_profile != null) {
+            commonFun.swipeUpSlowly()
+            log("点击Profile")
+            randomSleep()
+            commonFun.clickWidget(click_profile)
+        }
     }
 }
 
@@ -705,7 +747,6 @@ function check_web_fb_login() {
             resgisterStatus = enums.REGISTER_STATUS.WEB_FB_LOGIN
             isSuccess = false
             desc = resgisterStatus
-            httpUtilFunc.materialRollback(appid, appid_key, material_INFO)
         }
     } catch (error) {
         log("该账号需要web登陆:" + error)
@@ -903,6 +944,84 @@ function selectBirthDayed() {
     }
     Bir_success = true
 }
+
+// 修改头像
+function change_head_portrait() {
+    do {
+        if (!packageName(tiktop_packageName).findOne(1)) {
+            log("TikTok 启动中..." + "启动次数为:" + launchAppCount)
+            launchApp("TikTok")
+            sleep(3000)
+            launchAppCount++
+            checkpop_up()
+        }
+        try {
+            clickProfile1()
+            click_headportrait()
+            click_HeadEdit()
+            select_one()
+            if (change_picture == true) {
+                break
+            }
+        } catch (error) {
+            error
+        }
+    } while (true)
+}
+
+// 点击头像
+function click_headportrait() {
+    log("判断头像框")
+    var click_headportrait = id("com.zhiliaoapp.musically:id/d9k").findOne(FIND_WIDGET_TIMEOUT)
+    if (click_headportrait != null) {
+        log("点击头像框")
+        commonFun.clickWidget(click_headportrait)
+        randomSleep()
+    }
+}
+
+// 点击编辑
+function click_HeadEdit() {
+    log("判断头像编辑弹框")
+    var click_edit = id("com.zhiliaoapp.musically:id/be7").findOne(FIND_WIDGET_TIMEOUT)
+    if (click_edit != null) {
+        log("点击头像框")
+        commonFun.clickWidget(click_edit)
+        randomSleep()
+    }
+}
+
+// 选择第一个头像
+function select_one() {
+    log("判断图片选择页面是否出现")
+    var select_one = id("com.zhiliaoapp.musically:id/a4k").findOne(FIND_WIDGET_TIMEOUT)
+    if (select_one != null) {
+        log("点击第一张图")
+        commonFun.clickWidget(select_one)
+        sleep(1000)
+        log("判断Confirm是否高亮")
+        var click_confirm = text("Confirm").id("com.zhiliaoapp.musically:id/a04").findOne(FIND_WIDGET_TIMEOUT)
+        if (click_confirm != null) {
+            log("点击Confirm")
+            commonFun.clickWidget(click_confirm)
+            sleep(1000)
+            log("判断Save是否出现")
+            var click_save = text("Save").id("com.zhiliaoapp.musically:id/eu2").findOne(FIND_WIDGET_TIMEOUT)
+            if (click_save != null) {
+                log("点击Save")
+                commonFun.clickWidget(click_save)
+                sleep(5000)
+                back()
+                change_picture = true
+            }
+        }
+    }
+}
+
+function kill_tt() {
+    shell("am force-stop " + tiktop_packageName)
+}
+
 
 // ---------------------------------写方法区-----------------------
 

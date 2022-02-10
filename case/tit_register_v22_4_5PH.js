@@ -41,7 +41,7 @@ function doSomething() {
         }
     }
 }
-let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 1, () => { log("时间已经超时10分钟,程序退出") })
+let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 10, () => { log("时间已经超时10分钟,程序退出") })
 
 function alaways_running() {
     Facebook_Account_Transfer()
@@ -205,8 +205,6 @@ function Facebook_Account_Transfer() {
         matter_rollback()
         engines.stopAll();
     }
-
-
 }
 
 // 检查vpn连接
@@ -400,7 +398,7 @@ function check_face_recognition() {
 function tiktio_backupUplive() {
     commonFun.backupUpApp(tiktop_packageName)
     randomSleep()
-    commonFun.backupUpAppInfo(tiktop_packageName, "ID-Tiktok—ran(2022-1-12)")
+    commonFun.backupUpAppInfo(tiktop_packageName, "PH-Tiktok—ran(2022-1-12)")
 }
 
 // tiktok登陆成功
