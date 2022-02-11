@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-27 11:00:02
- * @LastEditTime: 2022-02-11 17:00:23
+ * @LastEditTime: 2022-02-11 19:35:26
  */
 
 // const { longSleep, shortSleep, randomSleep } = require("../lib/common");
@@ -316,19 +316,28 @@ var kitsunebi_packageName = "fun.kitsunebi.kitsunebi4android"
 // }
 
 
-
-try {
-    timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
-    ip = newThread(function () {
-        let res = http.get("https://www.ip.cn/api/index?ip=&type=0", {
-            "headers": {
-                'User-Agent': commonFun.getRandomUA()
-            }
-        })
-        res = res.body.json()
-        log("当前网络ip为：", res.ip)
-        let local_ip = httpUtilFunc.getLocalIp()
-        log("本地 IP: " + local_ip)
-        throw res.statusCode
-    }, null, timeout, () => { throw "超时退出" })
-} catch (error) { log("https://www.ip.cn/api/index?ip=&type=0: " + commonFun.objectToString(error)) }
+checkpop_up()
+// 检查弹窗
+function checkpop_up() {
+    log("检查弹窗")
+    sleep(7000)
+    var TC1 = text("Don't allow").findOne(FIND_WIDGET_TIMEOUT)
+    if (TC1 != null) {
+        log("点击弹窗1")
+        randomSleep()
+        commonFun.clickWidget(TC1)
+    }
+    sleep(3000)
+    var swipe_element = text("Swipe up for more").id("com.zhiliaoapp.musically:id/f4r").findOne(FIND_WIDGET_TIMEOUT)
+    if (swipe_element != null) {
+        log("检测用户引导")
+        log("上滑一小截1次");
+        commonFun.swipeUpRandomSpeed()
+        commonFun.swipeUpRandomSpeed()
+    }
+    log("检测系统写入操作")
+    var allow = text("ALLOW").findOne(FIND_WIDGET_TIMEOUT)
+    if (allow != null) {
+        commonFun.clickWidget(allow)
+    }
+}

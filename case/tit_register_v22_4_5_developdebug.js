@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-11 19:10:41
+ * @LastEditTime: 2022-02-11 19:44:53
  */
 
 
@@ -782,18 +782,11 @@ function checkpop_up() {
     sleep(7000)
     var TC1 = text("Don't allow").findOne(FIND_WIDGET_TIMEOUT)
     if (TC1 != null) {
-        log("点击弹窗1")
+        log("点击Don't allow弹窗")
         randomSleep()
         commonFun.clickWidget(TC1)
     }
     sleep(3000)
-    var TC2 = text("Don't allow").findOne(FIND_WIDGET_TIMEOUT)
-    if (TC2 != null) {
-        log("点击弹窗2")
-        randomSleep()
-        commonFun.clickWidget(TC2)
-
-    }
     var swipe_element = text("Swipe up for more").id("com.zhiliaoapp.musically:id/f4r").findOne(FIND_WIDGET_TIMEOUT)
     if (swipe_element != null) {
         log("检测用户引导")

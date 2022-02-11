@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2021-12-23 19:59:44
- * @LastEditTime: 2022-02-11 16:56:18
+ * @LastEditTime: 2022-02-11 19:36:59
  */
 function init() {
     // 设置日志文件
@@ -48,7 +48,7 @@ function init() {
     }
     try { http.__okhttp__.setTimeout(120000) } catch (error) { } //  设置网络请求超时时间(全局)
 }
-init()
+// init()
 // var mainTask = require("./case/tit_restore");
 // var mainTask = require("./case/tit_register_v22_4_5ID");
 // var mainTask = require("./case/tit_register_v22_4_5UK");
@@ -57,7 +57,7 @@ init()
 // var mainTask = require("./case/Gmail_login");
 // var mainTask = require("./case/tit_restore");
 // var mainTask = require("./case/Gmail_replaceVpns");
-// var mainTask = require("./case/demo");
+var mainTask = require("./case/demo");
 
 
 //  爬取用户信息业务
@@ -66,5 +66,5 @@ init()
 
 //  TT注册可视化业务
 // var mainTask = require("./case/tit_register_v22_4_5_develop");
-var mainTask = require("./case/tit_register_v22_4_5_developdebug");
-mainTask.runTask()
+// var mainTask = require("./case/tit_register_v22_4_5_developdebug");
+// mainTask.runTask()
