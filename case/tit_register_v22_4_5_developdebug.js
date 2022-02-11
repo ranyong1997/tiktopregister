@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-10 19:48:03
+ * @LastEditTime: 2022-02-11 19:10:41
  */
 
 
@@ -46,6 +46,7 @@ taskDemo.runTask = function () {
     new function () {
         try {
             try {   // 版本检测
+
                 let happybayVersion = "1.1.40_beta_8_4"
                 if (commonFun.happybayVersion < happybayVersion) { throw "happybayVersion " + commonFun.happybayVersion + " -> " + happybayVersion }
                 if (commonFun.happybayVersion < "1.1.50_beta_4_8") { commonFun.taskResultSet("请升级群控系统应用:" + commonFun.happybayVersion + " -> " + "1.1.50_beta_4_8", "w") }
@@ -69,8 +70,7 @@ taskDemo.runTask = function () {
                 }
                 if (!lan_test) {
                     log("业务后台连接异常")
-                    // commonFun.uninstallApp("fun.kitsunebi.kitsunebi4android")
-                    // commonFun.uninstallApp("com.v2ray.ang")
+                    commonFun.uninstallApp("fun.kitsunebi.kitsunebi4android")
                     //  业务后台连接检测
                     for (let index = 0; index < 90; index++) {
                         try {
@@ -153,10 +153,9 @@ taskDemo.runTask = function () {
             //  执行任务
             try {
                 //  本地网络
-                let local_ip = httpUtilFunc.getLocalIp()
-                let global_ip = null
+                local_ip = httpUtilFunc.getLocalIp()
                 log("本地 IP: " + local_ip)
-                let ipInfo = {}
+                global_ip = null
                 if (taskPluginData.proxyProvider) {
                     let is_proxy_on = false
                     is_proxy_on = newThread(() => {
@@ -223,9 +222,7 @@ taskDemo.runTask = function () {
                                 continue
                             }
                             //  3. 检测代理
-                            global_ip = null
                             for (let index = 0; index < 3; index++) {
-                                commonFun.showLog("代理IP检测: " + global_ip)
                                 global_ip = httpUtilFunc.getGlobalIp()
                                 reportLog("检测IP: " + local_ip + " -> " + global_ip)
                                 commonFun.showLog("代理IP检测: " + global_ip)
@@ -236,14 +233,11 @@ taskDemo.runTask = function () {
                             }
                         }
                     }, false, 1000 * 60 * 30, () => { throw "代理连接超时退出 " + taskDemo.desc })
-                    if (!is_proxy_on) { throw taskDemo.desc }
-                    ipInfo = httpUtilFunc.getIpInfo()
-                    reportLog("代理网络 " + JSON.stringify(ipInfo))
                 }
-                log("注册脚本or 修改头像脚本")
             } catch (error) {
                 throw error
             }
+            log("注册脚本or 修改头像脚本")
             try {
                 if (register != "") {
                     log("选择注册")
@@ -280,7 +274,6 @@ taskDemo.runTask = function () {
         } catch (error) {
             throw error
         }
-
     }()
     sleep(3000)
     try { threads.shutDownAll() } catch (error) { }
@@ -399,7 +392,6 @@ function checkTiktokInstall() {
         httpUtilFunc.downloadFile("http://192.168.91.3:8012/upload/a59d3e2a-1a41-4eb1-8098-2d9a0b524364.xapk", "/storage/emulated/obb/Tiktok_v19.2.4", 1000 * 60, false)
         randomSleep()
         commonFun.installApkNew("/storage/emulated/obb/Tiktok_v19.2.4")
-
     }
 }
 
@@ -557,7 +549,7 @@ function updateRegisterResult() {
             var data = {
                 "forceRecord": true,
                 "type": 1,
-                "appName": appName,
+                "appName": "tiktok",
                 "phone": backupTag2 + commonFun.androidId,
                 "deviceId": commonFun.deviceId,
                 "folderId": commonFun.folderId,
@@ -592,6 +584,7 @@ function updateRegisterResult() {
             res = res.body.json()
             httpUtilFunc.reportLog("更新注册账号结果: " + JSON.stringify(res))
             if (res.code != 200) { throw res }
+            tiktio_backupUplive()
             return JSON.parse(res.data)
         })
     } catch (error) {
@@ -700,14 +693,13 @@ function clickProfile() {
             desc = resgisterStatus
             updateRegisterResult()
             randomSleep()
-            tiktio_backupUplive()
-            randomSleep()
             kill_tt()
+            let url = "http://" + commonFun.server + ":8000/user/registered"
             commonFun.taskResultSet("任务配置-" + url, "a")
             let log_server = commonFun.taskResultSet("-Result-" + desc, "w")
             commonFun.taskResultGet(log_server)
-            engines.stopAll();
             toastLog("停止脚本")
+            engines.stopAll();
         }
     } catch (error) {
         commonFun.taskResultSet("创建失败" + error, "w")
@@ -848,7 +840,7 @@ function checkBirthDayPage() {
             var CheckYearsOld = text("Edit").findOne(FIND_WIDGET_TIMEOUT)
             log("已经检查到确认年龄页面")
             if (CheckYearsOld != null) {
-                randomSleep()
+                sleep(2000)
                 var confirm = text("Confirm").findOne(FIND_WIDGET_TIMEOUT)
                 if (confirm != null) {
                     randomSleep()

@@ -37,7 +37,6 @@ httpUtilFunc.accountLoginRecord = function (record_data) {
         record_data.desc = record_data.desc || null        //  描述信息
         record_data.deviceId = commonFunc.deviceId
         record_data.folderId = commonFunc.folderId
-
         try { record_data.ip = record_data.ip ? record_data.ip : httpUtilFunc.getGlobalIp() } catch (error) { }
         httpUtilFunc.reportLog("记录登陆信息: " + JSON.stringify(record_data))
         let url = "http://" + commonFunc.server + ":8000/user/loginrecord"
@@ -384,9 +383,9 @@ httpUtilFunc.getRegisterContact = function () {
 httpUtilFunc.getPluginData = function () {
     let pluginData = null
     try {
-        // let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
+        let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
         // let url = "http://192.168.91.3:83/task/getplugindata?taskid=64aafa9f-fd9a-451b-b800-054c02ba11f4" // 爬取粉丝
-        let url = "http://192.168.91.3:83/task/getplugindata?taskid=361af535-8cf7-4ccb-91d3-a517aaba9767" // 修改头像+注册
+        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=361af535-8cf7-4ccb-91d3-a517aaba9767" // 修改头像+注册
         log("读取配置:" + url)
         commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
@@ -613,75 +612,6 @@ httpUtilFunc.getProxyFromDoveip = function (base_url, args) {
 }
 
 /**
- * 从 https://api.ipify.org 或 https://www.whatismyip.com 获取当前网络IP
- * @param {*} timeout 
- * @returns ip
- */
-httpUtilFunc.getGlobalIp = function (timeout) {
-    let ip = null
-    try {
-        timeout = typeof (timeout) == "number" ? timeout : 1000 * 30
-        ip = commonFunc.newThread(function () {
-            let res = http.get("https://api.ipify.org/?format=json", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            if (res.statusCode == 200) {
-                res = res.body.json()
-                return res.ip
-            }
-            throw res.statusCode
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://api.ipify.org/?format=json: request error ") }
-    try {
-        ip = ip || commonFunc.newThread(function () {
-            let res = http.get("https://ipinfo.io/json", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            if (res.statusCode == 200) {
-                res = res.body.json()
-                return res.ip
-            }
-            throw res
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://ipinfo.io/json: request error ") }
-    try {
-        ip = ip || commonFunc.newThread(function () {
-            let res = http.get("https://ifconfig.me/", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            res = res.body.string()
-            let reg = new RegExp(/id="ip_address">([^<]+)/)
-            if (reg.test(res)) {
-                return res.match(reg)[1]
-            }
-            throw res
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://ifconfig.me/ request error ") }
-    try {
-        ip = ip || commonFunc.newThread(function () {
-            let res = http.get("https://www.whatismyip.com/", {
-                "headers": {
-                    'User-Agent': commonFunc.getRandomUA()
-                }
-            })
-            res = res.body.string()
-            let reg = new RegExp(/Detailed information about IP address ([^"]+)/)
-            if (reg.test(res)) {
-                return res.match(reg)[1]
-            }
-            throw res
-        }, null, timeout, () => { throw "超时退出" })
-    } catch (error) { log("    https://www.whatismyip.com/ request error ") }
-    return ip
-}
-
-/**
  * 从 https://www.ip.cn 获取 Bypass 网络IP
  * @param {*} timeout 
  * @returns ip
@@ -700,12 +630,12 @@ httpUtilFunc.getLocalIp = function (timeout) {
                 res = res.body.json()
                 return res.ip
             }
-            log("当前网络ip为：", res.ip)
             throw res.statusCode
         }, null, timeout, () => { throw "超时退出" })
     } catch (error) { log("    https://www.ip.cn/api/index?ip=&type=0: " + commonFunc.objectToString(error)) }
     return ip
 }
+
 /**
  * @param {Number} type 素材类型（0:纯文本；1:图片；2:视频；3:音频）
  * @param {Number} count 获取数量
@@ -796,19 +726,14 @@ httpUtilFunc.materialFeedback = function (feedback_data) {
         args_data.tiktok_lables = feedback_data.account_tags
         args_data.comment = feedback_data.comment || ""
         try { args_data.task_ip = feedback_data.ip || httpUtilFunc.getGlobalIp() } catch (error) { }
-
         args_data.task_id = commonFunc.taskid
         args_data.task_name = commonFunc.taskName || null
         args_data.script_name = commonFunc.pluginName
-
-        // args_data.box_no                = "unknow"
         args_data.mobile_no = commonFunc.deviceId
         args_data.folder_no = commonFunc.folderId
         args_data.folder_bind_param_id = commonFunc.androidId
         args_data.folder_device_model = commonFunc.brand + " " + commonFunc.model
         args_data.folder_device_os_version = device.release
-
-
         let call = "material_result"
         let version = "1.0.0"
         let ts = new Date().getTime()
@@ -1251,7 +1176,7 @@ httpUtilFunc.getProxyFromSellerip = function (base_url, args) {
 /**
  * 从 https://api.ipify.org 或 https://www.whatismyip.com 获取当前网络IP
  * @param {*} timeout 
- * @returns ip
+ * @returns ip1
  */
 httpUtilFunc.getGlobalIp = function (timeout) {
     let ip = null
