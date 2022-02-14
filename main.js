@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2021-12-23 19:59:44
- * @LastEditTime: 2022-02-14 10:48:55
+ * @LastEditTime: 2022-02-14 15:16:18
  */
 function init() {
     // 设置日志文件
@@ -58,6 +58,7 @@ init()
 // var mainTask = require("./case/tit_restore");
 // var mainTask = require("./case/Gmail_replaceVpns");
 // var mainTask = require("./case/demo");
+// var mainTask = require("./case/installall");
 
 
 //  爬取用户信息业务
@@ -65,6 +66,11 @@ init()
 // mainTask.runTask()
 
 //  TT注册可视化业务
-var mainTask = require("./case/tit_register_v22_4_5_develop");
+// var mainTask = require("./case/tit_register_v22_4_5_develop");
 // var mainTask = require("./case/tit_register_v22_4_5_developdebug");
+// mainTask.runTask()
+
+
+//  Gmail登录可视化业务
+var mainTask = require("./case/Gmail_login_develop");
 mainTask.runTask()
