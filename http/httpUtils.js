@@ -385,7 +385,7 @@ httpUtilFunc.getPluginData = function () {
     try {
         let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
         // let url = "http://192.168.91.3:83/task/getplugindata?taskid=64aafa9f-fd9a-451b-b800-054c02ba11f4" // 爬取粉丝
-        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=361af535-8cf7-4ccb-91d3-a517aaba9767" // 修改头像+注册
+        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=ffc409dd-b5fb-4ec6-bbd1-eda4343f00ee" // 修改头像+注册
         log("读取配置:" + url)
         commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
@@ -797,6 +797,51 @@ httpUtilFunc.materialRollback = function (app_id, app_secret, material) {
         throw res
     } catch (error) {
         httpUtilFunc.reportLog("素材回滚异常: " + commonFunc.objectToString(error))
+    }
+    return false
+}
+
+/**
+ * 素材禁用, 用于业务失败时回滚素材资源
+ * @param {*} app_id 
+ * @param {*} app_secret 
+ * @param {*} material 
+ * @returns 
+ */
+httpUtilFunc.materialDisable = function (app_id, app_secret, material) {
+    try {
+        // "mid": 3380
+        if (!material) { return false }
+        if (!isNotNullObject(material) || !material.id) { throw "参数异常" + commonFunc.objectToString(material) }
+        httpUtilFunc.reportLog("素材禁用: " + commonFunc.objectToString(material))
+        let args_data = {
+            "mid": material.id
+        }
+        let call = "material_disable"
+        let version = "1.0.0"
+        let ts = new Date().getTime()
+        let sign = commonFunc.getmd5(app_id + ts + call + JSON.stringify(args_data) + version + app_secret)
+        let data_json = {
+            "data": {
+                "app_id": app_id,
+                "ts": ts,
+                "call": call,
+                "version": version,
+                "args": args_data,
+                "sign": sign
+            }
+        }
+        log(commonFunc.objectToString(data_json))
+        let res = http.postJson("http://" + commonFunc.server + ":3002/i/a/", data_json)
+        res = res.body.json()
+        if (res.data && res.data.code == "000000") {
+            // return res.data.data.materials
+            return true
+        }
+        throw res
+    } catch (error) {
+        httpUtilFunc.reportLog("素材禁用异常: " + commonFunc.objectToString(error))
+        // throw error
     }
     return false
 }

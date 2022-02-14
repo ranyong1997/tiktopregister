@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-11 19:44:53
+ * @LastEditTime: 2022-02-14 10:29:51
  */
 
 
@@ -46,7 +46,6 @@ taskDemo.runTask = function () {
     new function () {
         try {
             try {   // 版本检测
-
                 let happybayVersion = "1.1.40_beta_8_4"
                 if (commonFun.happybayVersion < happybayVersion) { throw "happybayVersion " + commonFun.happybayVersion + " -> " + happybayVersion }
                 if (commonFun.happybayVersion < "1.1.50_beta_4_8") { commonFun.taskResultSet("请升级群控系统应用:" + commonFun.happybayVersion + " -> " + "1.1.50_beta_4_8", "w") }
@@ -156,7 +155,10 @@ taskDemo.runTask = function () {
                 local_ip = httpUtilFunc.getLocalIp()
                 log("本地 IP: " + local_ip)
                 global_ip = null
-                if (taskPluginData.proxyProvider) {
+                // vpn---> none
+                // 获取代理异常: 代理标签为空
+                if (taskPluginData.proxyProvider != "none") {
+                    log("进行vpn设置")
                     let is_proxy_on = false
                     is_proxy_on = newThread(() => {
                         let proxy_loop_max = taskPluginData.proxyProvider == "doveip" ? 5 : 1
@@ -215,11 +217,12 @@ taskDemo.runTask = function () {
                             try {
                                 is_proxy_on = proxySettings.kitsunebiSetup(proxy_info)
                                 reportLog("代理连接结果: " + is_proxy_on)
-                            } catch (error) {
+                            }
+                            catch (error) {
                                 taskDemo.desc = "代理连接异常: " + commonFun.objectToString(error)
                                 if (proxy_loop + 1 > proxy_loop_max) { throw taskDemo.desc }
                                 reportLog(taskDemo.desc)
-                                continue
+                                // continue
                             }
                             //  3. 检测代理
                             for (let index = 0; index < 3; index++) {
@@ -233,7 +236,9 @@ taskDemo.runTask = function () {
                             }
                         }
                     }, false, 1000 * 60 * 30, () => { throw "代理连接超时退出 " + taskDemo.desc })
-                }
+                } else (
+                    log("跳过设置")
+                )
             } catch (error) {
                 throw error
             }
@@ -241,16 +246,18 @@ taskDemo.runTask = function () {
             try {
                 if (register != "") {
                     log("选择注册")
-                    commonFun.taskStepRecordSet(40, null, "开始注册任务", null)
+                    commonFun.taskStepRecordSet(40, null, "TT一键登录任务", null)
                     // 素材获取
                     material_gain(keyword_FB, used_times_model, used_counter)
                     checkFacebookInstall()   // 检测facebook是否安装
                     checkTiktokInstall() // 检测tiktok是否安装
                     function doSomething() {
+                        commonFun.taskStepRecordSet(40, null, "TT一键登录任务", null)
                         Facebook_Account_Transfer()
                         sleep(2000)
                         log("脚本执行")
                         One_Key_Login()
+                        commonFun.taskStepRecordSet(40, null, "TT一键登录任务结束", null)
                     }
                     let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 12, () => { log("时间已超时12分钟,程序退出") })
                 } else if (updatePhoto != "") {
@@ -260,6 +267,7 @@ taskDemo.runTask = function () {
                     material_gain_url(used_times_model, used_counter)
                     change_head_portrait()
                     kill_tt()
+                    commonFun.taskStepRecordSet(40, null, "修改头像任务结束", null)
                 } else if (register == "on" && updatePhoto == "on") {
                     // 暂时没法判断同时开启
                     log("又注册又修改头像")
@@ -304,6 +312,9 @@ taskDemo.runTask = function () {
             commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
             throw task_result.taskStatus + "-" + logsdesc
         }
+        // try { logsdesc = "任务中途异常 " + (task_result.logsdesc || "下载报表查看详情") } catch (error) { log(error) }
+        // commonFun.taskStepRecordSet( taskStatus, null, null, logsdesc )
+        // if( task_result.taskStatus > 0 && task_result.taskStatus < 40 ){ throw task_result.taskStatus +"-"+ logsdesc }
     }
 }
 
@@ -341,6 +352,8 @@ function material_gain_url(used_times_model, used_counter) {
     try {
         log("正在素材获取")
         let materialTag = taskPluginData.materialTag
+        let app_id = taskPluginData.appid
+        let appid_key = taskPluginData.appid_key
         log("materialTag--->", materialTag)
         log("app_id--->", app_id)
         log("appid_key--->", appid_key)
@@ -352,7 +365,7 @@ function material_gain_url(used_times_model, used_counter) {
             "type": 1,   // 类型（0:纯文本；1:图片；2:视频；3:音频）
             "classify": 2,   // 分类（文本类；图片类；视频类）
             "used_times_model": used_times_model,   // 匹配模式
-            "used_times": used_counter    // 使用次数  
+            // "used_times": used_counter    // 使用次数  
         })
         media_path = material_gain_url.media_path
         log("头像url获取--->>", media_path)
@@ -986,6 +999,7 @@ function click_HeadEdit() {
     var click_edit = id("com.zhiliaoapp.musically:id/be7").findOne(FIND_WIDGET_TIMEOUT)
     if (click_edit != null) {
         log("点击头像框")
+        randomSleep()
         commonFun.clickWidget(click_edit)
         randomSleep()
     }

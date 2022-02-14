@@ -3,13 +3,14 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-10 14:47:23
+ * @LastEditTime: 2022-02-14 10:48:45
  */
 
 
 // taskip写死 需要重置  在httpUtilFunc.getPluginData
 const commonFun = require("../lib/common.js");
 const httpUtilFunc = require("../http/httpUtils");
+const targetApp = require("../app/tiktokApp.js");
 const { reportLog } = require("../network/httpUtil.js");
 const proxySettings = require("../vpn/proxySettings.js")
 const enums = require("../util/enums")
@@ -33,57 +34,47 @@ var kitsunebi_packageName = "fun.kitsunebi.kitsunebi4android"
 
 
 taskDemo.init = function () {
-    commonFun.showLog("init taskDemo")
+    commonFun.showLog("init tit_register_v22_4_5")
     taskDemo.result = 0
     taskDemo.desc = ""
-    if (commonFun.server.length) { return true }
+    commonFun.forceStopApp(targetApp.bid)
+    //  清理 Camera 文件夹
+    targetApp.clearTaskCache()
 }
-
+taskDemo.init()
 taskDemo.runTask = function () {
     new function () {
         try {
-        } catch (error) {
-            log(commonFun.objectToString(error))
-        }
-        try {   //  初始化测试
-            if (!commonFun.server) { throw "未连接到群控后台" }
-            //  初始化网络测试   
-            randomSleep(3000)
-            try { ui.run(function () { commonFun.statusBox.close() }); } catch (error) { }
-        } catch (error) { httpUtilFunc.taskStop(null, error); throw error }
-        try {
-            global_ip = httpUtilFunc.getGlobalIp()
-            log("当前网络ip--->", global_ip)
-            let timestamp = new Date().getTime()
-            log("现在时间---->", timestamp)
             try {   // 版本检测
                 let happybayVersion = "1.1.40_beta_8_4"
                 if (commonFun.happybayVersion < happybayVersion) { throw "happybayVersion " + commonFun.happybayVersion + " -> " + happybayVersion }
+                if (commonFun.happybayVersion < "1.1.50_beta_4_8") { commonFun.taskResultSet("请升级群控系统应用:" + commonFun.happybayVersion + " -> " + "1.1.50_beta_4_8", "w") }
                 let jsengineVersion = "4.1.1 Alpha2-gxl-817"
                 if (commonFun.jsengineVersion < jsengineVersion) { throw "jsengineVersion " + commonFun.jsengineVersion + " -> " + jsengineVersion }
             } catch (error) {
                 throw "系统应用版本过低,请先升级: " + commonFun.objectToString(error)
             }
-            try {   //  初始化测试
+            let timestamp = new Date().getTime()
+            //  初始化测试
+            try {
                 if (!commonFun.server) { throw "未连接到群控后台" }
                 //  业务后台连接检测
+                commonFun.taskStepRecordSet(10, null, "业务后台连接检测", null)
                 let lan_test = null
-                for (let index = 0; index < 5; index++) {
+                for (let index = 0; index < 6; index++) {
                     try { lan_test = httpUtilFunc.testTaskServer() } catch (error) { }
                     commonFun.showLog("局域网测试: " + lan_test)
-                    commonFun.taskStepRecordSet(200, null, "局域网测试", "局域网测试" + lan_test)
                     if (lan_test) { break }
                     sleep(5000)
                 }
                 if (!lan_test) {
-                    //  业务后台连接检测
                     log("业务后台连接异常")
+                    commonFun.uninstallApp("fun.kitsunebi.kitsunebi4android")
+                    //  业务后台连接检测
                     for (let index = 0; index < 90; index++) {
                         try {
-                            if (httpUtilFunc.testTaskServer()) {
-                                break
-                            }
-                            throw ""
+                            if (!httpUtilFunc.testTaskServer()) { throw "" }
+                            break
                         } catch (error) {
                             if (index > 80) { throw "业务后台连接异常, 请检查网络和服务器状态. " + commonFun.objectToString(error) }
                             commonFun.showLog("业务后台连接异常, 请检查网络和服务器状态. ")
@@ -92,8 +83,13 @@ taskDemo.runTask = function () {
                     }
                 }
                 randomSleep(3000)
-            } catch (error) { throw error }
+                commonFun.showLog("")
+            } catch (error) {
+                commonFun.taskStepRecordSet(250, null, "任务回滚", null)
+                throw error
+            }
             try {   //  获取插件配置
+                commonFun.taskStepRecordSet(20, null, "插件配置检测", null)
                 taskPluginData = httpUtilFunc.getPluginData()
                 reportLog("插件配置: " + JSON.stringify(taskPluginData))
                 appName = taskPluginData.appName
@@ -127,41 +123,42 @@ taskDemo.runTask = function () {
                 log("备份标签2: " + backupTag2)
                 log("appid: " + appid)
                 log("appid_key: " + appid_key)
-                // log("素材类型: " + type)
-                // log("文本类型: " + classify)
                 log("素材匹配: " + used_times_model)
                 log("使用次数: " + used_counter)
-                commonFun.taskStepRecordSet(200, null, "获取插件配置信息", "获取插件配置信息:" + JSON.stringify(taskPluginData))
             } catch (error) {
-                log("  插件配置 获取失败 " + commonFun.objectToString(error))
-                throw "插件配置 获取失败 " + JSON.stringify(error)
+                commonFun.taskStepRecordSet(250, null, "任务回滚", null)
+                throw "插件配置 获取失败 " + commonFun.objectToString(error)
             }
+            try {   //  ip、语言、时区检测
+                taskDemo.result = 1
+                // 系统语言、时区获取设置
+                if (taskPluginData.systemLanguage != "") {
+                    reportLog("检测系统语言: " + commonFun.systemLanguageGet())
+                    commonFun.systemLanguageSet(systemLanguage)
+                    sleep(3000)
+                    if (taskPluginData.systemLanguage != commonFun.systemLanguageGet()) {
+                        throw "系统语言错误"
+                    }
+                }
+                if (taskPluginData.systemTimezone != "") {
+                    reportLog("当前系统时区: " + commonFun.systemTimezoneGet())
+                    commonFun.systemTimezoneSet_New(systemTimezone)
+                    sleep(3000)
+                    if (taskPluginData.systemTimezone != commonFun.systemTimezoneGet()) {
+                        throw "系统时区错误"
+                    }
+                }
+            } catch (error) { throw error }
             //  执行任务
             try {
-                try {   //  ip、语言、时区检测
-                    taskDemo.result = 1
-                    // 系统语言、时区获取设置
-                    if (taskPluginData.systemLanguage != "") {
-                        reportLog("检测系统语言: " + commonFun.systemLanguageGet())
-                        commonFun.systemLanguageSet(systemLanguage)
-                        sleep(3000)
-                        if (taskPluginData.systemLanguage != commonFun.systemLanguageGet()) {
-                            throw "系统语言错误"
-                        }
-                    }
-                    if (taskPluginData.systemTimezone != "") {
-                        reportLog("检测系统时区: " + commonFun.systemTimezoneGet())
-                        commonFun.systemTimezoneSet_New(systemTimezone)
-                        sleep(3000)
-                        if (taskPluginData.systemTimezone != commonFun.systemTimezoneGet()) {
-                            throw "系统时区错误"
-                        }
-                    }
-                } catch (error) { throw error }
-                // 代理获取 需要联调
-                proxy_info = null
-                let ipInfo = {}
-                if (taskPluginData.proxyProvider) {
+                //  本地网络
+                local_ip = httpUtilFunc.getLocalIp()
+                log("本地 IP: " + local_ip)
+                global_ip = null
+                // vpn---> none
+                // 获取代理异常: 代理标签为空
+                if (taskPluginData.proxyProvider != "none") {
+                    log("进行vpn设置")
                     let is_proxy_on = false
                     is_proxy_on = newThread(() => {
                         let proxy_loop_max = taskPluginData.proxyProvider == "doveip" ? 5 : 1
@@ -220,83 +217,105 @@ taskDemo.runTask = function () {
                             try {
                                 is_proxy_on = proxySettings.kitsunebiSetup(proxy_info)
                                 reportLog("代理连接结果: " + is_proxy_on)
-                            } catch (error) {
+                            }
+                            catch (error) {
                                 taskDemo.desc = "代理连接异常: " + commonFun.objectToString(error)
                                 if (proxy_loop + 1 > proxy_loop_max) { throw taskDemo.desc }
                                 reportLog(taskDemo.desc)
-                                continue
+                                // continue
                             }
-                            //  获取本机ip
-                            local_ip = httpUtilFunc.getLocalIp()
-                            reportLog("本机 IP: " + local_ip)
-                            commonFun.taskStepRecordSet(200, null, "获取本机ip", "获取本机ip：" + local_ip)
-                            // ip检测
-                            if (!is_proxy_on) { continue }
-                            randomSleep(3000)
+                            //  3. 检测代理
                             for (let index = 0; index < 3; index++) {
-                                is_proxy_on = false
-                                commonFun.showLog("代理IP检测: " + global_ip)
+                                global_ip = httpUtilFunc.getGlobalIp()
                                 reportLog("检测IP: " + local_ip + " -> " + global_ip)
+                                commonFun.showLog("代理IP检测: " + global_ip)
+                                if (global_ip) { return true } else { taskDemo.desc = "代理已连接, 但IP检测失败 " + local_ip + " -> " + global_ip }
+                                try { if (httpUtilFunc.isUrlAccessable("https://www.tiktok.com", "This page is not available in your area")) { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " + "This page is not available in your area"; continue } } catch (error) { }
+                                try { if (httpUtilFunc.isUrlAccessable("https://www.tiktok.com", "tiktok")) { return true } } catch (error) { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " + commonFun.objectToString(error) }
+                                randomSleep(5000)
                             }
                         }
                     }, false, 1000 * 60 * 30, () => { throw "代理连接超时退出 " + taskDemo.desc })
-                    if (!is_proxy_on) { throw taskDemo.desc }
-                    ipInfo = httpUtilFunc.getIpInfo()
-                    reportLog("代理网络 " + JSON.stringify(ipInfo))
-
-                }
-                log("注册脚本or 修改头像脚本")
+                } else (
+                    log("跳过设置")
+                )
             } catch (error) {
                 throw error
             }
-        } catch (error) {
-            taskDemo.result = 0
-            taskDemo.desc = commonFun.objectToString(error)
-            commonFun.taskResultSet(taskDemo.desc, "a")
-        }
-        try {
-            if (register != "") {
-                log("选择注册")
-                // 素材获取
-                material_gain(keyword_FB, used_times_model, used_counter)
-                checkFacebookInstall()   // 检测facebook是否安装
-                checkTiktokInstall() // 检测tiktok是否安装
-                function doSomething() {
-                    Facebook_Account_Transfer()
-                    sleep(2000)
-                    log("脚本执行")
-                    One_Key_Login()
+            log("注册脚本or 修改头像脚本")
+            try {
+                if (register != "") {
+                    log("选择注册")
+                    commonFun.taskStepRecordSet(40, null, "TT一键登录任务", null)
+                    // 素材获取
+                    material_gain(keyword_FB, used_times_model, used_counter)
+                    checkFacebookInstall()   // 检测facebook是否安装
+                    checkTiktokInstall() // 检测tiktok是否安装
+                    function doSomething() {
+                        commonFun.taskStepRecordSet(40, null, "TT一键登录任务", null)
+                        Facebook_Account_Transfer()
+                        sleep(2000)
+                        log("脚本执行")
+                        One_Key_Login()
+                        commonFun.taskStepRecordSet(40, null, "TT一键登录任务结束", null)
+                    }
+                    let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 12, () => { log("时间已超时12分钟,程序退出") })
+                } else if (updatePhoto != "") {
+                    log("选择修改头像")
+                    commonFun.taskStepRecordSet(40, null, "修改头像任务", null)
+                    // 素材获取
+                    material_gain_url(used_times_model, used_counter)
+                    change_head_portrait()
+                    kill_tt()
+                    commonFun.taskStepRecordSet(40, null, "修改头像任务结束", null)
+                } else if (register == "on" && updatePhoto == "on") {
+                    // 暂时没法判断同时开启
+                    log("又注册又修改头像")
+                } else {
+                    log("退出程序")
                 }
-                let myThreadResult = commonFun.newThread(doSomething, false, 1000 * 60 * 12, () => { log("时间已超时12分钟,程序退出") })
-            } else if (updatePhoto != "") {
-                log("选择修改头像")
-                // 素材获取
-                material_gain_url(used_times_model, used_counter)
-                change_head_portrait()
-                kill_tt()
-            } else if (register == "on" && updatePhoto == "on") {
-                // 暂时没法判断同时开启
-                log("又注册又修改头像")
-            } else {
-                log("退出程序")
+            } catch (error) {
+                throw error
             }
+            reportLog("运行时间 - " + parseInt((new Date().getTime() - timestamp) / 1000 / 60) + "分钟")
+            if (taskDemo.result != 1) { throw taskDemo.desc }
         } catch (error) {
-            // throw error
-        }
-        sleep(3000)
-        try { threads.shutDownAll() } catch (error) { }
-        try { home(); sleep(2000) } catch (error) { }
-        let task_result = "任务结果: " + taskDemo.result + " - \n" + commonFun.taskResultGet()
-        commonFun.taskStepRecordSet(200, null, "任务运行结果", "任务运行结果" + task_result)
-        commonFun.taskResultSet(task_result, "w")
-        //  任务结果反馈    
-        if (taskDemo.result == 1) {
-            reportLog(task_result, 1)
-        } else {
-            reportLog(task_result, 2)
-            throw task_result
+            throw error
         }
     }()
+    sleep(3000)
+    try { threads.shutDownAll() } catch (error) { }
+    try { home(); sleep(2000) } catch (error) { }
+    //  清理任务缓存
+    try { targetApp.clearTaskCache() } catch (error) { }
+    let task_result = commonFun.taskStepRecordGet()
+    if (!task_result || typeof (task_result) != "object") { throw "未识别到任务上报日志" }
+    let taskStatus = null
+    let logsdesc = null
+    if (taskDemo.result == 1) {
+        taskStatus = 200
+        try { logsdesc = "任务完成 " + (task_result.logsdesc || "下载报表查看详情") } catch (error) { log(error) }
+        commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
+    } else {
+        if (task_result.taskStatus == 40) {
+            taskStatus = 0
+            logsdesc = "任务中途异常 " + (task_result.logsdesc || "下载报表查看详情")
+            commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
+        }
+        else if (task_result.taskStatus == 250) {
+            logsdesc = "任务回滚,因为-" + (task_result.logsdesc || "下载报表查看详情")
+            commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
+            throw task_result.taskStatus + "-" + logsdesc
+        }
+        else {
+            logsdesc = (task_result.logsdesc || "下载报表查看详情")
+            commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
+            throw task_result.taskStatus + "-" + logsdesc
+        }
+        // try { logsdesc = "任务中途异常 " + (task_result.logsdesc || "下载报表查看详情") } catch (error) { log(error) }
+        // commonFun.taskStepRecordSet( taskStatus, null, null, logsdesc )
+        // if( task_result.taskStatus > 0 && task_result.taskStatus < 40 ){ throw task_result.taskStatus +"-"+ logsdesc }
+    }
 }
 
 // ---------------------------------写方法区-----------------------
@@ -333,10 +352,10 @@ function material_gain_url(used_times_model, used_counter) {
     try {
         log("正在素材获取")
         let materialTag = taskPluginData.materialTag
-        log("materialTag--->", materialTag)
         let app_id = taskPluginData.appid
-        log("app_id--->", app_id)
         let appid_key = taskPluginData.appid_key
+        log("materialTag--->", materialTag)
+        log("app_id--->", app_id)
         log("appid_key--->", appid_key)
         var material_gain_url = httpUtilFunc.materialGet({
             "lable": materialTag, // 头像素材标签
@@ -346,7 +365,7 @@ function material_gain_url(used_times_model, used_counter) {
             "type": 1,   // 类型（0:纯文本；1:图片；2:视频；3:音频）
             "classify": 2,   // 分类（文本类；图片类；视频类）
             "used_times_model": used_times_model,   // 匹配模式
-            "used_times": used_counter    // 使用次数  
+            // "used_times": used_counter    // 使用次数  
         })
         media_path = material_gain_url.media_path
         log("头像url获取--->>", media_path)
@@ -363,7 +382,6 @@ function material_gain_url(used_times_model, used_counter) {
         commonFun.taskResultSet("素材获取失败" + error, "w")
     }
 }
-
 
 // 检测Facebook是否安装对应版本
 function checkFacebookInstall() {
@@ -387,9 +405,9 @@ function checkTiktokInstall() {
         httpUtilFunc.downloadFile("http://192.168.91.3:8012/upload/a59d3e2a-1a41-4eb1-8098-2d9a0b524364.xapk", "/storage/emulated/obb/Tiktok_v19.2.4", 1000 * 60, false)
         randomSleep()
         commonFun.installApkNew("/storage/emulated/obb/Tiktok_v19.2.4")
-
     }
 }
+
 // facebook 迁移
 function Facebook_Account_Transfer() {
     var androidId = material_gain()
@@ -544,7 +562,7 @@ function updateRegisterResult() {
             var data = {
                 "forceRecord": true,
                 "type": 1,
-                "appName": appName,
+                "appName": "tiktok",
                 "phone": backupTag2 + commonFun.androidId,
                 "deviceId": commonFun.deviceId,
                 "folderId": commonFun.folderId,
@@ -579,6 +597,7 @@ function updateRegisterResult() {
             res = res.body.json()
             httpUtilFunc.reportLog("更新注册账号结果: " + JSON.stringify(res))
             if (res.code != 200) { throw res }
+            tiktio_backupUplive()
             return JSON.parse(res.data)
         })
     } catch (error) {
@@ -687,14 +706,13 @@ function clickProfile() {
             desc = resgisterStatus
             updateRegisterResult()
             randomSleep()
-            tiktio_backupUplive()
-            randomSleep()
             kill_tt()
+            let url = "http://" + commonFun.server + ":8000/user/registered"
             commonFun.taskResultSet("任务配置-" + url, "a")
             let log_server = commonFun.taskResultSet("-Result-" + desc, "w")
             commonFun.taskResultGet(log_server)
-            engines.stopAll();
             toastLog("停止脚本")
+            engines.stopAll();
         }
     } catch (error) {
         commonFun.taskResultSet("创建失败" + error, "w")
@@ -777,18 +795,11 @@ function checkpop_up() {
     sleep(7000)
     var TC1 = text("Don't allow").findOne(FIND_WIDGET_TIMEOUT)
     if (TC1 != null) {
-        log("点击弹窗1")
+        log("点击Don't allow弹窗")
         randomSleep()
         commonFun.clickWidget(TC1)
     }
     sleep(3000)
-    var TC2 = text("Don't allow").findOne(FIND_WIDGET_TIMEOUT)
-    if (TC2 != null) {
-        log("点击弹窗2")
-        randomSleep()
-        commonFun.clickWidget(TC2)
-
-    }
     var swipe_element = text("Swipe up for more").id("com.zhiliaoapp.musically:id/f4r").findOne(FIND_WIDGET_TIMEOUT)
     if (swipe_element != null) {
         log("检测用户引导")
@@ -835,7 +846,7 @@ function checkBirthDayPage() {
             var CheckYearsOld = text("Edit").findOne(FIND_WIDGET_TIMEOUT)
             log("已经检查到确认年龄页面")
             if (CheckYearsOld != null) {
-                randomSleep()
+                sleep(2000)
                 var confirm = text("Confirm").findOne(FIND_WIDGET_TIMEOUT)
                 if (confirm != null) {
                     randomSleep()
@@ -988,6 +999,7 @@ function click_HeadEdit() {
     var click_edit = id("com.zhiliaoapp.musically:id/be7").findOne(FIND_WIDGET_TIMEOUT)
     if (click_edit != null) {
         log("点击头像框")
+        randomSleep()
         commonFun.clickWidget(click_edit)
         randomSleep()
     }
@@ -1024,9 +1036,5 @@ function select_one() {
 function kill_tt() {
     shell("am force-stop " + tiktop_packageName)
 }
-
-
 // ---------------------------------写方法区-----------------------
-
-taskDemo.init()
 module.exports = taskDemo;
