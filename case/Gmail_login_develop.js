@@ -3,39 +3,27 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-15 11:41:57
+ * @LastEditTime: 2022-02-15 18:29:04
  */
 
 
 // taskip写死 需要重置  在httpUtilFunc.getPluginData
 const commonFun = require("../lib/common.js");
 const httpUtilFunc = require("../http/httpUtils");
-const targetApp = require("../app/tiktokApp.js");
 const { reportLog } = require("../network/httpUtil.js");
-const proxySettings = require("../vpn/proxySettings.js")
-const enums = require("../util/enums")
-const { newThread, randomSleep, clickIfWidgetClickable, taskResultSet, shortSleep, longSleep } = require("../lib/common.js");
+const { randomSleep } = require("../lib/common.js");
 const taskDemo = {}
 let taskPluginData = null
 var FIND_WIDGET_TIMEOUT = 1000
-var registerDone = false
-var isSuccess = true
-var change_picture = false
 var desc = ""
-var fail_register = false
 var isUsed = false
 var isProcess = true
-var Bir_success = false
-var launchAppCount = 1
-var resgisterStatus = ""
 var gmail_package = "com.google.android.gm"
 
 
 taskDemo.init = function () {
     commonFun.showLog("init Gmail_v22_4_5")
-    taskDemo.result = 0
     taskDemo.desc = ""
-    commonFun.forceStopApp(targetApp.bid)
 }
 taskDemo.init()
 taskDemo.runTask = function () {
@@ -109,20 +97,6 @@ taskDemo.runTask = function () {
                 classify = taskPluginData.classify
                 used_times_model = taskPluginData.used_times_model
                 used_counter = taskPluginData.used_counter
-                // log("目标应用包名: " + appName)
-                // log("login状态: " + login)
-                // log("facebook关键字: " + keyword_FB)
-                // log("系统语言: " + systemLanguage)
-                // log("系统时区: " + systemTimezone)
-                // log("代理归属国: " + proxyCountry)
-                // log("代理来源: " + proxyProvider)
-                // log("素材标签: " + materialTag)
-                // log("备份标签: " + backupTag)
-                // log("备份标签2: " + backupTag2)
-                // log("appid: " + appid)
-                // log("appid_key: " + appid_key)
-                // log("素材匹配: " + used_times_model)
-                // log("使用次数: " + used_counter)
             } catch (error) {
                 commonFun.taskStepRecordSet(250, null, "任务回滚", null)
                 throw "插件配置 获取失败 " + commonFun.objectToString(error)
@@ -133,89 +107,7 @@ taskDemo.runTask = function () {
                 local_ip = httpUtilFunc.getLocalIp()
                 log("本地 IP: " + local_ip)
                 global_ip = null
-                // if (taskPluginData.proxyProvider != "none") {
-                //     log("进行vpn设置")
-                //     let is_proxy_on = false
-                //     is_proxy_on = newThread(() => {
-                //         let proxy_loop_max = taskPluginData.proxyProvider == "doveip" ? 5 : 1
-                //         for (let proxy_loop = 0; proxy_loop < proxy_loop_max; proxy_loop++) {
-                //             // 检测网络是否通畅, 如果网络不通, 则卸载 代理软件
-                //             if (!httpUtilFunc.getGlobalIp() && !commonFun.uninstallApp(kitsunebi_packageName)) { reportLog("设备环境异常") }
-                //             //  从代理库获取代理信息
-                //             try {
-                //                 let proxy_data = httpUtilFunc.getProxyData(taskPluginData.proxyProvider, taskPluginData.proxyTag)
-                //                 if (taskPluginData.proxyProvider == "doveip") {
-                //                     log("deveip代理")
-                //                     proxy_info = httpUtilFunc.getProxyFromDoveip(proxy_data.proxy, { "geo": taskPluginData.proxyCountry, "timeout": 10 })
-                //                 }
-                //                 else if (taskPluginData.proxyProvider == "cloudam") {
-                //                     log("cloudam代理")
-                //                     proxy_info = httpUtilFunc.getProxyFromCloudam(proxy_data.proxy, { "regionid": taskPluginData.proxyCountry })
-                //                 }
-                //                 else if (taskPluginData.proxyProvider == "connanys") {
-                //                     log("connanys代理")
-                //                     proxy_info = httpUtilFunc.getProxyFromConnanys(proxy_data.proxy, { "regionid": taskPluginData.proxyCountry, "timeout": 30 })
-                //                 }
-                //                 else if (taskPluginData.proxyProvider == "bytesfly") {
-                //                     log("bytesfly代理")
-                //                     proxy_info = httpUtilFunc.getProxyFromBytesfly("SOCKS5", 0, "tiktok", 1, 0, taskPluginData.proxyCountry)
-                //                 }
-                //                 else if (taskPluginData.proxyProvider == "sellerip") {// 新增代理sellerip规则
-                //                     log("sellerip代理")
-                //                     proxy_info = httpUtilFunc.getProxyFromSellerip(proxy_data.proxy, { "geo": taskPluginData.proxyCountry, "timeout": 10 })
-                //                 }
-                //                 else {
-                //                     proxy_info = proxy_data.proxy
-                //                 }
-                //                 reportLog("获取的代理信息: " + JSON.stringify(proxy_info))
-                //             } catch (error) {
-                //                 taskDemo.desc = commonFun.objectToString(error)
-                //                 reportLog(taskDemo.desc)
-                //                 randomSleep(30000)
-                //                 if (taskDemo.desc.match("IP 列表为空")) {
-                //                     home()
-                //                     for (let index = 0; index < 18; index++) {
-                //                         toast("IP 列表为空")
-                //                         sleep(10000)
-                //                     }
-                //                 }
-                //                 else if (taskDemo.desc.match("无可用信息")) {
-                //                     home()
-                //                     for (let index = 0; index < 18; index++) {
-                //                         toast("无可用代理信息")
-                //                         sleep(10000)
-                //                     }
-                //                 }
-                //             }
-                //             if (!proxy_info) { continue }
-                //             reportLog("代理配置 " + JSON.stringify(proxy_info))
-                //             if (!proxySettings.kitsunebiInstall(taskPluginData.proxyLink)) { throw "未安装 " + "fun.kitsunebi.kitsunebi4android" }
-                //             try {
-                //                 is_proxy_on = proxySettings.kitsunebiSetup(proxy_info)
-                //                 reportLog("代理连接结果: " + is_proxy_on)
-                //             }
-                //             catch (error) {
-                //                 taskDemo.desc = "代理连接异常: " + commonFun.objectToString(error)
-                //                 if (proxy_loop + 1 > proxy_loop_max) { throw taskDemo.desc }
-                //                 reportLog(taskDemo.desc)
-                //                 // continue
-                //             }
-                //             //  3. 检测代理
-                //             for (let index = 0; index < 3; index++) {
-                //                 global_ip = httpUtilFunc.getGlobalIp()
-                //                 reportLog("检测IP: " + local_ip + " -> " + global_ip)
-                //                 commonFun.showLog("代理IP检测: " + global_ip)
-                //                 if (global_ip) { return true } else { taskDemo.desc = "代理已连接, 但IP检测失败 " + local_ip + " -> " + global_ip }
-                //                 try { if (httpUtilFunc.isUrlAccessable("https://www.tiktok.com", "This page is not available in your area")) { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " + "This page is not available in your area"; continue } } catch (error) { }
-                //                 try { if (httpUtilFunc.isUrlAccessable("https://www.tiktok.com", "tiktok")) { return true } } catch (error) { taskDemo.desc = "代理已连接,但 tiktok 网站访问失败: " + commonFun.objectToString(error) }
-                //                 randomSleep(5000)
-                //             }
-                //         }
-                //     }, false, 1000 * 60 * 30, () => { throw "代理连接超时退出 " + taskDemo.desc })
-                // } else (
-                //     log("跳过设置")
-                // )
-                //  3. 检测代理
+                // 检测代理
                 for (let index = 0; index < 3; index++) {
                     global_ip = httpUtilFunc.getGlobalIp()
                     reportLog("检测IP: " + local_ip + " -> " + global_ip)
@@ -224,21 +116,15 @@ taskDemo.runTask = function () {
             } catch (error) {
                 throw error
             }
-            try {
-                if (login != "off") {
-                    log("Gmail一键登录")
-                    commonFun.taskStepRecordSet(40, null, "Gmail一键登录任务", null)
-                    // 素材获取
-                    material_gain(keyword_FB, used_times_model, used_counter)
-
-                    One_Key_Login()
-                    commonFun.taskStepRecordSet(40, null, "Gmail一键登录任务结束", null)
-                }
-            } catch (error) {
-                throw error
+            if (login != "") {
+                log("Gmail一键登录")
+                commonFun.taskStepRecordSet(40, null, "Gmail一键登录任务开始", null)
+                material_gain(used_times_model) // 素材获取
+                One_Key_Login()
+                // commonFun.taskStepRecordSet(200, null, "Gmail一键登录任务结束", null)
+                commonFun.taskResultSet("运行成功-", "a")
             }
             reportLog("运行时间 - " + parseInt((new Date().getTime() - timestamp) / 1000 / 60) + "分钟")
-            if (taskDemo.result != 1) { throw taskDemo.desc }
         } catch (error) {
             throw error
         }
@@ -246,14 +132,12 @@ taskDemo.runTask = function () {
     sleep(3000)
     try { threads.shutDownAll() } catch (error) { }
     try { home(); sleep(2000) } catch (error) { }
-    //  清理任务缓存
-    try { targetApp.clearTaskCache() } catch (error) { }
+    // ------------------------------分割线---------------------------------
     let task_result = commonFun.taskStepRecordGet()
     if (!task_result || typeof (task_result) != "object") { throw "未识别到任务上报日志" }
     let taskStatus = null
     let logsdesc = null
-    if (taskDemo.result == 1) {
-        taskStatus = 200
+    if (taskStatus = 200) {
         try { logsdesc = "任务完成 " + (task_result.logsdesc || "下载报表查看详情") } catch (error) { log(error) }
         commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
     } else {
@@ -272,36 +156,35 @@ taskDemo.runTask = function () {
             commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
             throw task_result.taskStatus + "-" + logsdesc
         }
-        // try { logsdesc = "任务中途异常 " + (task_result.logsdesc || "下载报表查看详情") } catch (error) { log(error) }
-        // commonFun.taskStepRecordSet( taskStatus, null, null, logsdesc )
-        // if( task_result.taskStatus > 0 && task_result.taskStatus < 40 ){ throw task_result.taskStatus +"-"+ logsdesc }
     }
 }
 
 // ---------------------------------写方法区-----------------------
 // 素材获取
-function material_gain(keyword_FB, used_times_model, used_counter) {
+function material_gain(used_times_model) {
     try {
         log("正在素材获取")
+        let lable = taskPluginData.keyword_Gmail
         let app_id = taskPluginData.appid
         let appid_key = taskPluginData.appid_key
+        let used_times = Number(taskPluginData.used_counter)
         var material_gain = httpUtilFunc.materialGet({
-            "lable": keyword_FB, // FB素材标签
+            "lable": lable, // FB素材标签
             "app_id": app_id,   // app_id
             "app_secret": appid_key,   // 密钥
             "count": 1, // 需要数据条数
             "type": 0,   // 类型（0:纯文本；1:图片；2:视频；3:音频）
             "classify": 3,   // 分类（文本类；图片类；视频类）
             "used_times_model": used_times_model,   // 匹配模式
-            "used_times": used_counter    // 使用次数 
+            "used_times": used_times    // 使用次数 
         })
+        material_INFO = material_gain
         Gmail_info = material_gain.text_content.split(",")
         log("Gmail邮箱密码获取--->>", Gmail_info)
         username = Gmail_info[0]
         password = Gmail_info[1]
         username1 = Gmail_info[2]
         log("账号为：", username, "密码为：", password, "辅助账号为：", username1)
-        material_INFO = material_gain
         return Gmail_info
     } catch (error) {
         log("获取素材时捕获到一个错误:" + error)
@@ -317,102 +200,39 @@ function matter_rollback() {
     httpUtilFunc.materialRollback(app_id, appid_key, material_INFO)
 }
 
-// 更新账号信息到8000端口 // TODO:你登录后直接将AndroidID和gmail账号密码等关系上传到服务器就好了
-function updateRegisterResult() {
-    log("更新账号信息到8000端口")
-    try {
-        return commonFun.newThread(() => {
-            var data = {
-                "forceRecord": true,
-                "type": 1,
-                "appName": "gmail",
-                "phone": keyword_Gmail + commonFun.androidId,
-                "deviceId": commonFun.deviceId,
-                "folderId": commonFun.folderId,
-                "androidId": commonFun.androidId,
-                "password": null,
-                "username": username,
-                "password": password,
-                "tag": backupTag2,
-                "phoneProvider": null,
-                "dialCode": null,
-                "countryCode": null,
-                "email": null,
-                "emailPassword": null,
-                "smsurl": null,
-                "isRegistered": false,
-                "isProcess": isProcess,
-                "extra": null,
-                "city": null,
-                "country": null,
-                "emailProvider": null,
-                "proxy": null,
-                "proxyProvider": null,
-                "ip": global_ip,
-                "isUsed": isUsed,
-                "desc": desc,
-                "isSuccess": isSuccess,
-                "deviceInfo": commonFun.model,
-                "nickname": username
-            }
-            httpUtilFunc.reportLog("更新注册账号: " + JSON.stringify(data))
-            url = "http://" + commonFun.server + ":8000/user/registered"
-            var res = http.postJson(url, data);
-            res = res.body.json()
-            httpUtilFunc.reportLog("更新注册账号结果: " + JSON.stringify(res))
-            if (res.code != 200) { throw res }
-            tiktio_backupUplive()
-            return JSON.parse(res.data)
-        })
-    } catch (error) {
-        httpUtilFunc.reportLog("更新注册账号异常: " + JSON.stringify(error))
-        commonFun.taskResultSet("更新账号失败" + error, "w")
-    }
-    return null
-}
-
 // 一键登陆Gmail邮箱
 function One_Key_Login() {
     toastLog("开始Gmail一键登陆功能")
+    var isSuccess = null
     openGMSApp(commonFun.userId)
     randomSleep()
     if (!packageName(gmail_package).findOne(1)) {
         log("Gmail启动中...")
         launch(gmail_package)
-        sleep(3000)
+        sleep(6000)
     } else {
         log("目前还没有此app,请检查改机工具是否被隐藏")
         openGMSApp(commonFun.userId)
         launch(gmail_package)
     }
     do {
-        try {
-            // 写方法区
-            click_GotIt()
-            click_Add()
-            click_Google()
-            click_Signin()
-            click_Welcome()
-            click_Add_Phone()
-            click_SkipBtn()
-            click_AgreeBtn()
-            click_TakeMeToBtn()
-            click_PopUpBtn()
-            click_AbnormalTip()
-            click_HeadPortrait()
-            click_IdInfo()
-        } catch (error) {
-            log("一键登陆时捕获到一个错误:" + error)
-            // 素材回退
-            matter_rollback()
-        }
-    } while (true);
+        // 写方法区
+        click_GotIt()
+        click_Add()
+        click_Google()
+        click_Signin()
+        click_Welcome()
+        click_Add_Phone()
+        click_SkipBtn()
+        click_AgreeBtn()
+        click_TakeMeToBtn()
+        click_PopUpBtn()
+        click_AbnormalTip()
+        click_HeadPortrait()
+        click_IdInfo()
+    } while (isSuccess == true);
 }
 
-// 杀进程
-function kill_tt() {
-    shell("am force-stop " + gmail_package)
-}
 
 // ------------------------------------------分割线-----------------
 // 更新账号信息到8000端口
@@ -433,7 +253,7 @@ function updateRegisterResult() {
                 "tag": "Gmail_login",
                 "phoneProvider": null,
                 "dialCode": null,
-                "countryCode": "US",
+                "countryCode": null,
                 "email": username,
                 "emailPassword": password,
                 "smsurl": null,
@@ -500,33 +320,6 @@ function openGMSApp(userId) {
     }
 }
 
-// 从素材库获取账号密码
-function material_gain1() {
-    try {
-        log("正在素材获取")
-        var material_gain = httpUtilFunc.materialGet({
-            "app_id": "21a5ae2f6168064f2c664056ea56726b",
-            "app_secret": "132a34bba2167280f59f4bd249b2ae69",
-            "count": 1,
-            "type": 0,
-            "classify": 3,
-            "used_times": 0,
-            "used_times_model": "lte",
-            "lable": "gmail"
-        })
-        Gmail_info = material_gain.text_content.split(",")
-        log("Gmail邮箱密码获取--->>", Gmail_info)
-        username = Gmail_info[0]
-        password = Gmail_info[1]
-        username1 = Gmail_info[2]
-        log("账号为：", username, "密码为：", password, "辅助账号为：", username1)
-        material_INFO = material_gain
-        return Gmail_info
-    } catch (error) {
-        log("获取安卓id时捕获到一个错误:" + error)
-        commonFun.taskResultSet("素材获取失败" + error, "w")
-    }
-}
 
 // Gmail第一步:点击GOT IT
 function click_GotIt() {
@@ -768,10 +561,6 @@ function click_IdInfo() {
             isSuccess = true
             desc = "登陆成功"
             updateRegisterResult()
-            if (isSuccess = true) {
-                engines.stopAll();
-                toastLog("停止脚本")
-            }
         }
     } catch (error) {
         log("获取账号信息时捕获到一个错误:", error)

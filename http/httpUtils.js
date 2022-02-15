@@ -386,9 +386,9 @@ httpUtilFunc.getPluginData = function () {
         let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
         // let url = "http://192.168.91.3:83/task/getplugindata?taskid=64aafa9f-fd9a-451b-b800-054c02ba11f4" // 爬取粉丝
         // let url = "http://192.168.91.3:83/task/getplugindata?taskid=ffc409dd-b5fb-4ec6-bbd1-eda4343f00ee" // 修改头像+注册
-        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=b2a1a529-6610-41dc-a204-06b2df933e6c" // 修改头像+注册
+        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=497a877c-d2ba-447a-aa11-4474ffefd987" // Gmail
         log("读取配置:" + url)
-        commonFunc.taskResultSet("任务配置-" + url, "a")
+        // commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
         let res_json = res.body.json()
         if (commonFunc.isNotNullObject(res_json.param)) {
@@ -656,7 +656,8 @@ httpUtilFunc.materialGetList = function (req_data) {
         args_data.type = req_data.type
         args_data.count = req_data.count || 1
         args_data.classify = req_data.classify || 0
-        args_data.used_times = typeof (req_data.used_times) == "number" ? req_data.used_times : null
+        // args_data.used_times = typeof (req_data.used_times) == "number" ? req_data.used_times : null
+        args_data.used_times = Number (req_data.used_times) 
         args_data.used_times_model = req_data.used_times_model || "lte"
         args_data.lable = req_data.lable || null
         let call = "material_get"
