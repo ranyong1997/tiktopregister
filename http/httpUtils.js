@@ -386,6 +386,7 @@ httpUtilFunc.getPluginData = function () {
         let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
         // let url = "http://192.168.91.3:83/task/getplugindata?taskid=64aafa9f-fd9a-451b-b800-054c02ba11f4" // 爬取粉丝
         // let url = "http://192.168.91.3:83/task/getplugindata?taskid=ffc409dd-b5fb-4ec6-bbd1-eda4343f00ee" // 修改头像+注册
+        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=b2a1a529-6610-41dc-a204-06b2df933e6c" // 修改头像+注册
         log("读取配置:" + url)
         commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
