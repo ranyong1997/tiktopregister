@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-15 18:29:04
+ * @LastEditTime: 2022-02-16 12:21:55
  */
 
 
@@ -16,6 +16,7 @@ const taskDemo = {}
 let taskPluginData = null
 var FIND_WIDGET_TIMEOUT = 1000
 var desc = ""
+var end = false
 var isUsed = false
 var isProcess = true
 var gmail_package = "com.google.android.gm"
@@ -78,7 +79,8 @@ taskDemo.runTask = function () {
                 reportLog("插件配置: " + JSON.stringify(taskPluginData))
                 appName = taskPluginData.appName
                 login = taskPluginData.login
-                keyword_FB = taskPluginData.keyword_FB
+                // stoptimes = taskPluginData.stoptimes
+                // stoptimes2 = taskPluginData.stoptimes2
                 systemLanguage = taskPluginData.systemLanguage
                 systemTimezone = taskPluginData.systemTimezone
                 proxyCountry = taskPluginData.proxyCountry
@@ -121,7 +123,8 @@ taskDemo.runTask = function () {
                 commonFun.taskStepRecordSet(40, null, "Gmail一键登录任务开始", null)
                 material_gain(used_times_model) // 素材获取
                 One_Key_Login()
-                // commonFun.taskStepRecordSet(200, null, "Gmail一键登录任务结束", null)
+                commonFun.taskStepRecordSet(200, null, "Gmail一键登录任务结束", null)
+                // log("Gmail浏览邮件")
                 commonFun.taskResultSet("运行成功-", "a")
             }
             reportLog("运行时间 - " + parseInt((new Date().getTime() - timestamp) / 1000 / 60) + "分钟")
@@ -203,7 +206,6 @@ function matter_rollback() {
 // 一键登陆Gmail邮箱
 function One_Key_Login() {
     toastLog("开始Gmail一键登陆功能")
-    var isSuccess = null
     openGMSApp(commonFun.userId)
     randomSleep()
     if (!packageName(gmail_package).findOne(1)) {
@@ -215,8 +217,8 @@ function One_Key_Login() {
         openGMSApp(commonFun.userId)
         launch(gmail_package)
     }
-    do {
-        // 写方法区
+    while (true) {
+        launch(gmail_package)
         click_GotIt()
         click_Add()
         click_Google()
@@ -230,9 +232,11 @@ function One_Key_Login() {
         click_AbnormalTip()
         click_HeadPortrait()
         click_IdInfo()
-    } while (isSuccess == true);
+        if (end) {
+            break
+        }
+    }
 }
-
 
 // ------------------------------------------分割线-----------------
 // 更新账号信息到8000端口
@@ -560,11 +564,15 @@ function click_IdInfo() {
             randomSleep()
             isSuccess = true
             desc = "登陆成功"
+            end = true
             updateRegisterResult()
+            shell("am force-stop " + gmail_package)
+            return true
         }
     } catch (error) {
         log("获取账号信息时捕获到一个错误:", error)
     }
+    return false
 }
 // Gmail第十四步:如果没有登陆成功则回退素材
 //TODO:待补充
@@ -603,6 +611,22 @@ function click_AbnormalTip() {
         }
     } catch (error) {
         log("检查提示框时捕获到一个错误:", error)
+    }
+}
+
+// Gmail 重新打开欢迎界面
+function click_WelcomePage() {
+    log("检查欢迎界面")
+    try {
+        let check_page = text("SKIP").id("com.google.android.gm:id/welcome_tour_skip").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击SKIP")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+            randomSleep()
+        }
+    } catch (error) {
+        log("检查欢迎界面时捕获到一个错误:", error)
     }
 }
 // ---------------------------------写方法区-----------------------

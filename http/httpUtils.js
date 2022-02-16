@@ -383,10 +383,11 @@ httpUtilFunc.getRegisterContact = function () {
 httpUtilFunc.getPluginData = function () {
     let pluginData = null
     try {
-        let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
+        // let url = "http://" + commonFunc.server + ":83/task/getplugindata?taskid=" + commonFunc.taskid
         // let url = "http://192.168.91.3:83/task/getplugindata?taskid=64aafa9f-fd9a-451b-b800-054c02ba11f4" // 爬取粉丝
         // let url = "http://192.168.91.3:83/task/getplugindata?taskid=ffc409dd-b5fb-4ec6-bbd1-eda4343f00ee" // 修改头像+注册
-        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=497a877c-d2ba-447a-aa11-4474ffefd987" // Gmail
+        let url = "http://192.168.91.3:83/task/getplugindata?taskid=497a877c-d2ba-447a-aa11-4474ffefd987" // Gmail
+        // let url = "http://192.168.91.3:83/task/getplugindata?taskid=a403b8d9-4f78-4507-837b-e079ea5fe612" // Gmail
         log("读取配置:" + url)
         // commonFunc.taskResultSet("任务配置-" + url, "a")
         var res = http.get(url);
