@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-16 12:23:04
+ * @LastEditTime: 2022-02-16 14:33:13
  */
 
 
@@ -509,10 +509,10 @@ function click_TakeMeToBtn() {
             log("点击Take Me To Gmail")
             sleep(6000)
             commonFun.clickWidget(check_page)
-            let check_EmailAddress = text("Pleast add at least one email address").findOne(FIND_WIDGET_TIMEOUT)
-            if (check_EmailAddress != null) {
+            let click_ok = text("OK").findOne(FIND_WIDGET_TIMEOUT)
+            if (click_ok != null) {
                 log("点击ok")
-                let click_ok = text("OK").findOne(FIND_WIDGET_TIMEOUT)
+                sleep(1000)
                 commonFun.clickWidget(click_ok)
             }
             sleep(3000)
@@ -522,18 +522,24 @@ function click_TakeMeToBtn() {
     }
 }
 // Gmail第十步:点击弹窗关闭按钮
-function click_PopUpBtn() {
-    log("检查首次登陆是否会有弹窗")
+function click_TakeMeToBtn() {
+    log("检查Take Me To Gmail是否存在")
     try {
-        let check_page = id("com.google.android.gm:id/dismiss_button").findOne(FIND_WIDGET_TIMEOUT)
+        let check_page = text("TAKE ME TO GMAIL").id("com.google.android.gm:id/action_done").findOne(FIND_WIDGET_TIMEOUT)
         if (check_page != null) {
-            log("点击弹窗关闭按钮")
-            randomSleep()
+            log("点击Take Me To Gmail")
+            sleep(2000)
             commonFun.clickWidget(check_page)
-            randomSleep()
+            let click_ok = text("OK").findOne(FIND_WIDGET_TIMEOUT)
+            if (click_ok != null) {
+                log("点击ok")
+                sleep(1000)
+                commonFun.clickWidget(click_ok)
+            }
+            sleep(1000)
         }
     } catch (error) {
-        log("检查弹窗时捕获到一个错误:", error)
+        log("检查Take me to gmail页面时捕获到一个错误:", error)
     }
 }
 // Gmail第十一步:点击头像查看信息

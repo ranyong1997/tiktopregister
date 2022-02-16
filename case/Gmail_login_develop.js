@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-16 12:21:55
+ * @LastEditTime: 2022-02-16 16:44:11
  */
 
 
@@ -79,8 +79,8 @@ taskDemo.runTask = function () {
                 reportLog("插件配置: " + JSON.stringify(taskPluginData))
                 appName = taskPluginData.appName
                 login = taskPluginData.login
-                // stoptimes = taskPluginData.stoptimes
-                // stoptimes2 = taskPluginData.stoptimes2
+                stoptimes = taskPluginData.stoptimes
+                stoptimes2 = taskPluginData.stoptimes2
                 systemLanguage = taskPluginData.systemLanguage
                 systemTimezone = taskPluginData.systemTimezone
                 proxyCountry = taskPluginData.proxyCountry
@@ -99,6 +99,7 @@ taskDemo.runTask = function () {
                 classify = taskPluginData.classify
                 used_times_model = taskPluginData.used_times_model
                 used_counter = taskPluginData.used_counter
+                log("stoptimes-->" + stoptimes)
             } catch (error) {
                 commonFun.taskStepRecordSet(250, null, "任务回滚", null)
                 throw "插件配置 获取失败 " + commonFun.objectToString(error)
@@ -119,15 +120,19 @@ taskDemo.runTask = function () {
                 throw error
             }
             if (login != "") {
-                log("Gmail一键登录")
+                taskDemo.result = 1
                 commonFun.taskStepRecordSet(40, null, "Gmail一键登录任务开始", null)
+                log("Gmail一键登录")
                 material_gain(used_times_model) // 素材获取
                 One_Key_Login()
                 commonFun.taskStepRecordSet(200, null, "Gmail一键登录任务结束", null)
-                // log("Gmail浏览邮件")
-                commonFun.taskResultSet("运行成功-", "a")
+                commonFun.taskStepRecordSet(40, null, "Gmail浏览邮件任务开始", null)
+                log("Gmail浏览邮件")
+                browse_mail()
+                commonFun.taskStepRecordSet(200, null, "Gmail浏览邮件结束", null)
             }
             reportLog("运行时间 - " + parseInt((new Date().getTime() - timestamp) / 1000 / 60) + "分钟")
+            if (taskDemo.result != 1) { throw taskDemo.desc }
         } catch (error) {
             throw error
         }
@@ -140,8 +145,9 @@ taskDemo.runTask = function () {
     if (!task_result || typeof (task_result) != "object") { throw "未识别到任务上报日志" }
     let taskStatus = null
     let logsdesc = null
-    if (taskStatus = 200) {
-        try { logsdesc = "任务完成 " + (task_result.logsdesc || "下载报表查看详情") } catch (error) { log(error) }
+    if (taskDemo.result == 1) {
+        taskStatus = 200
+        try { logsdesc = "任务完成 || 下载报表查看详情" } catch (error) { log(error) }
         commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
     } else {
         if (task_result.taskStatus == 40) {
@@ -236,6 +242,18 @@ function One_Key_Login() {
             break
         }
     }
+}
+
+// 浏览邮件
+function browse_mail() {
+    toastLog("开始Gmail一键浏览")
+    log("Gmail启动中...")
+    launch(gmail_package)
+    sleep(6000)
+    click_WelcomePage()
+    click_PopUpBtn()
+    browse_Email()
+    enter_Email()
 }
 
 // ------------------------------------------分割线-----------------
@@ -502,20 +520,19 @@ function click_AgreeBtn() {
 // Gmail第九步:点击Take me to gmail
 function click_TakeMeToBtn() {
     log("检查Take Me To Gmail是否存在")
-    sleep(5000)
     try {
         let check_page = text("TAKE ME TO GMAIL").id("com.google.android.gm:id/action_done").findOne(FIND_WIDGET_TIMEOUT)
         if (check_page != null) {
             log("点击Take Me To Gmail")
-            sleep(6000)
+            sleep(2000)
             commonFun.clickWidget(check_page)
-            let check_EmailAddress = text("Pleast add at least one email address").findOne(FIND_WIDGET_TIMEOUT)
-            if (check_EmailAddress != null) {
+            let click_ok = text("OK").findOne(FIND_WIDGET_TIMEOUT)
+            if (click_ok != null) {
                 log("点击ok")
-                let click_ok = text("OK").findOne(FIND_WIDGET_TIMEOUT)
+                sleep(1000)
                 commonFun.clickWidget(click_ok)
             }
-            sleep(3000)
+            sleep(1000)
         }
     } catch (error) {
         log("检查Take me to gmail页面时捕获到一个错误:", error)
@@ -566,7 +583,7 @@ function click_IdInfo() {
             desc = "登陆成功"
             end = true
             updateRegisterResult()
-            shell("am force-stop " + gmail_package)
+            back()
             return true
         }
     } catch (error) {
@@ -627,6 +644,44 @@ function click_WelcomePage() {
         }
     } catch (error) {
         log("检查欢迎界面时捕获到一个错误:", error)
+    }
+}
+
+// 进入邮件
+function browse_Email() {
+    log('检查邮件')
+    try {
+        let check_page = id("com.google.android.gm:id/senders").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_page != null) {
+            log("点击第一封邮件")
+            randomSleep()
+            commonFun.clickWidget(check_page)
+        }
+    } catch (error) {
+        log("检查邮件界面时捕获到一个错误:", error)
+    }
+}
+
+// 浏览邮件
+function enter_Email() {
+    log('浏览邮件')
+    try {
+        sleep(2000)
+        let check_star = id("com.google.android.gm:id/conversation_header_star").findOne(FIND_WIDGET_TIMEOUT)
+        if (check_star != null) {
+            log("点击收藏")
+            commonFun.swipeDownRandomSpeed()
+            sleep(2000)
+            commonFun.clickWidget(check_star)
+            // 传入等待时间
+            commonFun.swipeUpRandomSpeed()
+            commonFun.swipeUpRandomSpeed()
+            log("停留时长：" + stoptimes + "秒")
+            sleep(stoptimes * 1000)
+            back()
+        }
+    } catch (error) {
+        log("检查邮件界面时捕获到一个错误:", error)
     }
 }
 // ---------------------------------写方法区-----------------------

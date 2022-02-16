@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2021-12-23 19:59:44
- * @LastEditTime: 2022-02-14 17:29:52
+ * @LastEditTime: 2022-02-16 15:35:33
  */
 function init() {
     // 设置日志文件
@@ -72,5 +72,6 @@ init()
 
 
 //  Gmail登录可视化业务
+// var mainTask = require("./case/Gmail_login");
 var mainTask = require("./case/Gmail_login_develop");
 mainTask.runTask()
