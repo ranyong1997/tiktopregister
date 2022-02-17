@@ -3,7 +3,7 @@
  * @version: 
  * @Author: 冉勇
  * @Date: 2022-01-25 20:12:22
- * @LastEditTime: 2022-02-16 16:44:11
+ * @LastEditTime: 2022-02-17 11:31:54
  */
 
 
@@ -24,6 +24,7 @@ var gmail_package = "com.google.android.gm"
 
 taskDemo.init = function () {
     commonFun.showLog("init Gmail_v22_4_5")
+    taskDemo.result = 1
     taskDemo.desc = ""
 }
 taskDemo.init()
@@ -54,6 +55,7 @@ taskDemo.runTask = function () {
                 }
                 if (!lan_test) {
                     log("业务后台连接异常")
+                    commonFun.taskStepRecordSet(10, null, "业务后台连接异常", null)
                     commonFun.uninstallApp("fun.kitsunebi.kitsunebi4android")
                     //  业务后台连接检测
                     for (let index = 0; index < 90; index++) {
@@ -107,6 +109,7 @@ taskDemo.runTask = function () {
             //  执行任务
             try {
                 //  本地网络
+                commonFun.taskStepRecordSet(30, null, "代理ip检测", null)
                 local_ip = httpUtilFunc.getLocalIp()
                 log("本地 IP: " + local_ip)
                 global_ip = null
@@ -120,7 +123,6 @@ taskDemo.runTask = function () {
                 throw error
             }
             if (login != "") {
-                taskDemo.result = 1
                 commonFun.taskStepRecordSet(40, null, "Gmail一键登录任务开始", null)
                 log("Gmail一键登录")
                 material_gain(used_times_model) // 素材获取
@@ -130,6 +132,7 @@ taskDemo.runTask = function () {
                 log("Gmail浏览邮件")
                 browse_mail()
                 commonFun.taskStepRecordSet(200, null, "Gmail浏览邮件结束", null)
+                commonFun.taskResultSet("任务完成 下载报表查看详情", "a")
             }
             reportLog("运行时间 - " + parseInt((new Date().getTime() - timestamp) / 1000 / 60) + "分钟")
             if (taskDemo.result != 1) { throw taskDemo.desc }
@@ -147,7 +150,7 @@ taskDemo.runTask = function () {
     let logsdesc = null
     if (taskDemo.result == 1) {
         taskStatus = 200
-        try { logsdesc = "任务完成 || 下载报表查看详情" } catch (error) { log(error) }
+        try { logsdesc = "任务完成" + (task_result.logsdesc || "下载报表查看详情") } catch (error) { log(error) }
         commonFun.taskStepRecordSet(taskStatus, null, null, logsdesc)
     } else {
         if (task_result.taskStatus == 40) {
@@ -167,6 +170,24 @@ taskDemo.runTask = function () {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ---------------------------------写方法区-----------------------
 // 素材获取
